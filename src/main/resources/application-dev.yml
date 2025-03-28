@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 5
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+#추후 redis추가
+
+# 개발 환경용 로깅 설정
+logging:
+  level:
+    root: ${LOG_LEVEL:info}
+    kr.kro.deom: ${APP_LOG_LEVEL:debug}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:debug}
+    org.springframework.web: ${WEB_LOG_LEVEL:debug}
+
+# 개발 환경 서버 설정
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-stacktrace: always
+    include-message: always
+
+# Actuator 추가 설정 (개발 환경에서는 더 많은 정보 노출)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always

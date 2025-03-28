@@ -1,0 +1,32 @@
+
+spring:
+  application:
+    name: deom
+  profiles:
+    active: dev # ????? ?? ?? ???
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  thymeleaf:
+    cache: false
+# ?? ?? ??
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+# Actuator ??
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+:
+
+
