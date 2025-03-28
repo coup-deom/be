@@ -27,6 +27,6 @@ management:
     health:
       show-details: when_authorized
 
-:
+
 
 
