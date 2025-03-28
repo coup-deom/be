@@ -3,7 +3,7 @@ spring:
   application:
     name: deom
   profiles:
-    active: dev # ????? ?? ?? ???
+    active: dev
   jpa:
     open-in-view: false
     properties:
@@ -11,13 +11,12 @@ spring:
         format_sql: true
   thymeleaf:
     cache: false
-# ?? ?? ??
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
 
-# Actuator ??
+# Actuator
 management:
   endpoints:
     web:
