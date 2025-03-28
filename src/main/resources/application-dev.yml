@@ -18,10 +18,10 @@ spring:
 # 개발 환경용 로깅 설정
 logging:
   level:
-    root: ${LOG_LEVEL:info}
-    kr.kro.deom: ${APP_LOG_LEVEL:debug}
-    org.springframework.security: ${SECURITY_LOG_LEVEL:debug}
-    org.springframework.web: ${WEB_LOG_LEVEL:debug}
+    root: ${LOG_LEVEL}
+    kr.kro.deom: ${APP_LOG_LEVEL}
+    org.springframework.security: ${SECURITY_LOG_LEVEL}
+    org.springframework.web: ${WEB_LOG_LEVEL}
 
 # 개발 환경 서버 설정
 server:
