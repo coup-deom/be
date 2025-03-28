@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @JsonPropertyOrder({"isSuccess", "code", "message", "data"})
@@ -39,5 +41,9 @@ public class GlobalResponse<T> {
 
     public static <T> GlobalResponse<T> fail(String message) {
         return new GlobalResponse<>(false, HttpStatus.BAD_REQUEST, message, null);
+    }
+
+    public static <K, V> GlobalResponse<Map<K, V>> fail(String message, Map<K, V> errors) {
+        return new GlobalResponse<>(false,HttpStatus.BAD_REQUEST, message, errors);
     }
 }
