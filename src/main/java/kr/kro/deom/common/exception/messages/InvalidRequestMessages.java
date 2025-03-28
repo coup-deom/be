@@ -6,25 +6,17 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum InvalidRequestMessages {
-    // OTP
-    INVALID_OTP_CODE("유효하지 않은 otp 코드입니다."),
-    EXPIRED_OTP("opt가 만료되었습니다.");
+  // OTP
+  INVALID_OTP_CODE("유효하지 않은 otp 코드입니다."),
+  EXPIRED_OTP("opt가 만료되었습니다.");
 
+  // 고객
 
-    // 고객
+  // 사장
 
+  // 쿠폰(개수미달등)
 
-    // 사장
+  // 거래
 
-
-    // 쿠폰(개수미달등)
-
-
-    // 거래
-
-
-
-
-
-    private final String message;
+  private final String message;
 }

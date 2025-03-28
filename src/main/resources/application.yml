@@ -26,7 +26,3 @@ management:
   endpoint:
     health:
       show-details: when_authorized
-
-
-
-

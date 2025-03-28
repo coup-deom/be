@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum DuplicatedMessages {
-    EMAIL("이미 등록된 이메일입니다.");
-    private final String message;
+  EMAIL("이미 등록된 이메일입니다.");
+  private final String message;
 }
