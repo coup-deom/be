@@ -8,8 +8,7 @@ import lombok.Getter;
 public enum InvalidRequestMessages {
   // OTP
   INVALID_OTP_CODE("유효하지 않은 otp 코드입니다."),
-  EXPIRED_OTP("opt가 만료되었습니다.");
-
+  EXPIRED_OTP("OTP가 만료되었습니다.");
   // 고객
 
   // 사장
