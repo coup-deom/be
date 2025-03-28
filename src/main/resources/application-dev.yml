@@ -25,7 +25,7 @@ logging:
 
 # 개발 환경 서버 설정
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT}
   error:
     include-stacktrace: always
     include-message: always
