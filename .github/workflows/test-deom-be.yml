@@ -30,11 +30,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run tests (without database)
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run tests with TestContainers
         env:
-          SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
-          SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING: true
-          SPRING_TEST_DATABASE_REPLACE: none
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
+          DOCKER_HOST: unix:///var/run/docker.sock
+          # Redis 자동 구성 비활성화
+          SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
         run: ./gradlew test
 
       - name: Archive test results
