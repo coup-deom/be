@@ -41,7 +41,7 @@ out/
 # Edit at https://www.toptal.com/developers/gitignore?templates=gradle,intellij,java,macos,windows,redis,dotenv
 
 ### dotenv ###
-.env
+.env*
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
