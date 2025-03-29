@@ -34,6 +34,7 @@ jobs:
         env:
           SPRING_AUTOCONFIGURE_EXCLUDE: org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
           SPRING_MAIN_ALLOW_BEAN_DEFINITION_OVERRIDING: true
+          SPRING_TEST_DATABASE_REPLACE: none
         run: ./gradlew test
 
       - name: Archive test results
