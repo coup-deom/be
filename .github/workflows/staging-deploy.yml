@@ -165,7 +165,7 @@ jobs:
   
   
 
-  # 환경 변수 파일 생성 및 서비스 배포
+          # 환경 변수 파일 생성 및 서비스 배포
           ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "
           cd ~/deom
 
