@@ -2,7 +2,7 @@ name: deom backend deploy
 
 on:
   push:
-    branches: [develop]
+    branches: [ develop ]
     paths:
       - 'src/**'
       - 'build.gradle'
