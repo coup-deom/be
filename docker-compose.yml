@@ -17,9 +17,10 @@ services:
     restart: always
 
   springboot:
-    build:
-      context: .
-      dockerfile: ./docker/spring/Dockerfile
+#    build:
+#      context: .
+#      dockerfile: ./docker/spring/Dockerfile
+    image: ${DOCKER_USERNAME}/deom:${DOCKER_TAG}
     expose:
       - "8080"
     environment:
