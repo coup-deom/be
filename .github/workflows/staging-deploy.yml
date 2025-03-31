@@ -10,6 +10,7 @@ on:
       - 'docker/nginx/**'
       - 'docker/spring/**'
       - 'staging-deploy.yml'
+  workflow_dispatch:
 
 jobs:
   test:
