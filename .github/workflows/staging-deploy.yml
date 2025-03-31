@@ -161,10 +161,11 @@ jobs:
           ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "mkdir -p ~/deom"
 
           # 필요한 파일들을 서버로 복사
-          scp -i ~/.ssh/id_rsa docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
-          scp -i ~/.ssh/id_rsa -r docker ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
+          scp -i ~/.ssh/id_rsa -r ./* ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
+  
+  
 
-          # 환경 변수 파일 생성 및 서비스 배포
+  # 환경 변수 파일 생성 및 서비스 배포
           ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "
           cd ~/deom
 

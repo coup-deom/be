@@ -12,7 +12,7 @@ RUN sed -i 's/user  nginx/user  nginx/g' /etc/nginx/nginx.conf
 RUN rm /etc/nginx/conf.d/default.conf
 
 # 커스텀 설정은 볼륨 마운트로 주입됨
- COPY ./conf.d/default.conf /etc/nginx/conf.d/
+COPY ./conf.d/default.conf /etc/nginx/conf.d/
 
 # 80, 443 포트 오픈
 EXPOSE 80 443
