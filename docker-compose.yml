@@ -13,7 +13,7 @@ services:
     depends_on:
       - springboot
     networks:
-      - frontend-network
+      - frontend-network-d
     restart: always
 
   springboot:
@@ -41,8 +41,8 @@ services:
     depends_on:
       - postgres
     networks:
-      - frontend-network
-      - backend-network
+      - frontend-network-d
+      - backend-network-d
     restart: always
 
   postgres:
@@ -54,12 +54,12 @@ services:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     networks:
-      - backend-network
+      - backend-network-d
     restart: always
 
 networks:
-  frontend-network:
-  backend-network:
+  frontend-network-d:
+  backend-network-d:
     internal: true
 
 volumes:
