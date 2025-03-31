@@ -190,7 +190,7 @@ jobs:
           EOL
 
           sudo docker network create deom || true
-          sudo docker-compose pull
-          sudo docker-compose up -d
+          sudo docker compose pull
+          sudo docker compose up -d
           sudo docker image prune -f
           "
