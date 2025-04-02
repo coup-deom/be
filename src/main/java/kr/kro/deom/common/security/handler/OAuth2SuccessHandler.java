@@ -26,15 +26,20 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
 
-    // role이 일단 pending 상태니까 여기서 역할 설정하는 곳으로 넘어가기
+    /*
+       if (oAuth2User.getRole() == Role.PENDING) {
+         String targetUrl = "http://localhost:8080/user/role?userId=" + oAuth2User.getId();
+         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+       }
+    */
 
     String accessToken = jwtUtil.createAccessToken(oAuth2User.getId(), oAuth2User.getRole());
-    String refreshToken = jwtUtil.createRefreshToken(oAuth2User.getId());
+    String refreshToken = jwtUtil.createRefreshToken(oAuth2User.getId(), oAuth2User.getRole());
 
-    // refreshToken cookie에 저장
+    response.addCookie(jwtUtil.createRefreshTokenCookie(refreshToken));
 
-    String redirectUrl = "https://frontend/oauth?accessToken=" + accessToken;
+    String targetUrl = "http://localhost:8080/oauth?accessToken=" + accessToken;
 
-    response.sendRedirect(redirectUrl);
+    getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
 }

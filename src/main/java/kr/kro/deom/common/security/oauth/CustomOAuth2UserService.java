@@ -23,12 +23,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     String provider = userRequest.getClientRegistration().getRegistrationId();
 
     OAuth2UserInfo oAuth2UserInfo;
-    if (provider.equals("kakao")) {
-      oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
-    } else if (provider.equals("google")) {
-      oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
-    } else {
-      return null;
+    switch (provider) {
+      case "kakao" -> oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+      case "google" -> oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+      case "naver" -> oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+      default -> {
+        return null;
+      }
     }
 
     User user = userService.findOrCreateUser(oAuth2UserInfo);

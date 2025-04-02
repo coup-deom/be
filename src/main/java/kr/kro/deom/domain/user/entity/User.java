@@ -27,4 +27,8 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   private Role role;
+
+  public void updateRole(Role newRole) {
+    this.role = newRole;
+  }
 }

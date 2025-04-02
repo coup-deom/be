@@ -5,15 +5,20 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import javax.crypto.SecretKey;
 import kr.kro.deom.domain.user.entity.Role;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 @Component
 @Repository
+@RequiredArgsConstructor
 public class JwtUtil {
 
   @Value("${jwt.secret}")
@@ -25,7 +30,7 @@ public class JwtUtil {
   @Value("${jwt.refresh-expiration}")
   private long refreshTokenExpiration;
 
-  // private final RedisTemplate<String, String> redisTemplate;
+  private final RedisTemplate<String, String> redisTemplate;
 
   private SecretKey key;
 
@@ -46,18 +51,18 @@ public class JwtUtil {
         .compact();
   }
 
-  public String createRefreshToken(long userId) {
+  public String createRefreshToken(long userId, Role role) {
 
     String refreshToken =
         Jwts.builder()
             .subject(String.valueOf(userId))
+            .claim("role", role.name())
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
             .signWith(key)
             .compact();
 
-    // redisTemplate.opsForValue().set("refreshToken:"+userId, refreshToken, refreshTokenExpiration,
-    // TimeUnit.MILLISECONDS);
+    saveRefreshToken(userId, refreshToken);
 
     return refreshToken;
   }
@@ -86,5 +91,28 @@ public class JwtUtil {
     } catch (JwtException | IllegalArgumentException e) {
       return false;
     }
+  }
+
+  public Cookie createRefreshTokenCookie(String refreshToken) {
+    Cookie cookie = new Cookie("refreshToken", refreshToken);
+    cookie.setHttpOnly(true);
+    cookie.setPath("/");
+    cookie.setMaxAge(24 * 60 * 60);
+
+    return cookie;
+  }
+
+  public void saveRefreshToken(Long userId, String refreshToken) {
+    redisTemplate
+        .opsForValue()
+        .set("refreshToken:" + userId, refreshToken, refreshTokenExpiration, TimeUnit.MILLISECONDS);
+  }
+
+  public String getRefreshToken(Long userId) {
+    return redisTemplate.opsForValue().get("refreshToken:" + userId.toString());
+  }
+
+  public void deleteRefreshToken(Long userId) {
+    redisTemplate.delete("refreshToken:" + userId.toString());
   }
 }
