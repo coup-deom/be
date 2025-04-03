@@ -50,7 +50,8 @@ jobs:
               properties:
                 hibernate:
                   dialect: org.hibernate.dialect.PostgreSQLDialect
-                      security:
+            
+            security:
               oauth2:
                 client:
                   registration:
