@@ -43,9 +43,7 @@ public class SecurityConfig {
         */
 
         // 인가 설정
-        .authorizeHttpRequests(
-            authorize ->
-                authorize.requestMatchers("/user").authenticated().anyRequest().permitAll())
+        .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
 
         // JWT 필터 등록
         .addFilterBefore(

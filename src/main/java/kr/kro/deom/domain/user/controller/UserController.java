@@ -36,7 +36,8 @@ public class UserController {
   }
 
   @PostMapping("/role")
-  public ResponseEntity<GlobalResponse<String>> setRole(@RequestBody RoleRequest request, HttpServletResponse response) {
+  public ResponseEntity<GlobalResponse<String>> setRole(
+      @RequestBody RoleRequest request, HttpServletResponse response) {
     User user = userService.setUserRole(request.getUserId(), request.getRole());
 
     String newAccessToken = jwtUtil.createAccessToken(user.getId(), user.getRole());

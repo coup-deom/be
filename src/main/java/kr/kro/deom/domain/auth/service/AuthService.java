@@ -16,8 +16,6 @@ public class AuthService {
 
   private final JwtUtil jwtUtil;
 
-  // 여기서 access, refresh 토큰 발급하기
-
   public String refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
     String refreshToken = null;
 
