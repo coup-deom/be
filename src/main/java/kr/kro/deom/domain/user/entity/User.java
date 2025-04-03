@@ -28,7 +28,13 @@ public class User {
   @Enumerated(EnumType.STRING)
   private Role role;
 
+  private boolean deleted;
+
   public void updateRole(Role newRole) {
     this.role = newRole;
+  }
+
+  public void updateDeleted(boolean deleted) {
+    this.deleted = deleted;
   }
 }
