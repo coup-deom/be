@@ -1,0 +1,42 @@
+spring:
+  config:
+    activate:
+      on-profile: staging
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+  thymeleaf:
+    cache: true
+
+logging:
+  level:
+    root: ${LOG_LEVEL}
+    kr.kro.deom: ${APP_LOG_LEVEL}
+  file:
+    name: /var/log/deom/application-staging.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 7
+
+server:
+  port: ${SERVER_PORT}
+  error:
+    include-stacktrace: never
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

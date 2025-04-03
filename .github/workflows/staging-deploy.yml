@@ -1,0 +1,196 @@
+name: deom backend deploy
+
+on:
+  push:
+    branches: [ develop ]
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'docker-compose.yml'
+      - 'docker/nginx/**'
+      - 'docker/spring/**'
+      - 'staging-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: wrapper
+
+      - name: Create application-test.yml
+        run: |
+          cat > src/main/resources/application-test.yml << EOL
+          spring:
+            datasource:
+              url: jdbc:postgresql://localhost:5432/test_db
+              username: postgres
+              password: postgres
+            jpa:
+              hibernate:
+                ddl-auto: create-drop
+              properties:
+                hibernate:
+                  dialect: org.hibernate.dialect.PostgreSQLDialect
+          EOL
+
+      - name: Test with Gradle
+        run: ./gradlew test
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Build and Push Docker Images
+    environment: ${{ 'staging' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Spring Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/spring/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/deom:${{ secrets.DOCKER_TAG }}
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/deom:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/deom:buildcache,mode=max
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.25.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Build and push with Docker Compose
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE }}
+          DB_HOST: ${{ secrets.POSTGRESQL_HOST }}
+          DB_PORT: ${{ secrets.DPOSTGRESQL_PORT }}
+          DB_NAME: ${{ secrets.POSTGRESQL_NAME }}
+          DB_USERNAME: ${{ secrets.POSTGRESQL_USERNAME }}
+          DB_PASSWORD: ${{ secrets.POSTGRESQL_PASSWORD }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '8080' }}
+          NGINX_HTTP_PORT: ${{ secrets.NGINX_HTTP_PORT || '80' }}
+          NGINX_HTTPS_PORT: ${{ secrets.NGINX_HTTPS_PORT || '443' }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL || 'INFO' }}
+          APP_LOG_LEVEL: ${{ secrets.APP_LOG_LEVEL || 'INFO' }}
+          SECURITY_LOG_LEVEL: ${{ secrets.SECURITY_LOG_LEVEL || 'INFO' }}
+          WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
+        run: |
+          docker-compose build
+          docker-compose push
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    name: Deploy to Server
+    environment: ${{ 'staging' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PUBLIC_SERVER_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa ${{ secrets.PUBLIC_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TAG: ${{ secrets.DOCKER_TAG }}
+          SPRING_PROFILES_ACTIVE: ${{ secrets.SPRING_PROFILES_ACTIVE }}
+          DB_HOST: ${{ secrets.POSTGRESQL_HOST }}
+          DB_PORT: ${{ secrets.DPOSTGRESQL_PORT }}
+          DB_NAME: ${{ secrets.POSTGRESQL_NAME }}
+          DB_USERNAME: ${{ secrets.POSTGRESQL_USERNAME }}
+          DB_PASSWORD: ${{ secrets.POSTGRESQL_PASSWORD }}
+          SPRING_DATASOURCE_URL: ${{ secrets.SPRING_DATASOURCE_URL }}
+          SERVER_PORT: ${{ secrets.SERVER_PORT || '8080' }}
+          NGINX_HTTP_PORT: ${{ secrets.NGINX_HTTP_PORT || '80' }}
+          NGINX_HTTPS_PORT: ${{ secrets.NGINX_HTTPS_PORT || '443' }}
+          LOG_LEVEL: ${{ secrets.LOG_LEVEL || 'INFO' }}
+          APP_LOG_LEVEL: ${{ secrets.APP_LOG_LEVEL || 'INFO' }}
+          SECURITY_LOG_LEVEL: ${{ secrets.SECURITY_LOG_LEVEL || 'INFO' }}
+          WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
+        run: |
+          # 배포 디렉토리 생성
+          ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "mkdir -p ~/deom"
+
+          # 필요한 파일들을 서버로 복사
+          # scp -i ~/.ssh/id_rsa -r ./* ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
+          scp -i ~/.ssh/id_rsa docker-compose.yml ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
+          scp -i ~/.ssh/id_rsa -r ./docker ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }}:~/deom/
+  
+
+          # 환경 변수 파일 생성 및 서비스 배포
+          ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "
+          cd ~/deom
+
+          cat > .env << EOL
+          DOCKER_USERNAME=$DOCKER_USERNAME
+          DOCKER_TAG=$DOCKER_TAG
+          SPRING_PROFILES_ACTIVE=$SPRING_PROFILES_ACTIVE
+          DB_HOST=$DB_HOST
+          DB_PORT=$DB_PORT
+          DB_NAME=$DB_NAME
+          DB_USERNAME=$DB_USERNAME
+          DB_PASSWORD=$DB_PASSWORD
+          SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+          SERVER_PORT=${SERVER_PORT:-8080}
+          NGINX_HTTP_PORT=${NGINX_HTTP_PORT:-80}
+          NGINX_HTTPS_PORT=${NGINX_HTTPS_PORT:-443}
+          LOG_LEVEL=${LOG_LEVEL:-INFO}
+          APP_LOG_LEVEL=${APP_LOG_LEVEL:-INFO}
+          SECURITY_LOG_LEVEL=${SECURITY_LOG_LEVEL:-INFO}
+          WEB_LOG_LEVEL=${WEB_LOG_LEVEL:-INFO}
+          EOL
+
+          sudo docker network create deom || true
+          sudo docker compose pull
+          sudo docker compose up -d
+          sudo docker image prune -f
+          "
