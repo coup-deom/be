@@ -28,7 +28,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     /*
        if (oAuth2User.getRole() == Role.PENDING) {
-         String targetUrl = "http://localhost:8080/user/role?userId=" + oAuth2User.getId();
+         String targetUrl = "http://localhost:5173/user/role?userId=" + oAuth2User.getId();
          getRedirectStrategy().sendRedirect(request, response, targetUrl);
        }
     */
@@ -38,7 +38,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     response.addCookie(jwtUtil.createRefreshTokenCookie(refreshToken));
 
-    String targetUrl = "http://localhost:8080/oauth?accessToken=" + accessToken;
+    String targetUrl = "http://localhost:5173/signin/callback?accessToken=" + accessToken;
 
     getRedirectStrategy().sendRedirect(request, response, targetUrl);
   }
