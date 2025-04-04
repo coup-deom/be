@@ -11,38 +11,36 @@ import org.springframework.http.HttpStatus;
 @JsonPropertyOrder({"isSuccess", "status", "code", "data"})
 public class ApiResponse<T> {
 
-    @JsonProperty("isSuccess")
-    private Boolean isSuccess;
+  @JsonProperty("isSuccess")
+  private Boolean isSuccess;
 
-    @JsonProperty("status")
-    private String status;
+  @JsonProperty("status")
+  private String status;
 
-    @JsonProperty("code")
-    private String code;
+  @JsonProperty("code")
+  private String code;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonProperty("data")
-    private T data;
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonProperty("data")
+  private T data;
 
-    public static <T> ApiResponse<T> success(BaseResponseCode code, T data) {
-        return new ApiResponse<>(true, code.getStatus().name(), code.getCode(), data);
-    }
+  public static <T> ApiResponse<T> success(BaseResponseCode code, T data) {
+    return new ApiResponse<>(true, code.getStatus().name(), code.getCode(), data);
+  }
 
-    public static <T> ApiResponse<T> success(BaseResponseCode code) {
-        return success(code, null);
-    }
+  public static <T> ApiResponse<T> success(BaseResponseCode code) {
+    return success(code, null);
+  }
 
-    public static <T> ApiResponse<T> fail(BaseResponseCode code, T data) {
-        return new ApiResponse<>(false, code.getStatus().name(), code.getCode(), data);
-    }
+  public static <T> ApiResponse<T> fail(BaseResponseCode code, T data) {
+    return new ApiResponse<>(false, code.getStatus().name(), code.getCode(), data);
+  }
 
-    public static <T> ApiResponse<T> fail(BaseResponseCode code) {
-        return fail(code, null);
-    }
+  public static <T> ApiResponse<T> fail(BaseResponseCode code) {
+    return fail(code, null);
+  }
 
-    public static <T> ApiResponse<T> success(HttpStatus status, T data) {
-        return new ApiResponse<>(true, status.name(), String.valueOf(status.value()), data);
-    }
-
+  public static <T> ApiResponse<T> success(HttpStatus status, T data) {
+    return new ApiResponse<>(true, status.name(), String.valueOf(status.value()), data);
+  }
 }
-
