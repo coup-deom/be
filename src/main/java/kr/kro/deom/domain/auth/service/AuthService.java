@@ -3,8 +3,9 @@ package kr.kro.deom.domain.auth.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.kro.deom.common.exception.messages.UnauthorizedMessages;
 import kr.kro.deom.common.security.jwt.JwtUtil;
+import kr.kro.deom.domain.auth.exception.InvalidRefreshTokenException;
+import kr.kro.deom.domain.auth.exception.RefreshTokenExpiredException;
 import kr.kro.deom.domain.user.entity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,14 +28,14 @@ public class AuthService {
     }
 
     if (refreshToken == null && !jwtUtil.validateToken(refreshToken)) {
-      throw new UnauthorizedException(UnauthorizedMessages.REFRESH_TOKEN_EXPIRED);
+      throw new RefreshTokenExpiredException();
     }
 
     Long userId = jwtUtil.getUserId(refreshToken);
     Role role = Role.valueOf(jwtUtil.getRole(refreshToken));
 
     if (refreshToken != null && !refreshToken.equals(jwtUtil.getRefreshToken(userId))) {
-      throw new UnauthorizedException(UnauthorizedMessages.INVALID_REFRESH_TOKEN);
+      throw new InvalidRefreshTokenException();
     }
 
     String newAccessToken = jwtUtil.createAccessToken(userId, role);
