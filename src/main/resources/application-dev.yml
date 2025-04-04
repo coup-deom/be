@@ -13,6 +13,20 @@ spring:
       ddl-auto: update
     show-sql: true
 
+  data:
+    redis:
+      client-type: lettuce
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+      url: ${REDIS_URL}
+      timeout: 6000
+      lettuce:
+        pool:
+          max-active: 50
+          max-idle: 20
+          min-idle: 0
+          max-wait: 5000
+
   security:
     oauth2:
       client:
