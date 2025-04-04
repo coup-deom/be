@@ -3,7 +3,6 @@ package kr.kro.deom.domain.auth.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import kr.kro.deom.common.exception.exceptions.UnauthorizedException;
 import kr.kro.deom.common.exception.messages.UnauthorizedMessages;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.domain.user.entity.Role;

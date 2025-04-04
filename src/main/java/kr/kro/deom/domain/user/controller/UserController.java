@@ -1,7 +1,8 @@
 package kr.kro.deom.domain.user.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import kr.kro.deom.common.exception.response.GlobalResponse;
+import kr.kro.deom.common.response.ApiResponse;
+import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
 import kr.kro.deom.domain.user.dto.RoleRequest;
@@ -22,21 +23,21 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping("/me")
-  public ResponseEntity<GlobalResponse<UserResponse>> getCurrentUser(
+  public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
       @AuthenticationPrincipal CustomOAuth2User user) {
     UserResponse response = userService.getUserInfo(user.getUserId());
-    return ResponseEntity.ok(GlobalResponse.success(response));
+    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
   }
 
   @GetMapping("/withdrawal")
-  public ResponseEntity<GlobalResponse<String>> deleteMyAccount(
+  public ResponseEntity<ApiResponse<String>> deleteMyAccount(
       @AuthenticationPrincipal CustomOAuth2User user) {
     userService.deleteUser(user.getUserId());
-    return ResponseEntity.ok(GlobalResponse.success("회원 탈퇴 성공"));
+    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "회원 탈퇴 성공"));
   }
 
   @PostMapping("/role")
-  public ResponseEntity<GlobalResponse<String>> setRole(
+  public ResponseEntity<ApiResponse<String>> setRole(
       @RequestBody RoleRequest request, HttpServletResponse response) {
     User user = userService.setUserRole(request.getUserId(), request.getRole());
 
@@ -45,6 +46,6 @@ public class UserController {
 
     response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
 
-    return ResponseEntity.ok(GlobalResponse.success("role 설정 완료"));
+    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "role 설정 완료"));
   }
 }

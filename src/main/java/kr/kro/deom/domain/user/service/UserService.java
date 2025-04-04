@@ -1,11 +1,10 @@
 package kr.kro.deom.domain.user.service;
 
-import kr.kro.deom.common.exception.exceptions.NotFoundException;
-import kr.kro.deom.common.exception.messages.NotFoundMessages;
 import kr.kro.deom.common.security.oauth.OAuth2UserInfo;
 import kr.kro.deom.domain.user.dto.UserResponse;
 import kr.kro.deom.domain.user.entity.Role;
 import kr.kro.deom.domain.user.entity.User;
+import kr.kro.deom.domain.user.exception.UserNotFoundException;
 import kr.kro.deom.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,16 +17,11 @@ public class UserService {
   private final UserRepository userRepository;
 
   public User getUser(Long userId) {
-    return userRepository
-        .findById(userId)
-        .orElseThrow(() -> new NotFoundException(NotFoundMessages.USER));
+    return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
   }
 
   public UserResponse getUserInfo(Long userId) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException(NotFoundMessages.USER));
+    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
     return UserResponse.from(user);
   }
@@ -60,18 +54,12 @@ public class UserService {
 
   @Transactional
   public void deleteUser(Long userId) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException(NotFoundMessages.USER));
+    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     user.updateDeleted(true);
   }
 
   public User setUserRole(Long userId, Role role) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new NotFoundException(NotFoundMessages.USER));
+    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
     user.updateRole(role);
     return userRepository.save(user);
   }

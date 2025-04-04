@@ -5,9 +5,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import kr.kro.deom.common.exception.exceptions.UnauthorizedException;
 import kr.kro.deom.common.exception.messages.UnauthorizedMessages;
-import kr.kro.deom.common.exception.response.GlobalResponse;
+import kr.kro.deom.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -27,8 +26,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     response.setContentType("application/json; charset=UTF-8");
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
-    GlobalResponse<Object> errorResponse =
-        GlobalResponse.fail(new UnauthorizedException(UnauthorizedMessages.AUTHENTICATION_FAILED));
+    ApiResponse<Object> errorResponse =
+        ApiResponse.fail(new UnauthorizedException(UnauthorizedMessages.AUTHENTICATION_FAILED));
 
     ObjectMapper mapper = new ObjectMapper();
     mapper.writeValue(response.getOutputStream(), errorResponse);

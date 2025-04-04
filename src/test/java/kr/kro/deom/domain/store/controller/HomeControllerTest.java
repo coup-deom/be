@@ -1,32 +1,32 @@
-//package kr.kro.deom.domain.store.controller;
+// package kr.kro.deom.domain.store.controller;
 //
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+// import static org.mockito.Mockito.*;
+// import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+// import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+// import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 //
-//import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.List;
-//import kr.kro.deom.common.utils.SecurityUtils;
-//import kr.kro.deom.domain.store.dto.response.StoreResponse;
-//import kr.kro.deom.domain.store.service.HomeService;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.MockedStatic;
-//import org.mockito.Mockito;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.http.MediaType;
-//import org.springframework.test.web.servlet.MockMvc;
+// import java.util.ArrayList;
+// import java.util.Arrays;
+// import java.util.List;
+// import kr.kro.deom.common.utils.SecurityUtils;
+// import kr.kro.deom.domain.store.dto.response.StoreResponse;
+// import kr.kro.deom.domain.store.service.HomeService;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.mockito.MockedStatic;
+// import org.mockito.Mockito;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+// import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.http.MediaType;
+// import org.springframework.test.web.servlet.MockMvc;
 //
-//@WebMvcTest(controllers = HomeController.class)
-//@AutoConfigureMockMvc(addFilters = false)
-//public class HomeControllerTest {
+// @WebMvcTest(controllers = HomeController.class)
+// @AutoConfigureMockMvc(addFilters = false)
+// public class HomeControllerTest {
 //
 //  @Configuration
 //  static class TestConfig {
@@ -158,4 +158,4 @@
 //    // verify
 //    verify(homeService, times(1)).getAvailableStores();
 //  }
-//}
+// }

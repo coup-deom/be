@@ -1,14 +1,20 @@
 package kr.kro.deom.common.exception.exceptions;
 
+import kr.kro.deom.common.response.BaseResponseCode;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 public class CustomException extends RuntimeException {
-  private final HttpStatus status;
 
-  public CustomException(final String message, final HttpStatus status) {
+  private final BaseResponseCode baseResponseCode;
+
+  public CustomException(BaseResponseCode code, String message) {
     super(message);
-    this.status = status;
+    this.baseResponseCode = code;
+  }
+
+  public CustomException(BaseResponseCode code) {
+    super(" ");
+    this.baseResponseCode = code;
   }
 }
