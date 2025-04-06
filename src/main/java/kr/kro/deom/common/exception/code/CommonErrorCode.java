@@ -17,12 +17,18 @@ public enum CommonErrorCode implements BaseResponseCode {
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C005", "서버 내부 오류가 발생했습니다."),
 
   // auth
-  REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A001","리프레쉬 토큰이 만료되었습니다."),
-  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"A002","유효하지 않은 리프레쉬 토큰입니다."),
+  REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A001", "리프레쉬 토큰이 만료되었습니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 리프레쉬 토큰입니다."),
   AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "A003", "인증에 실패하였습니다."),
 
   // user
-  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않는 사용자입니다.");
+  USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않는 사용자입니다."),
+
+  // otp
+  OPT_EXPIRED(HttpStatus.BAD_REQUEST, "O001", "OTP가 존재하지 만료되었습니다."),
+  OTP_INVALID(HttpStatus.NOT_FOUND, "O002", "존재하지 않는 OTP입니다."),
+  OPT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "O003", "이미 처리된 OTP입니다."),
+  OTP_UNAUTHORIZED(HttpStatus.FORBIDDEN, "O004", "이 OTP에 대한 권한이 없습니다.");
 
   private final HttpStatus status;
   private final String code;
