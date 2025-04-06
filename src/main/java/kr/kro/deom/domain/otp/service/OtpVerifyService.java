@@ -27,16 +27,17 @@ public class OtpVerifyService {
   private final OtpUsageRepository otpUsageRepository;
   private final StoreRepository storeRepository;
 
-  /** OTP 코드 검증 - 메인 메서드 */
+  /** OTP 코드 검증 - 메서드 */
   @Transactional
   public OtpVerifyResponse otpVerify(Long otpCode) {
-    // 1. Redis에서 OTP 정보 조회 시도
+
+    // Redis에서 OTP 정보 조회 시도
     OtpVerifyResponse redisResult = validateOtpFromRedis(otpCode);
     if (redisResult != null) {
       return redisResult;
     }
 
-    // 2. Redis에 없는 경우 DB에서 조회
+    // Redis에 없는 경우 DB에서 조회
     return validateOtpFromDatabase(otpCode);
   }
 
@@ -85,6 +86,8 @@ public class OtpVerifyService {
         OtpUsage savedOtpUsage = otpUsageRepository.save(newOtpUsage);
         return new OtpVerifyResponse(savedOtpUsage.getId(), type, OtpStatus.PENDING);
       }
+    } catch (OtpException e) {
+      throw e;
     } catch (Exception e) {
       throw new OtpException(CommonErrorCode.OTP_INVALID);
     }
