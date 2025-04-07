@@ -3,6 +3,7 @@ package kr.kro.deom.domain.otp.entity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import lombok.*;
+import org.springframework.data.redis.core.RedisHash;
 
 @Entity
 @Getter
