@@ -28,7 +28,7 @@ public class CustomerOtpController {
   }
 
   @PostMapping("/request/deom")
-  public ResponseEntity<ApiResponse<OtpResponse>> issueStampOtp(
+  public ResponseEntity<ApiResponse<OtpResponse>> issueDeomOtp(
       @RequestBody OtpDeomRequest request) {
     OtpResponse response = customerOtpService.issueDeomOtp(request);
     return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
