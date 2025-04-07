@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.owner.entity;
+package kr.kro.deom.domain.otp.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;

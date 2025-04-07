@@ -1,19 +1,18 @@
-package kr.kro.deom.domain.owner.service;
+package kr.kro.deom.domain.otp.service;
 
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
-import kr.kro.deom.domain.otp.service.OtpRedisService;
-import kr.kro.deom.domain.owner.dto.DeomUsageDto;
-import kr.kro.deom.domain.owner.entity.DeomUsage;
-import kr.kro.deom.domain.owner.entity.TransactionStatus;
-import kr.kro.deom.domain.owner.repository.DeomUsageRepository;
+import kr.kro.deom.domain.otp.dto.DeomUsageDto;
+import kr.kro.deom.domain.otp.entity.DeomUsage;
+import kr.kro.deom.domain.otp.entity.TransactionStatus;
+import kr.kro.deom.domain.otp.repository.DeomUsageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class OwnerDeomOtpService {
-    private final OtpRedisService otpRedisService;
+public class OtpOwnerDeomService {
+    private final OtpOwnerService otpOwnerService;
     private final DeomUsageRepository deomUsageRepository;
     private final MyStampRepository myStampRepository;
 
@@ -29,7 +28,7 @@ public class OwnerDeomOtpService {
             rejectOtp(deomUsageDto); // 괜찮은코드인가...
             throw new IllegalArgumentException("사용할 수 있는 스탬프가 부족합니다.");
         }
-        if (otpRedisService.approveOtp(otpCode, userId, storeId)) {
+        if (otpOwnerService.approveOtp(otpCode, userId, storeId)) {
             DeomUsage deomUsage =
                     createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.APPROVED);
             deomUsageRepository.save(deomUsage);
@@ -44,7 +43,7 @@ public class OwnerDeomOtpService {
         Long storeId = deomUsageDto.getStoreId();
         Long otpCode = deomUsageDto.getOtpCode();
         Integer usedStampAmount = deomUsageDto.getUsedStampAmount();
-        if (otpRedisService.rejectOtp(otpCode, userId, storeId)) {
+        if (otpOwnerService.rejectOtp(otpCode, userId, storeId)) {
             DeomUsage deomUsage =
                     createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.REJECTED);
             deomUsageRepository.save(deomUsage);

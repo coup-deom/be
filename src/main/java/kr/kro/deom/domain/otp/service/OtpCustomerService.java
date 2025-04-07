@@ -1,23 +1,25 @@
-package kr.kro.deom.domain.customer.service;
+package kr.kro.deom.domain.otp.service;
 
-import java.time.Instant;
-import java.util.Random;
-import kr.kro.deom.domain.customer.dto.OtpDeomRequest;
-import kr.kro.deom.domain.customer.dto.OtpResponse;
-import kr.kro.deom.domain.customer.dto.OtpStampRequest;
+import kr.kro.deom.domain.otp.dto.OtpDeomRequest;
+import kr.kro.deom.domain.otp.dto.OtpResponse;
+import kr.kro.deom.domain.otp.dto.OtpStampRequest;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
+import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
-import kr.kro.deom.domain.otp.service.OtpRedisService;
-import kr.kro.deom.domain.otp.service.OtpUsageService;
+import kr.kro.deom.domain.otp.entity.OtpUsage;
+import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Random;
+
 @Service
 @RequiredArgsConstructor
-public class CustomerOtpService {
+public class OtpCustomerService {
 
-    private final OtpUsageService otpUsageService;
     private final OtpRedisService otpRedisService;
+    private final OtpRepository otpRepository;
 
     private static final Random RANDOM = new Random();
     private static final Long OTP_TTL_SECONDS = 10800L;
@@ -41,21 +43,21 @@ public class CustomerOtpService {
     }
 
     private OtpRedisDto createOtpInfo(
-            Long userId, Long storeId, OtpType type, Long deomId, String usedStampAmount) {
+            Long userId, Long storeId, OtpType type, Long deomId, Integer usedStampAmount) {
         return OtpRedisDto.builder()
                 .userId(userId)
                 .storeId(storeId)
-                .type(type.name())
+                .type(type)
                 .deomId(deomId)
                 .usedStampAmount(usedStampAmount)
-                .createdAt(Instant.now().toString())
+                .createdAt(Instant.now())
                 .build();
     }
 
     private Long generateOtpCode(Long storeId) {
         while (true) {
             Long otpCode = 1000L + RANDOM.nextInt(9000);
-            if (!otpUsageService.duplicateOtp(otpCode, storeId)) {
+            if (!otpRepository.existsByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING)) {
                 return otpCode;
             }
         }
@@ -66,8 +68,24 @@ public class CustomerOtpService {
 
         otpRedisService.saveOtpToRedis(otpCode, otpInfo, OTP_TTL_SECONDS);
 
-        otpUsageService.createOtpUsage(otpCode, otpInfo);
+        createOtpUsage(otpCode, otpInfo);
 
         return new OtpResponse(otpCode);
     }
+
+    private void createOtpUsage(Long otpCode, OtpRedisDto info) {
+
+        OtpUsage otpUsage =
+                OtpUsage.builder()
+                        .otp(otpCode)
+                        .userId(info.getUserId())
+                        .storeId(info.getStoreId())
+                        .type(info.getType())
+                        .createdAt(Instant.now())
+                        .status(OtpStatus.PENDING)
+                        .build();
+
+        otpRepository.save(otpUsage);
+    }
+
 }

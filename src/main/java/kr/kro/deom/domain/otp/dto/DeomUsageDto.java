@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.owner.dto;
+package kr.kro.deom.domain.otp.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

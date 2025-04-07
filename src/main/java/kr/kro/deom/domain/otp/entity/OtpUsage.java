@@ -30,7 +30,7 @@ public class OtpUsage {
     private OtpType type; // stamp | deom
 
     @Column(name = "deom_id")
-    private Integer deomId;
+    private Long deomId;
 
     @Column(name = "used_stamp_amount")
     private Integer usedStampAmount;

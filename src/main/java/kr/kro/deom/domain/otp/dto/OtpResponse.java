@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.customer.dto;
+package kr.kro.deom.domain.otp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
