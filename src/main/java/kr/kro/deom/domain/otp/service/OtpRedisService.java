@@ -1,7 +1,9 @@
 package kr.kro.deom.domain.otp.service;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import kr.kro.deom.domain.otp.dto.OtpInfo;
+import kr.kro.deom.domain.otp.dto.OtpRedisDto;
+import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -10,22 +12,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OtpRedisService {
 
-  private static final String OTP_KEY_PREFIX = "otp:";
+  private static final long OTP_TTL_SECONDS = 60 * 60 * 3;
+  private static final Random RANDOM = new Random();
 
+  private final OtpRepository otpRepository;
   private final RedisTemplate<String, Object> redisTemplate;
 
-  public void saveOtp(String otpCode, OtpInfo otpInfo, long ttlSeconds) {
-    String key = OTP_KEY_PREFIX + otpCode;
-    redisTemplate.opsForValue().set(key, otpInfo, ttlSeconds, TimeUnit.SECONDS);
+  public void saveOtpToRedis(Long otpCode, OtpRedisDto otpRedisDto, long ttlSeconds) {
+    redisTemplate.opsForValue().set(otpCode.toString(), otpRedisDto, ttlSeconds, TimeUnit.SECONDS);
   }
 
-  public OtpInfo getOtp(String otpCode) {
-    String key = OTP_KEY_PREFIX + otpCode;
-    Object value = redisTemplate.opsForValue().get(key);
-    return value instanceof OtpInfo ? (OtpInfo) value : null;
+  private OtpRedisDto getOtpFromRedis(Long otpCode) {
+    Object value = redisTemplate.opsForValue().get(otpCode.toString());
+    return value instanceof OtpRedisDto ? (OtpRedisDto) value : null;
   }
 
-  public void deleteOtp(String otpCode) {
-    redisTemplate.delete(OTP_KEY_PREFIX + otpCode);
+  private void deleteOtpFromRedis(Long otpCode) {
+    redisTemplate.delete(otpCode.toString());
   }
 }

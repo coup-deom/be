@@ -17,8 +17,8 @@ public enum CommonErrorCode implements BaseResponseCode {
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C005", "서버 내부 오류가 발생했습니다."),
 
   // auth
-  REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A001","리프레쉬 토큰이 만료되었습니다."),
-  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED,"A002","유효하지 않은 리프레쉬 토큰입니다."),
+  REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A001", "리프레쉬 토큰이 만료되었습니다."),
+  INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "A002", "유효하지 않은 리프레쉬 토큰입니다."),
   AUTHENTICATION_FAILED(HttpStatus.UNAUTHORIZED, "A003", "인증에 실패하였습니다."),
 
   // user
