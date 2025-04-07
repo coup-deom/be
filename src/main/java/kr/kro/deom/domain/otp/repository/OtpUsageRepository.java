@@ -8,10 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OtpUsageRepository extends JpaRepository<OtpUsage, Long> {
 
-  @Query("SELECT o.id FROM OtpUsage o WHERE o.otp = :otp")
-  Optional<Long> findIdByOtp(Long otp);
+    @Query("SELECT o.id FROM OtpUsage o WHERE o.otp = :otp")
+    Optional<Long> findIdByOtp(Long otp);
 
-  @Query(
-      "SELECT new map(o.id as id, o.type as type, o.status as status) FROM OtpUsage o WHERE o.otp =:otp")
-  Optional<Map<String, Object>> findIdAndTypeAndStatusByOtp(Long otp);
+    @Query(
+            "SELECT new map(o.id as id, o.type as type, o.status as status) FROM OtpUsage o WHERE o.otp =:otp")
+    Optional<Map<String, Object>> findIdAndTypeAndStatusByOtp(Long otp);
 }

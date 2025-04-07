@@ -10,23 +10,23 @@ import lombok.Getter;
 @AllArgsConstructor
 public class StoreResponse {
 
-  private Long storeId;
-  private String storeName;
-  private String branchName;
-  private String image;
-  private int myStampCount;
-  private List<DeomInfo> deoms;
-  private String city;
-  private String street;
-  private String detail;
+    private Long storeId;
+    private String storeName;
+    private String branchName;
+    private String image;
+    private int myStampCount;
+    private List<DeomInfo> deoms;
+    private String city;
+    private String street;
+    private String detail;
 
-  @Builder
-  @Getter
-  @AllArgsConstructor
-  public static class DeomInfo {
-    private Long deomId;
-    private String name;
-    private int requiredStampAmount;
-    private DeomStatus status;
-  }
+    @Builder
+    @Getter
+    @AllArgsConstructor
+    public static class DeomInfo {
+        private Long deomId;
+        private String name;
+        private int requiredStampAmount;
+        private DeomStatus status;
+    }
 }

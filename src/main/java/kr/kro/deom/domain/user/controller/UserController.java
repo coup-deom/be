@@ -19,33 +19,33 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-  private final JwtUtil jwtUtil;
-  private final UserService userService;
+    private final JwtUtil jwtUtil;
+    private final UserService userService;
 
-  @GetMapping("/me")
-  public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
-      @AuthenticationPrincipal CustomOAuth2User user) {
-    UserResponse response = userService.getUserInfo(user.getUserId());
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
-  }
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponse>> getCurrentUser(
+            @AuthenticationPrincipal CustomOAuth2User user) {
+        UserResponse response = userService.getUserInfo(user.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
 
-  @GetMapping("/withdrawal")
-  public ResponseEntity<ApiResponse<String>> deleteMyAccount(
-      @AuthenticationPrincipal CustomOAuth2User user) {
-    userService.deleteUser(user.getUserId());
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "회원 탈퇴 성공"));
-  }
+    @GetMapping("/withdrawal")
+    public ResponseEntity<ApiResponse<String>> deleteMyAccount(
+            @AuthenticationPrincipal CustomOAuth2User user) {
+        userService.deleteUser(user.getUserId());
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "회원 탈퇴 성공"));
+    }
 
-  @PostMapping("/role")
-  public ResponseEntity<ApiResponse<String>> setRole(
-      @RequestBody RoleRequest request, HttpServletResponse response) {
-    User user = userService.setUserRole(request.getUserId(), request.getRole());
+    @PostMapping("/role")
+    public ResponseEntity<ApiResponse<String>> setRole(
+            @RequestBody RoleRequest request, HttpServletResponse response) {
+        User user = userService.setUserRole(request.getUserId(), request.getRole());
 
-    String newAccessToken = jwtUtil.createAccessToken(user.getId(), user.getRole());
-    String newRefreshToken = jwtUtil.createRefreshToken(user.getId(), user.getRole());
+        String newAccessToken = jwtUtil.createAccessToken(user.getId(), user.getRole());
+        String newRefreshToken = jwtUtil.createRefreshToken(user.getId(), user.getRole());
 
-    response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
+        response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
 
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "role 설정 완료"));
-  }
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "role 설정 완료"));
+    }
 }

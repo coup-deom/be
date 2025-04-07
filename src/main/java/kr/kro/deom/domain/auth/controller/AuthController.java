@@ -18,19 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-  private final AuthService authService;
+    private final AuthService authService;
 
-  @PostMapping("/reissue")
-  public ResponseEntity<ApiResponse<String>> reissueToken(
-      HttpServletRequest request, HttpServletResponse response) {
-    String accessToken = authService.refreshAccessToken(request, response);
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, accessToken));
-  }
+    @PostMapping("/reissue")
+    public ResponseEntity<ApiResponse<String>> reissueToken(
+            HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = authService.refreshAccessToken(request, response);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, accessToken));
+    }
 
-  @PostMapping("/logout")
-  public ResponseEntity<ApiResponse<String>> logout(
-      @AuthenticationPrincipal CustomOAuth2User user, HttpServletResponse response) {
-    authService.logout(user.getUserId(), response);
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "로그아웃 성공"));
-  }
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(
+            @AuthenticationPrincipal CustomOAuth2User user, HttpServletResponse response) {
+        authService.logout(user.getUserId(), response);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "로그아웃 성공"));
+    }
 }

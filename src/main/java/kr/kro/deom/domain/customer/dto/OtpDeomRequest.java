@@ -8,14 +8,18 @@ import lombok.Getter;
 @Getter
 @Builder
 public class OtpDeomRequest {
-  @NotNull(message = "사용자 ID는 필수입니다")
-  private Long userId;
-  @NotNull(message = "가게 ID는 필수입니다")
-  private Long storeId;
-  @NotNull(message = "otp 타입은 필수입니다")
-  private OtpType type;
-  @NotNull(message = "deom ID는 필수입니다")
-  private Long deomId;
-  @NotNull(message = "사용할 스탬프 수량은 필수입니다")
-  private String usedStampAmount;
+    @NotNull(message = "사용자 ID는 필수입니다")
+    private Long userId;
+
+    @NotNull(message = "가게 ID는 필수입니다")
+    private Long storeId;
+
+    @NotNull(message = "otp 타입은 필수입니다")
+    private OtpType type;
+
+    @NotNull(message = "deom ID는 필수입니다")
+    private Long deomId;
+
+    @NotNull(message = "사용할 스탬프 수량은 필수입니다")
+    private String usedStampAmount;
 }

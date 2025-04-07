@@ -25,16 +25,16 @@ public class OwnerDeomOtpService {
         Integer usedStampAmount = deomUsageDto.getUsedStampAmount();
 
         Integer stampAmount = myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
-        if(stampAmount == null || stampAmount < usedStampAmount){
-            rejectOtp(deomUsageDto); //괜찮은코드인가...
+        if (stampAmount == null || stampAmount < usedStampAmount) {
+            rejectOtp(deomUsageDto); // 괜찮은코드인가...
             throw new IllegalArgumentException("사용할 수 있는 스탬프가 부족합니다.");
         }
-        if(otpRedisService.approveOtp(otpCode, userId, storeId)){
-            DeomUsage deomUsage = createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.APPROVED);
+        if (otpRedisService.approveOtp(otpCode, userId, storeId)) {
+            DeomUsage deomUsage =
+                    createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.APPROVED);
             deomUsageRepository.save(deomUsage);
             // 스탬프 사용량 업데이트 -> 서비스 레이어 없이 직접 repository 호출 괜찮은가...
             myStampRepository.updateStampAmount(userId, storeId, usedStampAmount);
-
         }
     }
 
@@ -44,14 +44,15 @@ public class OwnerDeomOtpService {
         Long storeId = deomUsageDto.getStoreId();
         Long otpCode = deomUsageDto.getOtpCode();
         Integer usedStampAmount = deomUsageDto.getUsedStampAmount();
-        if(otpRedisService.rejectOtp(otpCode, userId, storeId)){
-            DeomUsage deomUsage = createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.REJECTED);
+        if (otpRedisService.rejectOtp(otpCode, userId, storeId)) {
+            DeomUsage deomUsage =
+                    createDeomUsage(userId, storeId, usedStampAmount, TransactionStatus.REJECTED);
             deomUsageRepository.save(deomUsage);
-
         }
     }
 
-    private DeomUsage createDeomUsage(Long userId, Long storeId,  Integer usedStampAmount, TransactionStatus status) {
+    private DeomUsage createDeomUsage(
+            Long userId, Long storeId, Integer usedStampAmount, TransactionStatus status) {
         return DeomUsage.builder()
                 .userId(userId)
                 .storeId(storeId)
@@ -59,7 +60,4 @@ public class OwnerDeomOtpService {
                 .status(status)
                 .build();
     }
-
-
-
 }

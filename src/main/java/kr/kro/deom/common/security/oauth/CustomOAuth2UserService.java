@@ -13,27 +13,27 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-  private final UserService userService;
+    private final UserService userService;
 
-  @Override
-  public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-    OAuth2User oAuth2User = super.loadUser(userRequest);
+        OAuth2User oAuth2User = super.loadUser(userRequest);
 
-    String provider = userRequest.getClientRegistration().getRegistrationId();
+        String provider = userRequest.getClientRegistration().getRegistrationId();
 
-    OAuth2UserInfo oAuth2UserInfo;
-    switch (provider) {
-      case "kakao" -> oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
-      case "google" -> oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
-      case "naver" -> oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
-      default -> {
-        return null;
-      }
+        OAuth2UserInfo oAuth2UserInfo;
+        switch (provider) {
+            case "kakao" -> oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+            case "google" -> oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+            case "naver" -> oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+            default -> {
+                return null;
+            }
+        }
+
+        User user = userService.findOrCreateUser(oAuth2UserInfo);
+
+        return new CustomOAuth2User(user.getId(), user.getRole(), oAuth2User.getAttributes());
     }
-
-    User user = userService.findOrCreateUser(oAuth2UserInfo);
-
-    return new CustomOAuth2User(user.getId(), user.getRole(), oAuth2User.getAttributes());
-  }
 }

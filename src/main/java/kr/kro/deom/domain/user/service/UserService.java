@@ -14,53 +14,53 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService {
 
-  private final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-  public User getUser(Long userId) {
-    return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-  }
+    public User getUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    }
 
-  public UserResponse getUserInfo(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    public UserResponse getUserInfo(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
 
-    return UserResponse.from(user);
-  }
+        return UserResponse.from(user);
+    }
 
-  @Transactional
-  public User findOrCreateUser(OAuth2UserInfo info) {
-    return userRepository
-        .findUserBySocialId(info.getProviderId())
-        .map(
-            user -> {
-              if (user.isDeleted()) {
-                user.updateDeleted(false);
-              }
-              return user;
-            })
-        .orElseGet(
-            () -> {
-              User newUser =
-                  User.builder()
-                      .socialId(info.getProviderId())
-                      .provider(info.getProvider())
-                      .email(info.getEmail())
-                      .nickname(info.getName())
-                      .role(Role.PENDING)
-                      .deleted(false)
-                      .build();
-              return userRepository.save(newUser);
-            });
-  }
+    @Transactional
+    public User findOrCreateUser(OAuth2UserInfo info) {
+        return userRepository
+                .findUserBySocialId(info.getProviderId())
+                .map(
+                        user -> {
+                            if (user.isDeleted()) {
+                                user.updateDeleted(false);
+                            }
+                            return user;
+                        })
+                .orElseGet(
+                        () -> {
+                            User newUser =
+                                    User.builder()
+                                            .socialId(info.getProviderId())
+                                            .provider(info.getProvider())
+                                            .email(info.getEmail())
+                                            .nickname(info.getName())
+                                            .role(Role.PENDING)
+                                            .deleted(false)
+                                            .build();
+                            return userRepository.save(newUser);
+                        });
+    }
 
-  @Transactional
-  public void deleteUser(Long userId) {
-    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    user.updateDeleted(true);
-  }
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        user.updateDeleted(true);
+    }
 
-  public User setUserRole(Long userId, Role role) {
-    User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-    user.updateRole(role);
-    return userRepository.save(user);
-  }
+    public User setUserRole(Long userId, Role role) {
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        user.updateRole(role);
+        return userRepository.save(user);
+    }
 }

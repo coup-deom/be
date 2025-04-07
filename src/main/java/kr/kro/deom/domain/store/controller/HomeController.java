@@ -16,26 +16,26 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class HomeController {
 
-  private final HomeService homeService;
+    private final HomeService homeService;
 
-  // 전체조회
-  @GetMapping
-  public ResponseEntity<ApiResponse<List<StoreResponse>>> getStores() {
-    List<StoreResponse> storeList = homeService.getAllStores();
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
-  }
+    // 전체조회
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<StoreResponse>>> getStores() {
+        List<StoreResponse> storeList = homeService.getAllStores();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
+    }
 
-  // 스탬프 존재하는 것만
-  @GetMapping("/stamped")
-  public ResponseEntity<ApiResponse<List<StoreResponse>>> getStampedStores() {
-    List<StoreResponse> storeList = homeService.getStampedStores();
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
-  }
+    // 스탬프 존재하는 것만
+    @GetMapping("/stamped")
+    public ResponseEntity<ApiResponse<List<StoreResponse>>> getStampedStores() {
+        List<StoreResponse> storeList = homeService.getStampedStores();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
+    }
 
-  // 받을 수 있는 덤이 있는 것만.
-  @GetMapping("/available-stores") // 지금받을수있는
-  public ResponseEntity<ApiResponse<List<StoreResponse>>> getAvailableStores() {
-    List<StoreResponse> storeList = homeService.getAvailableStores();
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
-  }
+    // 받을 수 있는 덤이 있는 것만.
+    @GetMapping("/available-stores") // 지금받을수있는
+    public ResponseEntity<ApiResponse<List<StoreResponse>>> getAvailableStores() {
+        List<StoreResponse> storeList = homeService.getAvailableStores();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, storeList));
+    }
 }

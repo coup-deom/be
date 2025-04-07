@@ -2,11 +2,11 @@ package kr.kro.deom.common.security.oauth;
 
 public interface OAuth2UserInfo {
 
-  OAuth2Provider getProvider();
+    OAuth2Provider getProvider();
 
-  String getProviderId();
+    String getProviderId();
 
-  String getEmail();
+    String getEmail();
 
-  String getName();
+    String getName();
 }

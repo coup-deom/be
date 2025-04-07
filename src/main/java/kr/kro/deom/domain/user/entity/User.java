@@ -12,29 +12,29 @@ import lombok.*;
 @Table(name = "users")
 public class User {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String socialId;
+    private String socialId;
 
-  @Enumerated(EnumType.STRING)
-  private OAuth2Provider provider;
+    @Enumerated(EnumType.STRING)
+    private OAuth2Provider provider;
 
-  private String email;
+    private String email;
 
-  private String nickname;
+    private String nickname;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-  private boolean deleted;
+    private boolean deleted;
 
-  public void updateRole(Role newRole) {
-    this.role = newRole;
-  }
+    public void updateRole(Role newRole) {
+        this.role = newRole;
+    }
 
-  public void updateDeleted(boolean deleted) {
-    this.deleted = deleted;
-  }
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }

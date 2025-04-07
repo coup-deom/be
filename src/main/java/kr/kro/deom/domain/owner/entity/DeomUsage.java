@@ -1,10 +1,8 @@
 package kr.kro.deom.domain.owner.entity;
 
-
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Instant;
+import lombok.*;
 
 @Entity
 @Getter
@@ -38,6 +36,4 @@ public class DeomUsage {
     protected void onCreate() {
         createdAt = Instant.now();
     }
-
-
 }

@@ -6,5 +6,5 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class OtpResponse {
-  private Long otpCode;
+    private Long otpCode;
 }

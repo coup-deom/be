@@ -13,24 +13,24 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class OtpUsageService {
 
-  private final OtpRepository otpRepository;
+    private final OtpRepository otpRepository;
 
-  public void createOtpUsage(Long otpCode, OtpRedisDto info) {
+    public void createOtpUsage(Long otpCode, OtpRedisDto info) {
 
-    OtpUsage otpUsage =
-        OtpUsage.builder()
-            .otp(otpCode)
-            .userId(info.getUserId())
-            .storeId(info.getStoreId())
-            .type(OtpType.valueOf(info.getType()))
-            .createdAt(Instant.now())
-            .status(OtpStatus.PENDING)
-            .build();
+        OtpUsage otpUsage =
+                OtpUsage.builder()
+                        .otp(otpCode)
+                        .userId(info.getUserId())
+                        .storeId(info.getStoreId())
+                        .type(OtpType.valueOf(info.getType()))
+                        .createdAt(Instant.now())
+                        .status(OtpStatus.PENDING)
+                        .build();
 
-    otpRepository.save(otpUsage);
-  }
+        otpRepository.save(otpUsage);
+    }
 
-  public boolean duplicateOtp(Long otpCode, Long storeId) {
-    return otpRepository.existsByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
-  }
+    public boolean duplicateOtp(Long otpCode, Long storeId) {
+        return otpRepository.existsByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
+    }
 }

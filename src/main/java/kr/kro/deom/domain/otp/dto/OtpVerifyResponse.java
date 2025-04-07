@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class OtpVerifyResponse {
-  private Long otpId;
-  private OtpType type;
-  private OtpStatus status;
+    private Long otpId;
+    private OtpType type;
+    private OtpStatus status;
 }

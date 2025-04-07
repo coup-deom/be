@@ -16,33 +16,34 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-      throws ServletException, IOException {
-    String token = resolveToken(request);
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String token = resolveToken(request);
 
-    if (token != null && jwtUtil.validateToken(token)) {
-      Long id = jwtUtil.getUserId(token);
-      Role role = Role.valueOf(jwtUtil.getRole(token));
+        if (token != null && jwtUtil.validateToken(token)) {
+            Long id = jwtUtil.getUserId(token);
+            Role role = Role.valueOf(jwtUtil.getRole(token));
 
-      CustomOAuth2User oAuth2User = new CustomOAuth2User(id, role, null);
+            CustomOAuth2User oAuth2User = new CustomOAuth2User(id, role, null);
 
-      UsernamePasswordAuthenticationToken authentication =
-          new UsernamePasswordAuthenticationToken(oAuth2User, null, oAuth2User.getAuthorities());
-      authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-      SecurityContextHolder.getContext().setAuthentication(authentication);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            oAuth2User, null, oAuth2User.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+        chain.doFilter(request, response);
     }
-    chain.doFilter(request, response);
-  }
 
-  private String resolveToken(HttpServletRequest request) {
-    String bearerToken = request.getHeader("Authorization");
-    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-      return bearerToken.substring(7);
+    private String resolveToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
-    return null;
-  }
 }

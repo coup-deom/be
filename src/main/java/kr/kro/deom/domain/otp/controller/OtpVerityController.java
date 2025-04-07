@@ -18,12 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OtpVerityController {
 
-  private final OtpVerifyService otpVerifyService;
+    private final OtpVerifyService otpVerifyService;
 
-  @PostMapping("/verify")
-  public ResponseEntity<ApiResponse<OtpVerifyResponse>> verifyOtp(
-      @RequestBody @Valid OtpVerifyRequest request) {
-    OtpVerifyResponse response = otpVerifyService.otpVerify(request.getOtpCode());
-    return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
-  }
+    @PostMapping("/verify")
+    public ResponseEntity<ApiResponse<OtpVerifyResponse>> verifyOtp(
+            @RequestBody @Valid OtpVerifyRequest request) {
+        OtpVerifyResponse response = otpVerifyService.otpVerify(request.getOtpCode());
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
 }
