@@ -28,12 +28,23 @@ public class OtpOwnerStampService {
 
     // 적립 승인
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveAndIncreaseStamp(Long optId, int amount) {
+    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(Long optId, int amount) {
 
         validateAmount(amount);
         OtpUsage otpUsage = getValidOtpUsage(optId);
         increaseStamp(otpUsage, amount);
         otpUsage.approve();
+        otpRepository.save(otpUsage);
+        otpRedisService.deleteOtpFromRedis(optId);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+    }
+
+    @Transactional
+    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long optId) {
+        OtpUsage otpUsage = getValidOtpUsage(optId);
+        otpUsage.reject();
+
+        otpRepository.save(otpUsage);
         otpRedisService.deleteOtpFromRedis(optId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
@@ -59,8 +70,8 @@ public class OtpOwnerStampService {
         return otpUsage;
     }
 
-    private MyStamp increaseStamp(OtpUsage otpUsage, int amount) {
-        return myStampRepository
+    private void increaseStamp(OtpUsage otpUsage, int amount) {
+        myStampRepository
                 .incrementStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount)
                 .orElseGet(
                         () ->

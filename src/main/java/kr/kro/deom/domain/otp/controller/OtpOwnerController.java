@@ -17,8 +17,13 @@ public class OtpOwnerController {
     private final OtpOwnerStampService otpOwnerStampService;
 
     @PostMapping("/stamp-request/{optId}/approve")
-    public ResponseEntity<ApiResponse<Void>> stampApprove(
+    public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
             @PathVariable Long optId, @RequestBody OtpStampApproveRequest request) {
-        return otpOwnerStampService.approveAndIncreaseStamp(optId, request.getAmount());
+        return otpOwnerStampService.approveOtpAndAddStamp(optId, request.getAmount());
+    }
+
+    @PostMapping("/stamp-request/{optId}/reject")
+    public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(@PathVariable Long optId) {
+        return otpOwnerStampService.rejectStampOtp(optId);
     }
 }
