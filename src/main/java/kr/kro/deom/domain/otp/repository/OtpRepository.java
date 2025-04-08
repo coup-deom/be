@@ -22,4 +22,6 @@ public interface OtpRepository extends CrudRepository<OtpUsage, Long> {
             "SELECT new map(o.id as id, o.type as type, o.status as status) FROM OtpUsage o WHERE o.otp =:otp AND o.storeId =:storedId AND o.status =:status")
     Optional<Map<String, Object>> findOtpInfoByOtpAndStoreIdAndStatus(
             Long otp, Long storeId, OtpStatus status);
+
+    Optional<OtpUsage> findById(Long id);
 }

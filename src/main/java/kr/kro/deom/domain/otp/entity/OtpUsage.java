@@ -2,6 +2,8 @@ package kr.kro.deom.domain.otp.entity;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.domain.otp.exception.OtpException;
 import lombok.*;
 
 @Entity
@@ -41,4 +43,18 @@ public class OtpUsage {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private OtpStatus status; // 진행중, 승인, 거절, 완료
+
+    public void approve() {
+        if (this.status != OtpStatus.PENDING) {
+            throw new OtpException(CommonErrorCode.OPT_ALREADY_PROCESSED);
+        }
+        this.status = OtpStatus.APPROVED;
+    }
+
+    public void reject() {
+        if (this.status != OtpStatus.PENDING) {
+            throw new OtpException(CommonErrorCode.OPT_ALREADY_PROCESSED);
+        }
+        this.status = OtpStatus.REJECTED;
+    }
 }
