@@ -1,15 +1,19 @@
 package kr.kro.deom.domain.otp.service;
 
+import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import kr.kro.deom.domain.myStamp.exception.MyStampException;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
+import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
 import kr.kro.deom.domain.otp.exception.OtpException;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
+import kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto;
+import kr.kro.deom.domain.stampPolicy.service.StampPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,31 +26,66 @@ public class OtpOwnerStampService {
     private final OtpRepository otpRepository;
     private final MyStampRepository myStampRepository;
     private final OtpRedisService otpRedisService;
+    private final StampPolicyService stampPolicyService;
 
-    // 적립내용 조회
-    // response: 지금까지 n개 적립한 고객입니다. 우리가게 스탬프 적립 가이드  ex- 5000원 이상 스탬프 1개 이런식!
+    // 적립 페이지
+    @Transactional(readOnly = true)
+    public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getUserStampStatusAndStampPolicy(
+            Long otpId) {
+
+        OtpUsage otpUsage = validateAndGetOtpUsage(otpId);
+        int customerStampAmount =
+                getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
+        List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
+        OwnerStampInfoResponse response =
+                createStampInfoResponse(customerStampAmount, stampPolicyList);
+
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
 
     // 적립 승인
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(Long optId, int amount) {
+    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(Long otpId, int amount) {
 
         validateAmount(amount);
-        OtpUsage otpUsage = getValidOtpUsage(optId);
+        OtpUsage otpUsage = getValidOtpUsage(otpId);
         increaseStamp(otpUsage, amount);
         otpUsage.approve();
         otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(optId);
+        otpRedisService.deleteOtpFromRedis(otpId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long optId) {
-        OtpUsage otpUsage = getValidOtpUsage(optId);
+    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpId) {
+        OtpUsage otpUsage = getValidOtpUsage(otpId);
         otpUsage.reject();
 
         otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(optId);
+        otpRedisService.deleteOtpFromRedis(otpId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+    }
+
+    private OtpUsage validateAndGetOtpUsage(Long otpId) {
+        return otpRepository
+                .findById(otpId)
+                .orElseThrow(() -> new OtpException(CommonErrorCode.OTP_INVALID));
+    }
+
+    private int getCustomerStampAmount(Long userId, Long storeId) {
+        return myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
+    }
+
+    private List<StampPolicyDto> getStoreStampPolicies(Long storeId) {
+        return stampPolicyService.getStampPolicy(storeId);
+    }
+
+    private OwnerStampInfoResponse createStampInfoResponse(
+            int customerStampAmount, List<StampPolicyDto> stampPolicyList) {
+        return OwnerStampInfoResponse.builder()
+                .customerStampAmount(customerStampAmount)
+                .stampPolicyList(stampPolicyList)
+                .build();
     }
 
     private void validateAmount(int amount) {
@@ -55,10 +94,10 @@ public class OtpOwnerStampService {
         }
     }
 
-    private OtpUsage getValidOtpUsage(Long optId) {
+    private OtpUsage getValidOtpUsage(Long otpId) {
         OtpUsage otpUsage =
                 otpRepository
-                        .findById(optId)
+                        .findById(otpId)
                         .orElseThrow(() -> new OtpException(CommonErrorCode.OTP_INVALID));
 
         if (otpUsage.getStatus() != OtpStatus.PENDING) {

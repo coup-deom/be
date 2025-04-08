@@ -2,10 +2,10 @@ package kr.kro.deom.domain.otp.service;
 
 import java.time.Instant;
 import java.util.Random;
-import kr.kro.deom.domain.otp.dto.OtpDeomRequest;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-import kr.kro.deom.domain.otp.dto.OtpResponse;
-import kr.kro.deom.domain.otp.dto.OtpStampRequest;
+import kr.kro.deom.domain.otp.dto.request.OtpDeomRequest;
+import kr.kro.deom.domain.otp.dto.request.OtpStampRequest;
+import kr.kro.deom.domain.otp.dto.response.OtpResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import kr.kro.deom.domain.otp.entity.OtpUsage;

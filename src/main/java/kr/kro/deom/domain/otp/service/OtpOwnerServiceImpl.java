@@ -6,7 +6,7 @@ import java.util.Optional;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-import kr.kro.deom.domain.otp.dto.OtpVerifyResponse;
+import kr.kro.deom.domain.otp.dto.response.OtpVerifyResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import kr.kro.deom.domain.otp.entity.OtpUsage;

@@ -1,7 +1,7 @@
 package kr.kro.deom.domain.otp.service;
 
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-import kr.kro.deom.domain.otp.dto.OtpVerifyResponse;
+import kr.kro.deom.domain.otp.dto.response.OtpVerifyResponse;
 
 public interface OtpOwnerService {
     boolean approveOtp(Long otpCode, Long userId, Long storeId);
