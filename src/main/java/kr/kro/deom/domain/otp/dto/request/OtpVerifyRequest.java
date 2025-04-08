@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.otp.dto;
+package kr.kro.deom.domain.otp.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
