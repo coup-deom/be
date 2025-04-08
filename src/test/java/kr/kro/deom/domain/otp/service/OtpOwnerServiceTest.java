@@ -1,36 +1,36 @@
-//package kr.kro.deom.domain.otp.service;
+// package kr.kro.deom.domain.otp.service;
 //
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.ArgumentMatchers.anyString;
-//import static org.mockito.Mockito.*;
+// import static org.junit.jupiter.api.Assertions.*;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.ArgumentMatchers.anyString;
+// import static org.mockito.Mockito.*;
 //
-//import java.time.Instant;
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.Optional;
-//import kr.kro.deom.common.exception.code.CommonErrorCode;
-//import kr.kro.deom.common.utils.SecurityUtils;
-//import kr.kro.deom.domain.otp.dto.OtpVerifyResponse;
-//import kr.kro.deom.domain.otp.entity.OtpStatus;
-//import kr.kro.deom.domain.otp.entity.OtpType;
-//import kr.kro.deom.domain.otp.entity.OtpUsage;
-//import kr.kro.deom.domain.otp.exception.OtpException;
-//import kr.kro.deom.domain.store.repository.StoreRepository;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockedStatic;
-//import org.mockito.Mockito;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.springframework.data.redis.core.HashOperations;
-//import org.springframework.data.redis.core.RedisTemplate;
+// import java.time.Instant;
+// import java.util.HashMap;
+// import java.util.Map;
+// import java.util.Optional;
+// import kr.kro.deom.common.exception.code.CommonErrorCode;
+// import kr.kro.deom.common.utils.SecurityUtils;
+// import kr.kro.deom.domain.otp.dto.OtpVerifyResponse;
+// import kr.kro.deom.domain.otp.entity.OtpStatus;
+// import kr.kro.deom.domain.otp.entity.OtpType;
+// import kr.kro.deom.domain.otp.entity.OtpUsage;
+// import kr.kro.deom.domain.otp.exception.OtpException;
+// import kr.kro.deom.domain.store.repository.StoreRepository;
+// import org.junit.jupiter.api.BeforeEach;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.MockedStatic;
+// import org.mockito.Mockito;
+// import org.mockito.junit.jupiter.MockitoExtension;
+// import org.springframework.data.redis.core.HashOperations;
+// import org.springframework.data.redis.core.RedisTemplate;
 //
-//@ExtendWith(MockitoExtension.class)
-//class OtpOwnerServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// class OtpOwnerServiceTest {
 //
 //    @Mock private RedisTemplate<String, String> redisTemplate;
 //
@@ -76,7 +76,8 @@
 //        when(otpUsageRepository.save(any(OtpUsage.class))).thenReturn(savedOtpUsage);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When
@@ -105,7 +106,8 @@
 //        when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(testUserId);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When
@@ -140,7 +142,8 @@
 //        when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(testUserId);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When
@@ -189,12 +192,14 @@
 //        when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(testUserId);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When & Then
 //            OtpException exception =
-//                    assertThrows(OtpException.class, () -> otpOwnerService.otpVerify(testOtpCode));
+//                    assertThrows(OtpException.class, () ->
+// otpOwnerService.otpVerify(testOtpCode));
 //
 //            assertEquals(CommonErrorCode.OPT_EXPIRED, exception.getBaseResponseCode());
 //        }
@@ -219,12 +224,14 @@
 //        when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(testUserId);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When & Then
 //            OtpException exception =
-//                    assertThrows(OtpException.class, () -> otpOwnerService.otpVerify(testOtpCode));
+//                    assertThrows(OtpException.class, () ->
+// otpOwnerService.otpVerify(testOtpCode));
 //
 //            assertEquals(CommonErrorCode.OPT_ALREADY_PROCESSED, exception.getBaseResponseCode());
 //        }
@@ -241,12 +248,14 @@
 //        when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(999L); // 다른 사용자 ID
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When & Then
 //            OtpException exception =
-//                    assertThrows(OtpException.class, () -> otpOwnerService.otpVerify(testOtpCode));
+//                    assertThrows(OtpException.class, () ->
+// otpOwnerService.otpVerify(testOtpCode));
 //
 //            assertEquals(CommonErrorCode.OTP_UNAUTHORIZED, exception.getBaseResponseCode());
 //        }
@@ -265,12 +274,14 @@
 //        // when(storeRepository.findOwnerIdByStoreId(testStoreId)).thenReturn(testUserId);
 //
 //        // SecurityUtils 모킹
-//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class)) {
+//        try (MockedStatic<SecurityUtils> securityUtils = Mockito.mockStatic(SecurityUtils.class))
+// {
 //            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(testUserId);
 //
 //            // When & Then
 //            OtpException exception =
-//                    assertThrows(OtpException.class, () -> otpOwnerService.otpVerify(testOtpCode));
+//                    assertThrows(OtpException.class, () ->
+// otpOwnerService.otpVerify(testOtpCode));
 //
 //            assertEquals(CommonErrorCode.OTP_INVALID, exception.getBaseResponseCode());
 //        }
@@ -287,4 +298,4 @@
 //        redisData.put("createdAt", Instant.now().toString());
 //        return redisData;
 //    }
-//}
+// }

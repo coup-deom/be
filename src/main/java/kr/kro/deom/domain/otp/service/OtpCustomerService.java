@@ -1,18 +1,17 @@
 package kr.kro.deom.domain.otp.service;
 
+import java.time.Instant;
+import java.util.Random;
 import kr.kro.deom.domain.otp.dto.OtpDeomRequest;
+import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.dto.OtpResponse;
 import kr.kro.deom.domain.otp.dto.OtpStampRequest;
-import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +56,8 @@ public class OtpCustomerService {
     private Long generateOtpCode(Long storeId) {
         while (true) {
             Long otpCode = 1000L + RANDOM.nextInt(9000);
-            if (!otpRepository.existsByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING)) {
+            if (!otpRepository.existsByOtpAndStoreIdAndStatus(
+                    otpCode, storeId, OtpStatus.PENDING)) {
                 return otpCode;
             }
         }
@@ -87,5 +87,4 @@ public class OtpCustomerService {
 
         otpRepository.save(otpUsage);
     }
-
 }

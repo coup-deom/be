@@ -1,15 +1,8 @@
 package kr.kro.deom.domain.otp.service;
 
-import java.time.Instant;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.TimeUnit;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-import kr.kro.deom.domain.otp.entity.OtpStatus;
-import kr.kro.deom.domain.otp.entity.OtpType;
-import kr.kro.deom.domain.otp.entity.OtpUsage;
-import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -50,5 +43,4 @@ public class OtpRedisServiceImpl implements OtpRedisService {
     public void deleteOtpFromRedis(Long otpCode) {
         redisTemplate.delete(otpCode.toString());
     }
-
 }

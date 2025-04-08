@@ -18,15 +18,14 @@ public class OtpRedisDto {
     private Integer usedStampAmount;
     private Instant createdAt;
 
-
-  public static OtpRedisDto convertToOtpRedisDto(OtpUsage otpUsage) {
-    return OtpRedisDto.builder()
-            .userId(otpUsage.getUserId())
-            .storeId(otpUsage.getStoreId())
-            .type(otpUsage.getType())
-            .deomId(otpUsage.getDeomId())
-            .usedStampAmount(otpUsage.getUsedStampAmount())
-            .createdAt(otpUsage.getCreatedAt())
-            .build();
-  }
+    public static OtpRedisDto convertToOtpRedisDto(OtpUsage otpUsage) {
+        return OtpRedisDto.builder()
+                .userId(otpUsage.getUserId())
+                .storeId(otpUsage.getStoreId())
+                .type(otpUsage.getType())
+                .deomId(otpUsage.getDeomId())
+                .usedStampAmount(otpUsage.getUsedStampAmount())
+                .createdAt(otpUsage.getCreatedAt())
+                .build();
+    }
 }
