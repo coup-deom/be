@@ -28,7 +28,10 @@ public enum CommonErrorCode implements BaseResponseCode {
     OPT_EXPIRED(HttpStatus.BAD_REQUEST, "O001", "OTP가 존재하지 만료되었습니다."),
     OTP_INVALID(HttpStatus.NOT_FOUND, "O002", "존재하지 않는 OTP입니다."),
     OPT_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "O003", "이미 처리된 OTP입니다."),
-    OTP_UNAUTHORIZED(HttpStatus.FORBIDDEN, "O004", "이 OTP에 대한 권한이 없습니다.");
+    OTP_UNAUTHORIZED(HttpStatus.FORBIDDEN, "O004", "이 OTP에 대한 권한이 없습니다."),
+
+    // stamp
+    INVALID_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "AMOUNT_001", "수량은 1 이상이어야 합니다.");
 
     private final HttpStatus status;
     private final String code;
