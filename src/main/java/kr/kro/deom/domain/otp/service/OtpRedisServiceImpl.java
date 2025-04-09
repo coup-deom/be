@@ -1,7 +1,11 @@
 package kr.kro.deom.domain.otp.service;
 
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
+
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -15,9 +19,10 @@ public class OtpRedisServiceImpl implements OtpRedisService {
 
     @Override
     public void saveOtpToRedis(Long otpCode, OtpRedisDto otpRedisDto, long ttlSeconds) {
+        String redisKey = otpRedisDto.getStoreId() + ":" + otpCode;
         redisTemplate
                 .opsForValue()
-                .set(otpCode.toString(), otpRedisDto, ttlSeconds, TimeUnit.SECONDS);
+                .set(redisKey, otpRedisDto, ttlSeconds, TimeUnit.SECONDS);
     }
 
     @Override
@@ -31,12 +36,12 @@ public class OtpRedisServiceImpl implements OtpRedisService {
             return (OtpRedisDto) value;
         }
 
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.convertValue(value, OtpRedisDto.class);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+        ObjectMapper mapper = JsonMapper.builder()
+                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
+                .addModule(new JavaTimeModule()) // Java 8 날짜/시간 모듈 추가
+                .build();
+        return mapper.convertValue(value, OtpRedisDto.class);
+
     }
 
     @Override

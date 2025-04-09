@@ -14,6 +14,7 @@ import kr.kro.deom.domain.otp.entity.OtpUsage;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class OtpCustomerService {
     private static final Random RANDOM = new Random();
     private static final Long OTP_TTL_SECONDS = 10800L;
 
+    @Transactional
     public OtpResponse issueStampOtp(OtpStampRequest request) {
         OtpRedisDto otpInfo =
                 createOtpInfo(
@@ -32,6 +34,7 @@ public class OtpCustomerService {
         return issueOtp(otpInfo);
     }
 
+    @Transactional
     public OtpResponse issueDeomOtp(OtpDeomRequest request) {
         OtpRedisDto otpInfo =
                 createOtpInfo(

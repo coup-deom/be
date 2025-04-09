@@ -1,6 +1,8 @@
 package kr.kro.deom.domain.otp.service;
 
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
+import kr.kro.deom.domain.otp.dto.request.OtpVerifyRequest;
+import kr.kro.deom.domain.otp.dto.response.OtpVerifyResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
@@ -53,7 +55,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
 
     /** Verify OTP - 사장님이 otp입력 받았을 때 여기 조회해서 otp정보 받으면 됩 */
     @Override
-    public OtpRedisDto verifyOtp(Long otpCode, Long userId, Long storeId) {
+    public OtpRedisDto verifyOtp(Long otpCode, Long storeId) {
         // 처음에는 레디스에서 조회
         OtpRedisDto otpRedisDto = otpRedisService.getOtpFromRedis(otpCode);
 
@@ -68,7 +70,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
         OtpUsage otpUsage =
                 otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
 
-        if (otpUsage == null || !userId.equals(otpUsage.getUserId())) {
+        if (otpUsage == null) {
             return null;
         }
 

@@ -8,5 +8,5 @@ public interface OtpOwnerService {
     boolean rejectOtp(Long otpCode, Long userId, Long storeId);
 
     /** Verify OTP - 사장님이 otp입력 받았을 때 여기 조회해서 otp정보 받으면 됩 */
-    OtpRedisDto verifyOtp(Long otpCode, Long userId, Long storeId);
+    OtpRedisDto verifyOtp(Long otpCode, Long storeId);
 }

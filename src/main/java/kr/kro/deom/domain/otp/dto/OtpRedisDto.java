@@ -6,7 +6,6 @@ import kr.kro.deom.domain.otp.entity.OtpUsage;
 import lombok.*;
 
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
