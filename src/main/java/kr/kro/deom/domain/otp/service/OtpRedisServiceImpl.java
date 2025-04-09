@@ -26,8 +26,10 @@ public class OtpRedisServiceImpl implements OtpRedisService {
     }
 
     @Override
-    public OtpRedisDto getOtpFromRedis(Long otpCode) {
-        Object value = redisTemplate.opsForValue().get(otpCode.toString());
+    public OtpRedisDto getOtpFromRedis(Long otpCode, Long storeId) {
+        String redisKey = storeId + ":" + otpCode;
+
+        Object value = redisTemplate.opsForValue().get(redisKey);
         if (value == null) {
             return null;
         }
@@ -45,7 +47,8 @@ public class OtpRedisServiceImpl implements OtpRedisService {
     }
 
     @Override
-    public void deleteOtpFromRedis(Long otpCode) {
-        redisTemplate.delete(otpCode.toString());
+    public void deleteOtpFromRedis(Long otpCode, Long storeId) {
+        String redisKey = storeId + ":" + otpCode;
+        redisTemplate.delete(redisKey);
     }
 }

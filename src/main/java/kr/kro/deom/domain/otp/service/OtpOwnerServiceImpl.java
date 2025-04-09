@@ -1,10 +1,12 @@
 package kr.kro.deom.domain.otp.service;
 
+import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.dto.request.OtpVerifyRequest;
 import kr.kro.deom.domain.otp.dto.response.OtpVerifyResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
+import kr.kro.deom.domain.otp.exception.OtpException;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
         otpRepository.save(otpUsage);
 
         // redis
-        otpRedisService.deleteOtpFromRedis(otpCode);
+        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
 
         return true;
     }
@@ -48,7 +50,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
         otpRepository.save(otpUsage);
 
         // redis
-        otpRedisService.deleteOtpFromRedis(otpCode);
+        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
 
         return true;
     }
@@ -57,13 +59,13 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
     @Override
     public OtpRedisDto verifyOtp(Long otpCode, Long storeId) {
         // 처음에는 레디스에서 조회
-        OtpRedisDto otpRedisDto = otpRedisService.getOtpFromRedis(otpCode);
+        OtpRedisDto otpRedisDto = otpRedisService.getOtpFromRedis(otpCode, storeId);
 
         if (otpRedisDto != null) {
             if (storeId.equals(otpRedisDto.getStoreId())) {
                 return otpRedisDto;
             }
-            return null;
+            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
 
         // 레디스 장애로 조회 실패한 경우 postgreSQL에서 조회 후 변환 후 반환
@@ -71,7 +73,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
                 otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
 
         if (otpUsage == null) {
-            return null;
+            throw new OtpException(CommonErrorCode.OTP_INVALID);
         }
 
         return OtpRedisDto.convertToOtpRedisDto(otpUsage);
