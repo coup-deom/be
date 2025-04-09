@@ -7,6 +7,7 @@ import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import kr.kro.deom.domain.myStamp.exception.MyStampException;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
+import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
@@ -33,7 +34,7 @@ public class OtpOwnerStampService {
     public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getUserStampStatusAndStampPolicy(
             Long otpCode, Long storeId) {
 
-        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
+        OtpRedisDto otpUsage = otpRedisService.getOtpFromRedis(otpCode, storeId);
         int customerStampAmount =
                 getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
         List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
