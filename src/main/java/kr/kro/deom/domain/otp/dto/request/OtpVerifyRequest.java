@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OtpVerifyRequest {
-    @NotNull
-    private Long storeId;
+    @NotNull private Long storeId;
+
     @NotNull(message = "OTP 코드는 필수입니다.")
     private Long otpCode;
 }

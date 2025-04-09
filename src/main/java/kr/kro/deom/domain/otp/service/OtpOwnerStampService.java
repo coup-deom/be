@@ -31,9 +31,9 @@ public class OtpOwnerStampService {
     // 적립 페이지
     @Transactional(readOnly = true)
     public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getUserStampStatusAndStampPolicy(
-            Long otpId) {
+            Long otpCode, Long storeId) {
 
-        OtpUsage otpUsage = validateAndGetOtpUsage(otpId);
+        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
         int customerStampAmount =
                 getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
         List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
@@ -45,31 +45,26 @@ public class OtpOwnerStampService {
 
     // 적립 승인
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(Long otpId, int amount) {
+    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(
+            Long otpCode, Long storeId, int amount) {
 
         validateAmount(amount);
-        OtpUsage otpUsage = getValidOtpUsage(otpId);
+        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
         increaseStamp(otpUsage, amount);
         otpUsage.approve();
         otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpId);
+        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpId) {
-        OtpUsage otpUsage = getValidOtpUsage(otpId);
+    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpCode, Long storeId) {
+
+        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
         otpUsage.reject();
-
         otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpId);
+        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
-    }
-
-    private OtpUsage validateAndGetOtpUsage(Long otpId) {
-        return otpRepository
-                .findById(otpId)
-                .orElseThrow(() -> new OtpException(CommonErrorCode.OTP_INVALID));
     }
 
     private int getCustomerStampAmount(Long userId, Long storeId) {
@@ -94,21 +89,6 @@ public class OtpOwnerStampService {
         }
     }
 
-    private OtpUsage getValidOtpUsage(Long otpId) {
-        OtpUsage otpUsage =
-                otpRepository
-                        .findById(otpId)
-                        .orElseThrow(() -> new OtpException(CommonErrorCode.OTP_INVALID));
-
-        if (otpUsage.getStatus() != OtpStatus.PENDING) {
-            if (otpUsage.getStatus() == OtpStatus.EXPIRED) {
-                throw new OtpException(CommonErrorCode.OPT_EXPIRED);
-            }
-            throw new OtpException(CommonErrorCode.OPT_ALREADY_PROCESSED);
-        }
-        return otpUsage;
-    }
-
     private void increaseStamp(OtpUsage otpUsage, int amount) {
         myStampRepository
                 .incrementStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount)
@@ -119,5 +99,16 @@ public class OtpOwnerStampService {
                                                 otpUsage.getUserId(),
                                                 otpUsage.getStoreId(),
                                                 amount)));
+    }
+
+    private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
+        OtpUsage otpUsage =
+                otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
+        if (otpUsage == null) {
+            throw new OtpException(CommonErrorCode.OTP_INVALID);
+        } else if (otpUsage.getStoreId().equals(storeId)) {
+            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
+        }
+        return otpUsage;
     }
 }

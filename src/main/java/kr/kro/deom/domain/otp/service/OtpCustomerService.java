@@ -2,9 +2,7 @@ package kr.kro.deom.domain.otp.service;
 
 import java.time.Instant;
 import java.util.Random;
-
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-
 import kr.kro.deom.domain.otp.dto.request.OtpDeomRequest;
 import kr.kro.deom.domain.otp.dto.request.OtpStampRequest;
 import kr.kro.deom.domain.otp.dto.response.OtpResponse;

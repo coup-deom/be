@@ -2,8 +2,6 @@ package kr.kro.deom.domain.otp.service;
 
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
-import kr.kro.deom.domain.otp.dto.request.OtpVerifyRequest;
-import kr.kro.deom.domain.otp.dto.response.OtpVerifyResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
 import kr.kro.deom.domain.otp.exception.OtpException;

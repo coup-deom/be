@@ -18,22 +18,25 @@ public class OtpOwnerController {
     private final OtpOwnerStampService otpOwnerStampService;
 
     @Operation(summary = "스탬프 요청 상세 조회", description = "고객의 적립 현황과 가게의 스탬프 정책을 조회합니다.")
-    @GetMapping("/stamp-requests/{otpId}")
+    @GetMapping("/stamp-requests/{storeId}/{otpCode}")
     public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getStampGuide(
-            @PathVariable Long otpId) {
-        return otpOwnerStampService.getUserStampStatusAndStampPolicy(otpId);
+            @PathVariable Long storeId, @PathVariable Long otpCode) {
+        return otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
     }
 
     @Operation(summary = "스탬프 요청 승인", description = "OTP 요청을 승인하고 고객에게 스탬프를 적립합니다.")
-    @PostMapping("/stamp-request/{optId}/approve")
+    @PostMapping("/stamp-request/{storeId}/{otpCode}/approval")
     public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
-            @PathVariable Long optId, @RequestBody OtpStampApproveRequest request) {
-        return otpOwnerStampService.approveOtpAndAddStamp(optId, request.getAmount());
+            @PathVariable Long storeId,
+            @PathVariable Long otpCode,
+            @RequestBody OtpStampApproveRequest request) {
+        return otpOwnerStampService.approveOtpAndAddStamp(otpCode, storeId, request.getAmount());
     }
 
     @Operation(summary = "스탬프 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
-    @PostMapping("/stamp-request/{optId}/reject")
-    public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(@PathVariable Long optId) {
-        return otpOwnerStampService.rejectStampOtp(optId);
+    @PostMapping("/stamp-request/{storeId}/{otpCode}/rejection")
+    public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
+            @PathVariable Long storeId, @PathVariable Long otpCode) {
+        return otpOwnerStampService.rejectStampOtp(otpCode, storeId);
     }
 }
