@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.otp.dto;
+package kr.kro.deom.domain.otp.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

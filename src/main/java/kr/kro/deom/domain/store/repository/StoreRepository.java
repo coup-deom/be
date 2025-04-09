@@ -8,4 +8,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     @Query("SELECT s.ownerId FROM Store s WHERE s.id = :storeId")
     Long findOwnerIdByStoreId(Long storeId);
+
+    @Query("SELECT s.id FROM Store s WHERE s.ownerId =: ownerId")
+    Long findIdByOwnerId(Long ownerId);
 }

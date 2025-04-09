@@ -2,9 +2,9 @@ package kr.kro.deom.domain.otp.controller;
 
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
-import kr.kro.deom.domain.otp.dto.OtpDeomRequest;
-import kr.kro.deom.domain.otp.dto.OtpResponse;
-import kr.kro.deom.domain.otp.dto.OtpStampRequest;
+import kr.kro.deom.domain.otp.dto.request.OtpDeomRequest;
+import kr.kro.deom.domain.otp.dto.request.OtpStampRequest;
+import kr.kro.deom.domain.otp.dto.response.OtpResponse;
 import kr.kro.deom.domain.otp.service.OtpCustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

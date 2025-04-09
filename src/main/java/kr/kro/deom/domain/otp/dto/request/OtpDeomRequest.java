@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.otp.dto;
+package kr.kro.deom.domain.otp.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import kr.kro.deom.domain.otp.entity.OtpType;
@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class OtpStampRequest {
+public class OtpDeomRequest {
     @NotNull(message = "사용자 ID는 필수입니다")
     private Long userId;
 
@@ -16,4 +16,10 @@ public class OtpStampRequest {
 
     @NotNull(message = "otp 타입은 필수입니다")
     private OtpType type;
+
+    @NotNull(message = "deom ID는 필수입니다")
+    private Long deomId;
+
+    @NotNull(message = "사용할 스탬프 수량은 필수입니다")
+    private Integer usedStampAmount;
 }
