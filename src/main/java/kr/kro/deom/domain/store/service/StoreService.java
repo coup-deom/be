@@ -10,6 +10,7 @@ import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
 import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.exception.StoreException;
 import kr.kro.deom.domain.store.repository.StoreRepository;
+import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,9 +22,12 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     @Transactional
     public StoreRegisterResponse registerStore(StoreRegisterRequest request) {
+
+        userService.validateUserByUserId(request.getOwnerId());
         validateDuplicateStore(request);
 
         Instant now = Instant.now();

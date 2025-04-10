@@ -63,4 +63,8 @@ public class UserService {
         user.updateRole(role);
         return userRepository.save(user);
     }
+
+    public void validateUserByUserId(Long userId) {
+        userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+    }
 }
