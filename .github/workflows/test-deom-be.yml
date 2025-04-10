@@ -62,7 +62,7 @@ jobs:
               redis:
                 url: redis:6379
                 username: default
-                password: 
+                password:
                 timeout: 6000
                 lettuce:
                   pool:
@@ -70,7 +70,7 @@ jobs:
                     max-idle: 5
                     min-idle: 0
                     max-wait: 1000
-          
+
             security:
               oauth2:
                 client:

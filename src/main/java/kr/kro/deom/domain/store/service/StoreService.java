@@ -1,6 +1,8 @@
 package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Duration;
 import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Tag(name = "store API", description = "")
 public class StoreService {
 
     private final StoreRepository storeRepository;
@@ -24,6 +27,7 @@ public class StoreService {
         validateDuplicateStore(request);
 
         Instant now = Instant.now();
+        Instant farFuture = now.plus(Duration.ofDays(365 * 100));
 
         Store store =
                 Store.builder()
@@ -36,6 +40,7 @@ public class StoreService {
                         .addressDetail(request.getAddressDetail())
                         .createdAt(now)
                         .updatedAt(now)
+                        .deletedAt(farFuture)
                         .isDeleted(false)
                         .image(request.getImage())
                         .build();

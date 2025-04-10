@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.store.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
@@ -21,6 +22,7 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping
+    @Operation(summary = "사장 가게 등록 신청", description = "사장이 가게 등록을 신청한다.")
     public ResponseEntity<ApiResponse<StoreRegisterResponse>> registerStore(
             @RequestBody @Valid StoreRegisterRequest request) {
         StoreRegisterResponse response = storeService.registerStore(request);
