@@ -28,19 +28,18 @@ public class OtpOwnerController {
     }
 
     @Operation(summary = "스탬프 요청 승인", description = "OTP 요청을 승인하고 고객에게 스탬프를 적립합니다.")
-    @PostMapping("/stamp-request/{storeId}/{otpCode}/approval")
+    @PostMapping("/stamp-request/approval")
     public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
-            @PathVariable Long storeId,
-            @PathVariable Long otpCode,
             @RequestBody OtpStampApproveRequest request) {
-        return otpOwnerStampService.approveOtpAndAddStamp(otpCode, storeId, request.getAmount());
+        return otpOwnerStampService.approveOtpAndAddStamp(
+                request.getOtpCode(), request.getStoreId(), request.getAmount());
     }
 
     @Operation(summary = "스탬프 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
-    @PostMapping("/stamp-request/{storeId}/{otpCode}/rejection")
+    @PostMapping("/stamp-request/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
-            @PathVariable Long storeId, @PathVariable Long otpCode) {
-        return otpOwnerStampService.rejectStampOtp(otpCode, storeId);
+            @RequestBody OtpStampApproveRequest request) {
+        return otpOwnerStampService.rejectStampOtp(request.getOtpCode(), request.getStoreId());
     }
 
     //    @Operation(summary = "덤 요청 상세 조회", description = "고객의 적립 현황과 가게의 덤 정책을 조회합니다.")

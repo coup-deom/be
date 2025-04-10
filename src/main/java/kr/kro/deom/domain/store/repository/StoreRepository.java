@@ -1,14 +1,13 @@
 package kr.kro.deom.domain.store.repository;
 
+import java.util.Optional;
 import kr.kro.deom.domain.store.entity.Store;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    @Query("SELECT s.ownerId FROM Store s WHERE s.id = :storeId")
-    Long findOwnerIdByStoreId(Long storeId);
+    Optional<Store> findByBusinessNumberAndIsDeletedFalse(Long businessNumber);
 
-    @Query("SELECT s.id FROM Store s WHERE s.ownerId =: ownerId")
-    Long findIdByOwnerId(Long ownerId);
+    Optional<Store> findByStoreNameAndBranchNameAndIsDeletedFalse(
+            String storeName, String branchName);
 }

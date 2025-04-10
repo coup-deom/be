@@ -23,6 +23,7 @@ public class OtpCustomerController {
     @PostMapping("/request/stamp")
     public ResponseEntity<ApiResponse<OtpResponse>> issueStampOtp(
             @RequestBody OtpStampRequest request) {
+        System.out.println(request.getType());
         OtpResponse response = otpCustomerService.issueStampOtp(request);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
