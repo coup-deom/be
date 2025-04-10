@@ -1,7 +1,7 @@
 package kr.kro.deom.domain.store.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.*;
 
 @Entity
@@ -40,13 +40,13 @@ public class Store {
     private String addressDetail;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Column(name = "deleted_at", nullable = false)
-    private LocalDateTime deletedAt;
+    private Instant deletedAt;
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
