@@ -19,7 +19,15 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval=10s --health-timeout=5s --health-retries=3
-
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,7 +58,19 @@ jobs:
               properties:
                 hibernate:
                   dialect: org.hibernate.dialect.PostgreSQLDialect
-
+            data:
+              redis:
+                url: redis:6379
+                username: default
+                password: 
+                timeout: 6000
+                lettuce:
+                  pool:
+                    max-active: 10
+                    max-idle: 5
+                    min-idle: 0
+                    max-wait: 1000
+          
             security:
               oauth2:
                 client:
