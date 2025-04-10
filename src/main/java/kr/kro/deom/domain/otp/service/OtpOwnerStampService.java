@@ -91,15 +91,14 @@ public class OtpOwnerStampService {
     }
 
     private void increaseStamp(OtpUsage otpUsage, int amount) {
-        myStampRepository
-                .incrementStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount)
-                .orElseGet(
-                        () ->
-                                myStampRepository.save(
-                                        new MyStamp(
-                                                otpUsage.getUserId(),
-                                                otpUsage.getStoreId(),
-                                                amount)));
+        Integer myStamp =
+                myStampRepository.incrementStamp(
+                        otpUsage.getUserId(), otpUsage.getStoreId(), amount);
+
+        if (myStamp != null) {
+            myStampRepository.save(
+                    new MyStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount));
+        }
     }
 
     private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
@@ -107,7 +106,7 @@ public class OtpOwnerStampService {
                 otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
         if (otpUsage == null) {
             throw new OtpException(CommonErrorCode.OTP_INVALID);
-        } else if (otpUsage.getStoreId().equals(storeId)) {
+        } else if (!otpUsage.getStoreId().equals(storeId)) {
             throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
         return otpUsage;
