@@ -16,13 +16,13 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
     private final OtpRedisService otpRedisService;
 
     @Override
-    public boolean approveOtp(Long otpCode, Long userId, Long storeId) {
+    public void approveOtp(Long otpCode, Long userId, Long storeId) {
         // PostgreSQL
         OtpUsage otpUsage =
                 otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
 
         if (otpUsage == null || !userId.equals(otpUsage.getUserId())) {
-            return false;
+            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
 
         otpUsage.setStatus(OtpStatus.APPROVED);
@@ -30,18 +30,16 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
 
         // redis
         otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-
-        return true;
     }
 
     @Override
-    public boolean rejectOtp(Long otpCode, Long userId, Long storeId) {
+    public void rejectOtp(Long otpCode, Long userId, Long storeId) {
         // PostgreSQL
         OtpUsage otpUsage =
                 otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
 
         if (otpUsage == null || !userId.equals(otpUsage.getUserId())) {
-            return false;
+            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
 
         otpUsage.setStatus(OtpStatus.REJECTED);
@@ -49,8 +47,6 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
 
         // redis
         otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-
-        return true;
     }
 
     /** Verify OTP - 사장님이 otp입력 받았을 때 여기 조회해서 otp정보 받으면 됩 */

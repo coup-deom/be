@@ -3,8 +3,10 @@ package kr.kro.deom.domain.otp.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.kro.deom.common.response.ApiResponse;
+import kr.kro.deom.domain.otp.dto.request.DeomUsageRequestDto;
 import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
+import kr.kro.deom.domain.otp.service.OtpOwnerDeomService;
 import kr.kro.deom.domain.otp.service.OtpOwnerStampService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class OtpOwnerController {
 
     private final OtpOwnerStampService otpOwnerStampService;
+    private final OtpOwnerDeomService otpOwnerDeomService;
 
     @Operation(summary = "스탬프 요청 상세 조회", description = "고객의 적립 현황과 가게의 스탬프 정책을 조회합니다.")
     @GetMapping("/stamp-requests/{storeId}/{otpCode}")
@@ -38,5 +41,26 @@ public class OtpOwnerController {
     public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
             @PathVariable Long storeId, @PathVariable Long otpCode) {
         return otpOwnerStampService.rejectStampOtp(otpCode, storeId);
+    }
+
+    //    @Operation(summary = "덤 요청 상세 조회", description = "고객의 적립 현황과 가게의 덤 정책을 조회합니다.")
+    //    @GetMapping("/deom-requests/{storeId}/{otpCode}")
+    //    public ResponseEntity<ApiResponse<OwnerDeomInfoResponse>> getStampGuide(
+    //            @PathVariable Long storeId, @PathVariable Long otpCode) {
+    //        return otpOwnerDeomService.getUserStampStatusAndDeomPolicy(otpCode, storeId);
+    //    }
+
+    @Operation(summary = "덤 요청 승인", description = "OTP 요청을 승인하고 고객 스탬프를 소진합니다.")
+    @PostMapping("/deom-requests/approval")
+    public ResponseEntity<ApiResponse<Void>> approveDeomOtpRequest(
+            @RequestBody DeomUsageRequestDto deomUsageRequestDto) {
+        return otpOwnerDeomService.approveOtp(deomUsageRequestDto);
+    }
+
+    @Operation(summary = "덤 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
+    @PostMapping("/deom-requests/rejection")
+    public ResponseEntity<ApiResponse<Void>> rejectDeomOthRequest(
+            @RequestBody DeomUsageRequestDto deomUsageRequestDto) {
+        return otpOwnerDeomService.rejectOtp(deomUsageRequestDto);
     }
 }

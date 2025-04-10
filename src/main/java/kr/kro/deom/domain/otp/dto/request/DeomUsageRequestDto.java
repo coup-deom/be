@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.otp.dto;
+package kr.kro.deom.domain.otp.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -9,9 +9,7 @@ import lombok.*;
 @NoArgsConstructor // 기본 생성자
 @AllArgsConstructor // 모든 필드를 매개변수로 받는 생성자
 @Builder
-public class DeomUsageDto {
-    private Long id;
-
+public class DeomUsageRequestDto {
     @NotNull(message = "사용자 ID는 필수입니다")
     private Long userId;
 
