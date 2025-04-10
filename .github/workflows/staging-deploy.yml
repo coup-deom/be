@@ -184,6 +184,21 @@ jobs:
           APP_LOG_LEVEL: ${{ secrets.APP_LOG_LEVEL || 'INFO' }}
           SECURITY_LOG_LEVEL: ${{ secrets.SECURITY_LOG_LEVEL || 'INFO' }}
           WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
+          # Redis 환경 변수
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          # JWT 환경 변수
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_EXPIRATION: ${{ secrets.JWT_ACCESS_EXPIRATION }}
+          JWT_REFRESH_EXPIRATION: ${{ secrets.JWT_REFRESH_EXPIRATION }}
+          # OAuth2 환경 변수
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
           docker-compose build
           docker-compose push
@@ -223,6 +238,21 @@ jobs:
           APP_LOG_LEVEL: ${{ secrets.APP_LOG_LEVEL || 'INFO' }}
           SECURITY_LOG_LEVEL: ${{ secrets.SECURITY_LOG_LEVEL || 'INFO' }}
           WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
+          # Redis 환경 변수
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          # JWT 환경 변수
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_ACCESS_EXPIRATION: ${{ secrets.JWT_ACCESS_EXPIRATION }}
+          JWT_REFRESH_EXPIRATION: ${{ secrets.JWT_REFRESH_EXPIRATION }}
+          # OAuth2 환경 변수
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
+          KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
         run: |
           # 배포 디렉토리 생성
           ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "mkdir -p ~/deom"
@@ -254,6 +284,21 @@ jobs:
           APP_LOG_LEVEL=${APP_LOG_LEVEL:-INFO}
           SECURITY_LOG_LEVEL=${SECURITY_LOG_LEVEL:-INFO}
           WEB_LOG_LEVEL=${WEB_LOG_LEVEL:-INFO}
+          
+          REDIS_URL=${REDIS_URL}
+          REDIS_USERNAME=${REDIS_USERNAME}
+          REDIS_PASSWORD=${REDIS_PASSWORD}
+
+          JWT_SECRET=${JWT_SECRET}
+          JWT_ACCESS_EXPIRATION=${JWT_ACCESS_EXPIRATION}
+          JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION}
+
+          GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+          GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+          KAKAO_CLIENT_ID=${KAKAO_CLIENT_ID}
+          KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
+          NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+          NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
           EOL
 
           sudo docker network create deom || true
