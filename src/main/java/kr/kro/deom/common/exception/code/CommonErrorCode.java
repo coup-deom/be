@@ -42,7 +42,13 @@ public enum CommonErrorCode implements BaseResponseCode {
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),
     DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다."),
-    NO_PERMISSION_FOR_STORE(HttpStatus.FORBIDDEN, "STORE_003", "이 가게에 대한 권한이 없습니다.");
+    NO_PERMISSION_FOR_STORE(HttpStatus.FORBIDDEN, "STORE_003", "이 가게에 대한 권한이 없습니다."),
+
+    // deom
+    INVALID_REQUIRED_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "DEOM_001", "스탬프 개수는 0보다 커야 합니다."),
+    ALREADY_REGISTERED_DEOM(HttpStatus.CONFLICT, "DEOM_002", "이미 등록된 덤 정책이 있습니다."),
+    INVALID_DEOM_POLICY(HttpStatus.NOT_FOUND, "DEOM_003", "존재하지 않는 덤 정책입니다."),
+    INVALID_DEOM_NAME(HttpStatus.BAD_REQUEST, "DEON_004", "덤 이름이 존재해야 합니다.");
 
     private final HttpStatus status;
     private final String code;

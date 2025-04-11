@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/stamp-policies")
-@Tag(name = "Stamp Policy", description = "스탬프 정책 관련 API")
+@Tag(name = "Stamp Policy", description = "사장님 마이페이지 - 스탬프 정책 관련 API")
 public class StampPolicyController {
 
     private final StampPolicyService stampPolicyService;
