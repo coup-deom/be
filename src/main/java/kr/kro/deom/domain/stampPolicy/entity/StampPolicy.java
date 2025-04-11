@@ -1,8 +1,8 @@
 package kr.kro.deom.domain.stampPolicy.entity;
 
 import jakarta.persistence.*;
+import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
-import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.domain.stampPolicy.exception.StampPolicyException;
 import lombok.*;
 
@@ -10,7 +10,7 @@ import lombok.*;
 @Table(name = "stamp_policy")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class StampPolicy extends BaseTimeEntity {
+public class StampPolicy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +25,15 @@ public class StampPolicy extends BaseTimeEntity {
     @Column(name = "stamp_count", nullable = false)
     private Integer stampCount;
 
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
+    @Column(name = "deleted_at")
+    private Instant deletedAt;
+
     private StampPolicy(Long storeId, Integer baseAmount, Integer stampCount) {
         validateBaseAmount(baseAmount);
         validateStampCount(stampCount);
@@ -32,6 +41,8 @@ public class StampPolicy extends BaseTimeEntity {
         this.storeId = storeId;
         this.baseAmount = baseAmount;
         this.stampCount = stampCount;
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
     }
 
     public static StampPolicy create(Long storeId, int baseAmount, int stampCount) {
@@ -55,5 +66,10 @@ public class StampPolicy extends BaseTimeEntity {
         validateStampCount(stampCount);
         this.baseAmount = baseAmount;
         this.stampCount = stampCount;
+        this.updatedAt = Instant.now();
+    }
+
+    public void delete() {
+        this.deletedAt = Instant.now();
     }
 }

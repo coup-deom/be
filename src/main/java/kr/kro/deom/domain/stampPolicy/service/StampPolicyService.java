@@ -53,19 +53,19 @@ public class StampPolicyService {
     public void deleteStampPolicy(Long policyId, Long storeId) {
         validateStoreOwnership(storeId);
         StampPolicy stampPolicy = findAndValidStampPolicy(policyId);
-        stampPolicyRepository.delete(stampPolicy);
+        stampPolicy.delete();
     }
 
     // 소유권 검증
     private void validateStoreOwnership(Long storeId) {
         storeRepository
-                .findByIdAndOwnerId(storeId, SecurityUtils.getCurrentUserId())
+                .findByIdAndOwnerIdAndIsDeletedFalse(storeId, SecurityUtils.getCurrentUserId())
                 .orElseThrow(() -> new StoreException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
     }
 
     // policy 중복 검증
     private void checkDuplicatePolicy(StampPolicyRequest request) {
-        if (stampPolicyRepository.existsByStoreIdAndBaseAmount(
+        if (stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
                 request.storeId(), request.baseAmount())) {
             throw new StampPolicyException(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
         }
@@ -74,7 +74,7 @@ public class StampPolicyService {
     // policy 조회
     private StampPolicy findAndValidStampPolicy(Long stampPolicyId) {
         return stampPolicyRepository
-                .findById(stampPolicyId)
+                .findByIdAndDeletedAtIsNull(stampPolicyId)
                 .orElseThrow(() -> new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY));
     }
 }
