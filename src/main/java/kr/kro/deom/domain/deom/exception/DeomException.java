@@ -1,4 +1,4 @@
-package kr.kro.deom.domain.exception;
+package kr.kro.deom.domain.deom.exception;
 
 import kr.kro.deom.common.exception.exceptions.CustomException;
 import kr.kro.deom.common.response.BaseResponseCode;

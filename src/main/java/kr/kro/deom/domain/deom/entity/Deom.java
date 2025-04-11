@@ -3,7 +3,7 @@ package kr.kro.deom.domain.deom.entity;
 import jakarta.persistence.*;
 import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
-import kr.kro.deom.domain.exception.DeomException;
+import kr.kro.deom.domain.deom.exception.DeomException;
 import kr.kro.deom.domain.stampPolicy.exception.StampPolicyException;
 import lombok.*;
 
