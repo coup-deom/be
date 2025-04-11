@@ -12,7 +12,9 @@ import org.springframework.stereotype.Repository;
 public interface StampPolicyRepository extends JpaRepository<StampPolicy, Long> {
 
     @Query(
-            "SELECT new kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto(sp.baseAmount, sp.stampCount) "
-                    + "FROM StampPolicy sp WHERE sp.storeId = :storeId")
+            "SELECT new kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto(sp.id, sp.baseAmount, sp.stampCount) "
+                    + "FROM StampPolicy sp WHERE sp.storeId = :storeId ORDER BY sp.baseAmount")
     List<StampPolicyDto> findPoliciesByStoreId(@Param("storeId") long storeId);
+
+    boolean existsByStoreIdAndBaseAmount(Long storeId, Integer baseAmount);
 }

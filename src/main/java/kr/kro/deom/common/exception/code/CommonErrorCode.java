@@ -33,9 +33,16 @@ public enum CommonErrorCode implements BaseResponseCode {
     // stamp
     INVALID_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "AMOUNT_001", "수량은 1 이상이어야 합니다."),
 
+    // stamp policy
+    INVALID_BASE_AMOUNT(HttpStatus.BAD_REQUEST, "POLICY_001", "기준 금액은 0보다 커야 합니다."),
+    INVALID_STAMP_COUNT(HttpStatus.BAD_REQUEST, "POLICY_002", "스탬프 개수는 0보다 커야 합니다."),
+    ALREADY_REGISTERED_STAMP_POLICY(HttpStatus.CONFLICT, "POLICY_003", "이미 등록된 스탬프 정책이 있습니다."),
+    INVALID_STAMP_POLICY(HttpStatus.NOT_FOUND, "POLICY_004", "존재하지 않는 스탬프 정책입니다."),
+
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),
-    DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다.");
+    DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다."),
+    NO_PERMISSION_FOR_STORE(HttpStatus.FORBIDDEN, "STORE_003", "이 가게에 대한 권한이 없습니다.");
 
     private final HttpStatus status;
     private final String code;

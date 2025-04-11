@@ -1,15 +1,15 @@
 package kr.kro.deom.domain.stampPolicy.entity;
 
 import jakarta.persistence.*;
+import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.global.entity.BaseTimeEntity;
+import kr.kro.deom.domain.stampPolicy.exception.StampPolicyException;
 import lombok.*;
 
 @Entity
 @Table(name = "stamp_policy")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class StampPolicy extends BaseTimeEntity {
 
     @Id
@@ -24,4 +24,36 @@ public class StampPolicy extends BaseTimeEntity {
 
     @Column(name = "stamp_count", nullable = false)
     private Integer stampCount;
+
+    private StampPolicy(Long storeId, Integer baseAmount, Integer stampCount) {
+        validateBaseAmount(baseAmount);
+        validateStampCount(stampCount);
+
+        this.storeId = storeId;
+        this.baseAmount = baseAmount;
+        this.stampCount = stampCount;
+    }
+
+    public static StampPolicy create(Long storeId, int baseAmount, int stampCount) {
+        return new StampPolicy(storeId, baseAmount, stampCount);
+    }
+
+    private void validateBaseAmount(Integer baseAmount) {
+        if (baseAmount == null || baseAmount <= 0) {
+            throw new StampPolicyException(CommonErrorCode.INVALID_BASE_AMOUNT);
+        }
+    }
+
+    private void validateStampCount(Integer stampCount) {
+        if (stampCount == null || stampCount <= 0) {
+            throw new StampPolicyException(CommonErrorCode.INVALID_STAMP_COUNT);
+        }
+    }
+
+    public void update(Integer baseAmount, Integer stampCount) {
+        validateBaseAmount(baseAmount);
+        validateStampCount(stampCount);
+        this.baseAmount = baseAmount;
+        this.stampCount = stampCount;
+    }
 }
