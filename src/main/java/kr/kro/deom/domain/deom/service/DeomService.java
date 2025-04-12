@@ -31,7 +31,7 @@ public class DeomService {
 
         validateStoreOwnership(request.storeId());
 
-        checkDuplicatePolicy(request);
+        checkDuplicatePolicy(request.storeId(), request.name());
 
         Deom deom = Deom.create(request.storeId(), request.name(), request.requiredStampAmount());
 
@@ -44,7 +44,7 @@ public class DeomService {
 
         validateStoreOwnership(request.storeId());
 
-        Deom deom = findAndValidDeomPolicy(deomId);
+        Deom deom = getValidDeomById(deomId);
 
         deom.update(request.name(), request.requiredStampAmount());
 
@@ -54,7 +54,7 @@ public class DeomService {
     @Transactional
     public void deleteDeomPolicy(Long deomId, Long storeId) {
         validateStoreOwnership(storeId);
-        Deom deom = findAndValidDeomPolicy(deomId);
+        Deom deom = getValidDeomById(deomId);
         deom.markAsDeleted();
     }
 
@@ -66,14 +66,14 @@ public class DeomService {
     }
 
     // policy 중복 검증
-    private void checkDuplicatePolicy(DeomRequest request) {
-        if (deomRepository.existsByStoreIdAndName(request.storeId(), request.name())) {
+    private void checkDuplicatePolicy(Long storeId, String name) {
+        if (deomRepository.existsByStoreIdAndName(storeId, name)) {
             throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
         }
     }
 
     // policy 조회
-    private Deom findAndValidDeomPolicy(Long deom) {
+    private Deom getValidDeomById(Long deom) {
         return deomRepository
                 .findById(deom)
                 .orElseThrow(() -> new DeomException(CommonErrorCode.INVALID_DEOM_POLICY));

@@ -28,7 +28,7 @@ public class StampPolicyService {
 
         validateStoreOwnership(request.storeId());
 
-        checkDuplicatePolicy(request);
+        checkDuplicatePolicy(request.storeId(), request.baseAmount());
 
         StampPolicy stampPolicy =
                 StampPolicy.create(request.storeId(), request.baseAmount(), request.stampCount());
@@ -42,7 +42,7 @@ public class StampPolicyService {
 
         validateStoreOwnership(request.storeId());
 
-        StampPolicy stampPolicy = findAndValidStampPolicy(policyId);
+        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
 
         stampPolicy.update(request.baseAmount(), request.stampCount());
 
@@ -52,7 +52,7 @@ public class StampPolicyService {
     @Transactional
     public void deleteStampPolicy(Long policyId, Long storeId) {
         validateStoreOwnership(storeId);
-        StampPolicy stampPolicy = findAndValidStampPolicy(policyId);
+        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
         stampPolicy.markAsDeleted();
     }
 
@@ -64,15 +64,15 @@ public class StampPolicyService {
     }
 
     // policy 중복 검증
-    private void checkDuplicatePolicy(StampPolicyRequest request) {
+    private void checkDuplicatePolicy(Long storeId, int baseAmount) {
         if (stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
-                request.storeId(), request.baseAmount())) {
+                storeId, baseAmount)) {
             throw new StampPolicyException(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
         }
     }
 
     // policy 조회
-    private StampPolicy findAndValidStampPolicy(Long stampPolicyId) {
+    private StampPolicy getValidStampPolicyById(Long stampPolicyId) {
         return stampPolicyRepository
                 .findByIdAndDeletedAtIsNull(stampPolicyId)
                 .orElseThrow(() -> new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY));
