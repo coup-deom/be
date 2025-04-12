@@ -1,8 +1,8 @@
 package kr.kro.deom.domain.deom.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.domain.deom.exception.DeomException;
 import kr.kro.deom.domain.stampPolicy.exception.StampPolicyException;
 import lombok.*;
@@ -13,7 +13,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Deom {
+public class Deom extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,15 +28,6 @@ public class Deom {
     @Column(name = "required_stamp_amount", nullable = false)
     private Integer requiredStampAmount;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
-
     private Deom(Long storeId, String name, Integer requiredStampAmount) {
         validateName(name);
         validateRequiredStampAmount(requiredStampAmount);
@@ -44,8 +35,6 @@ public class Deom {
         this.storeId = storeId;
         this.name = name;
         this.requiredStampAmount = requiredStampAmount;
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
     }
 
     public static Deom create(Long storeId, String name, Integer requiredStampAmount) {
@@ -69,10 +58,5 @@ public class Deom {
         validateRequiredStampAmount(newRequiredStampAmount);
         this.name = newName;
         this.requiredStampAmount = newRequiredStampAmount;
-        this.updatedAt = Instant.now();
-    }
-
-    public void delete() {
-        this.deletedAt = Instant.now();
     }
 }

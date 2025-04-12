@@ -56,8 +56,8 @@ public class DeomController {
     @DeleteMapping("/{storeId}/{deomId}")
     @Operation(summary = "덤 정책 삭제", description = "해당 매장의 덤 정책을 삭제합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteStampPolicy(
-            @Parameter(description = "덤 ID", required = true) @PathVariable Long deomId,
-            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId) {
+            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
+            @Parameter(description = "덤 ID", required = true) @PathVariable Long deomId) {
         deomService.deleteDeomPolicy(deomId, storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }

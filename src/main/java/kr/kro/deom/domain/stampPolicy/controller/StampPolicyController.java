@@ -54,8 +54,8 @@ public class StampPolicyController {
     @DeleteMapping("/{storeId}/{policyId}")
     @Operation(summary = "스탬프 정책 삭제", description = "해당 매장의 스탬프 정책을 삭제합니다.")
     public ResponseEntity<ApiResponse<Void>> deleteStampPolicy(
-            @Parameter(description = "정책 ID", required = true) @PathVariable Long policyId,
-            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId) {
+            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
+            @Parameter(description = "정책 ID", required = true) @PathVariable Long policyId) {
         stampPolicyService.deleteStampPolicy(policyId, storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }

@@ -55,7 +55,7 @@ public class DeomService {
     public void deleteDeomPolicy(Long deomId, Long storeId) {
         validateStoreOwnership(storeId);
         Deom deom = findAndValidDeomPolicy(deomId);
-        deom.delete();
+        deom.markAsDeleted();
     }
 
     // 소유권 검증

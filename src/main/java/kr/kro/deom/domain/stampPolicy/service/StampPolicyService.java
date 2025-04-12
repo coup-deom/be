@@ -53,7 +53,7 @@ public class StampPolicyService {
     public void deleteStampPolicy(Long policyId, Long storeId) {
         validateStoreOwnership(storeId);
         StampPolicy stampPolicy = findAndValidStampPolicy(policyId);
-        stampPolicy.delete();
+        stampPolicy.markAsDeleted();
     }
 
     // 소유권 검증
