@@ -73,9 +73,9 @@ public class DeomService {
     }
 
     // policy 조회
-    private Deom getValidDeomById(Long deom) {
+    private Deom getValidDeomById(Long deomId) {
         return deomRepository
-                .findById(deom)
+                .findById(deomId)
                 .orElseThrow(() -> new DeomException(CommonErrorCode.INVALID_DEOM_POLICY));
     }
 }

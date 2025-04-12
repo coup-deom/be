@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.domain.deom.exception.DeomException;
-import kr.kro.deom.domain.stampPolicy.exception.StampPolicyException;
 import lombok.*;
 
 @Entity
@@ -43,7 +42,7 @@ public class Deom extends BaseTimeEntity {
 
     private void validateName(String name) {
         if (name == null) {
-            throw new StampPolicyException(CommonErrorCode.INVALID_DEOM_NAME);
+            throw new DeomException(CommonErrorCode.INVALID_DEOM_NAME);
         }
     }
 
