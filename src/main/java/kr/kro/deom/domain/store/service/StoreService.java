@@ -2,11 +2,10 @@ package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.Duration;
-import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
+import kr.kro.deom.domain.store.entity.Status;
 import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.exception.StoreException;
 import kr.kro.deom.domain.store.repository.StoreRepository;
@@ -30,9 +29,6 @@ public class StoreService {
         userService.validateUserByUserId(request.getOwnerId());
         validateDuplicateStore(request);
 
-        Instant now = Instant.now();
-        Instant farFuture = now.plus(Duration.ofDays(365 * 100));
-
         Store store =
                 Store.builder()
                         .ownerId(request.getOwnerId())
@@ -42,14 +38,13 @@ public class StoreService {
                         .addressCity(request.getAddressCity())
                         .addressStreet(request.getAddressStreet())
                         .addressDetail(request.getAddressDetail())
-                        .createdAt(now)
-                        .updatedAt(now)
-                        .deletedAt(farFuture)
                         .isDeleted(false)
                         .image(request.getImage())
+                        .status(Status.PENDING)
                         .build();
 
         Store savedStore = storeRepository.save(store);
+        savedStore.setStatus(Status.APPROVED); // 일단 무조건 승인
         return mapToRegisterResponse(savedStore);
     }
 
@@ -71,7 +66,7 @@ public class StoreService {
                         });
     }
 
-    private StoreRegisterResponse mapToRegisterResponse(Store store) {
+    StoreRegisterResponse mapToRegisterResponse(Store store) {
         return objectMapper.convertValue(store, StoreRegisterResponse.class);
     }
 }
