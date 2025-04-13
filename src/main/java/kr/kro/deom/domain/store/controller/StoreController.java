@@ -26,6 +26,6 @@ public class StoreController {
     public ResponseEntity<ApiResponse<StoreRegisterResponse>> registerStore(
             @RequestBody @Valid StoreRegisterRequest request) {
         StoreRegisterResponse response = storeService.registerStore(request);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.CREATED, response));
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }
