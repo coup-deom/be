@@ -1,6 +1,6 @@
 package kr.kro.deom.domain.store.entity;
 
-public enum Status {
+public enum StoreStatus {
     PENDING,
     APPROVED,
     REJECTED

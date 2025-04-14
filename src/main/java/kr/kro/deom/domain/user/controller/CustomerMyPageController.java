@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.user.controller;
 
+import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
@@ -10,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,25 +24,24 @@ public class CustomerMyPageController {
 
     @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getAll(
-            @AuthenticationPrincipal CustomOAuth2User user
-    ) {
+            @AuthenticationPrincipal CustomOAuth2User user) {
         List<OtpUsageResponse> response = customerOtpUsageService.getAllUsages(user.getUserId());
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
     @GetMapping("/pending")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getPending(
-            @AuthenticationPrincipal CustomOAuth2User user
-    ) {
-        List<OtpUsageResponse> response = customerOtpUsageService.getUsagesByStatus(user.getUserId(), PENDING);
+            @AuthenticationPrincipal CustomOAuth2User user) {
+        List<OtpUsageResponse> response =
+                customerOtpUsageService.getUsagesByStatus(user.getUserId(), PENDING);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
     @GetMapping("/completed")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getCompleted(
-            @AuthenticationPrincipal CustomOAuth2User user
-    ) {
-        List<OtpUsageResponse> response = customerOtpUsageService.getUsagesByStatus(user.getUserId(), COMPLETED);
+            @AuthenticationPrincipal CustomOAuth2User user) {
+        List<OtpUsageResponse> response =
+                customerOtpUsageService.getUsagesByStatus(user.getUserId(), COMPLETED);
 
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }

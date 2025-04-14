@@ -25,7 +25,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
             throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
 
-        otpUsage.setStatus(OtpStatus.APPROVED);
+        otpUsage.approve();
         otpRepository.save(otpUsage);
 
         // redis
@@ -42,7 +42,7 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
             throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
         }
 
-        otpUsage.setStatus(OtpStatus.REJECTED);
+        otpUsage.reject();
         otpRepository.save(otpUsage);
 
         // redis

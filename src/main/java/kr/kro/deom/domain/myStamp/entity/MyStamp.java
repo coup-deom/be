@@ -6,7 +6,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "my_stamp")
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder

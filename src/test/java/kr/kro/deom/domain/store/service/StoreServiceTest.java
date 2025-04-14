@@ -11,8 +11,8 @@ import java.util.Optional;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
-import kr.kro.deom.domain.store.entity.Status;
 import kr.kro.deom.domain.store.entity.Store;
+import kr.kro.deom.domain.store.entity.StoreStatus;
 import kr.kro.deom.domain.store.exception.StoreException;
 import kr.kro.deom.domain.store.repository.StoreRepository;
 import kr.kro.deom.domain.user.service.UserService;
@@ -53,18 +53,19 @@ class StoreServiceTest {
         request.setImage("store_image.jpg");
 
         // 저장된 상점 객체 설정
-        savedStore = new Store();
-        savedStore.setId(1L);
-        savedStore.setOwnerId(request.getOwnerId());
-        savedStore.setBusinessNumber(request.getBusinessNumber());
-        savedStore.setStoreName(request.getStoreName());
-        savedStore.setBranchName(request.getBranchName());
-        savedStore.setAddressCity(request.getAddressCity());
-        savedStore.setAddressStreet(request.getAddressStreet());
-        savedStore.setAddressDetail(request.getAddressDetail());
-        savedStore.setIsDeleted(false);
-        savedStore.setImage(request.getImage());
-        savedStore.setStatus(Status.APPROVED);
+        savedStore = Store.builder()
+                .id(1L)
+                .ownerId(request.getOwnerId())
+                .businessNumber(request.getBusinessNumber())
+                .storeName(request.getStoreName())
+                .branchName(request.getBranchName())
+                .addressCity(request.getAddressCity())
+                .addressStreet(request.getAddressStreet())
+                .addressDetail(request.getAddressDetail())
+                .isDeleted(false)
+                .image(request.getImage())
+                .status(StoreStatus.APPROVED)
+                .build();
 
         // 응답 객체 설정
         response = new StoreRegisterResponse();

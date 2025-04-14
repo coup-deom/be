@@ -80,6 +80,8 @@ public class DeomService {
     }
 
     public Deom getDeom(Long deomId) {
-        return deomRepository.findById(deomId).orElseThrow(() -> new DeomException(CommonErrorCode.DEOM_NOT_FOUND));
+        return deomRepository
+                .findById(deomId)
+                .orElseThrow(() -> new DeomException(CommonErrorCode.DEOM_NOT_FOUND));
     }
 }

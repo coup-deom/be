@@ -84,7 +84,6 @@ public class OtpCustomerService {
                         .userId(info.getUserId())
                         .storeId(info.getStoreId())
                         .type(info.getType())
-                        .createdAt(Instant.now())
                         .status(OtpStatus.PENDING)
                         .build();
 

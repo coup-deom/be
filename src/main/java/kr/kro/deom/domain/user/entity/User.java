@@ -1,6 +1,7 @@
 package kr.kro.deom.domain.user.entity;
 
 import jakarta.persistence.*;
+import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.common.security.oauth.OAuth2Provider;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

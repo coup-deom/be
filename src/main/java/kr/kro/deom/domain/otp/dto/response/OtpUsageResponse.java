@@ -1,10 +1,9 @@
 package kr.kro.deom.domain.otp.dto.response;
 
+import java.time.Instant;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import lombok.Builder;
-
-import java.time.Instant;
 
 @Builder
 public class OtpUsageResponse {

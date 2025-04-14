@@ -7,7 +7,6 @@ import lombok.*;
 @Entity
 @Table(name = "store")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -46,5 +45,13 @@ public class Store extends BaseTimeEntity {
     private String image;
 
     @Column(name = "status")
-    private Status status;
+    private StoreStatus status;
+
+    public void approve() {
+        this.status = StoreStatus.APPROVED;
+    }
+
+    public void reject() {
+        this.status = StoreStatus.REJECTED;
+    }
 }
