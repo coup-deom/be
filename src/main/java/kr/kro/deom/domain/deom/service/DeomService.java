@@ -78,4 +78,8 @@ public class DeomService {
                 .findById(deomId)
                 .orElseThrow(() -> new DeomException(CommonErrorCode.INVALID_DEOM_POLICY));
     }
+
+    public Deom getDeom(Long deomId) {
+        return deomRepository.findById(deomId).orElseThrow(() -> new DeomException(CommonErrorCode.DEOM_NOT_FOUND));
+    }
 }
