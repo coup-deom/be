@@ -74,4 +74,8 @@ public class StoreService {
     private StoreRegisterResponse mapToRegisterResponse(Store store) {
         return objectMapper.convertValue(store, StoreRegisterResponse.class);
     }
+
+    public Store getStore(Long storeId) {
+        return storeRepository.findById(storeId).orElseThrow(() -> new StoreException(CommonErrorCode.STORE_NOT_FOUND));
+    }
 }
