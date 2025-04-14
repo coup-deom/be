@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/mypage/customer/otp-usage")
+@RequestMapping("/customers/request")
 public class CustomerMyPageController {
 
     private final CustomerOtpUsageService customerOtpUsageService;
