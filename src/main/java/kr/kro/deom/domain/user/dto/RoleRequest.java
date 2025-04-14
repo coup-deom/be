@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 public class RoleRequest {
-  private Long userId;
-  private Role role;
+    private Long userId;
+    private Role role;
 }
