@@ -3,6 +3,7 @@ package kr.kro.deom.common.exception.code;
 import kr.kro.deom.common.response.BaseResponseCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -35,7 +36,12 @@ public enum CommonErrorCode implements BaseResponseCode {
 
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),
-    DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다.");
+    DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다."),
+    STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "STORE_003", "존재하지 않는 가게입니다."),
+
+    // deom
+    DEOM_NOT_FOUND(HttpStatus.NOT_FOUND, "DEOM_005", "존재하지 않는 덤입니다.");
+
 
     private final HttpStatus status;
     private final String code;
