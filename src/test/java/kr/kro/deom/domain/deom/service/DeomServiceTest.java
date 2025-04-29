@@ -63,7 +63,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 목록 조회 성공")
+    @DisplayName("덤 정책 목록 조회 성공")
     void getDeomPolicy_Success() {
         // given
         when(deomRepository.findPoliciesByStoreId(storeId)).thenReturn(deomDtoList);
@@ -81,7 +81,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 생성 성공")
+    @DisplayName("덤 정책 생성 성공")
     void createDeomPolicy_Success() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -113,7 +113,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 생성 실패 - 가게 소유권 없음")
+    @DisplayName("덤 정책 생성 실패 - 가게 소유권 없음")
     void createDeomPolicy_Fail_NoStoreOwnership() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -136,7 +136,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 생성 실패 - 이미 존재하는 정책")
+    @DisplayName("덤 정책 생성 실패 - 이미 존재하는 정책")
     void createDeomPolicy_Fail_DuplicatePolicy() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -161,7 +161,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 수정 성공")
+    @DisplayName("덤 정책 수정 성공")
     void updateDeomPolicy_Success() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -188,7 +188,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 수정 실패 - 가게 소유권 없음")
+    @DisplayName("덤 정책 수정 실패 - 가게 소유권 없음")
     void updateDeomPolicy_Fail_NoStoreOwnership() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -212,7 +212,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 수정 실패 - 유효하지 않은 정책")
+    @DisplayName("덤 정책 수정 실패 - 유효하지 않은 정책")
     void updateDeomPolicy_Fail_InvalidPolicy() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -237,7 +237,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 삭제 성공")
+    @DisplayName("덤 정책 삭제 성공")
     void deleteDeomPolicy_Success() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -261,7 +261,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 삭제 실패 - 가게 소유권 없음")
+    @DisplayName("덤 정책 삭제 실패 - 가게 소유권 없음")
     void deleteDeomPolicy_Fail_NoStoreOwnership() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
@@ -285,7 +285,7 @@ class DeomServiceTest {
     }
 
     @Test
-    @DisplayName("디옴 정책 삭제 실패 - 유효하지 않은 정책")
+    @DisplayName("덤 정책 삭제 실패 - 유효하지 않은 정책")
     void deleteDeomPolicy_Fail_InvalidPolicy() {
         // given
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
