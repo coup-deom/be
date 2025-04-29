@@ -2,6 +2,7 @@ package kr.kro.deom.domain.otp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.domain.otp.dto.request.DeomUsageRequestDto;
 import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
@@ -30,7 +31,7 @@ public class OtpOwnerController {
     @Operation(summary = "스탬프 요청 승인", description = "OTP 요청을 승인하고 고객에게 스탬프를 적립합니다.")
     @PostMapping("/stamp-request/approval")
     public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
-            @RequestBody OtpStampApproveRequest request) {
+            @RequestBody @Valid OtpStampApproveRequest request) {
         return otpOwnerStampService.approveOtpAndAddStamp(
                 request.getOtpCode(), request.getStoreId(), request.getAmount());
     }
@@ -38,7 +39,7 @@ public class OtpOwnerController {
     @Operation(summary = "스탬프 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
     @PostMapping("/stamp-request/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
-            @RequestBody OtpStampApproveRequest request) {
+            @RequestBody @Valid OtpStampApproveRequest request) {
         return otpOwnerStampService.rejectStampOtp(request.getOtpCode(), request.getStoreId());
     }
 
@@ -52,14 +53,14 @@ public class OtpOwnerController {
     @Operation(summary = "덤 요청 승인", description = "OTP 요청을 승인하고 고객 스탬프를 소진합니다.")
     @PostMapping("/deom-requests/approval")
     public ResponseEntity<ApiResponse<Void>> approveDeomOtpRequest(
-            @RequestBody DeomUsageRequestDto deomUsageRequestDto) {
+            @RequestBody @Valid DeomUsageRequestDto deomUsageRequestDto) {
         return otpOwnerDeomService.approveOtp(deomUsageRequestDto);
     }
 
     @Operation(summary = "덤 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
     @PostMapping("/deom-requests/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectDeomOthRequest(
-            @RequestBody DeomUsageRequestDto deomUsageRequestDto) {
+            @RequestBody @Valid DeomUsageRequestDto deomUsageRequestDto) {
         return otpOwnerDeomService.rejectOtp(deomUsageRequestDto);
     }
 }

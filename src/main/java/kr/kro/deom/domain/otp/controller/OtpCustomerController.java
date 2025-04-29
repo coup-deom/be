@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.otp.controller;
 
+import jakarta.validation.Valid;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.otp.dto.request.OtpDeomRequest;
@@ -22,7 +23,7 @@ public class OtpCustomerController {
 
     @PostMapping("/request/stamp")
     public ResponseEntity<ApiResponse<OtpResponse>> issueStampOtp(
-            @RequestBody OtpStampRequest request) {
+            @RequestBody @Valid OtpStampRequest request) {
         System.out.println(request.getType());
         OtpResponse response = otpCustomerService.issueStampOtp(request);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
@@ -30,7 +31,7 @@ public class OtpCustomerController {
 
     @PostMapping("/request/deom")
     public ResponseEntity<ApiResponse<OtpResponse>> issueDeomOtp(
-            @RequestBody OtpDeomRequest request) {
+            @RequestBody @Valid OtpDeomRequest request) {
         OtpResponse response = otpCustomerService.issueDeomOtp(request);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
