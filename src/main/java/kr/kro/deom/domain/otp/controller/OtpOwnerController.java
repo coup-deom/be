@@ -32,15 +32,14 @@ public class OtpOwnerController {
     @PostMapping("/stamp-request/approval")
     public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
             @RequestBody @Valid OtpStampApproveRequest request) {
-        return otpOwnerStampService.approveOtpAndAddStamp(
-                request.getOtpCode(), request.getStoreId(), request.getAmount());
+        return otpOwnerStampService.approveOtpAndAddStamp(request);
     }
 
     @Operation(summary = "스탬프 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
     @PostMapping("/stamp-request/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
             @RequestBody @Valid OtpStampApproveRequest request) {
-        return otpOwnerStampService.rejectStampOtp(request.getOtpCode(), request.getStoreId());
+        return otpOwnerStampService.rejectStampOtp(request);
     }
 
     //    @Operation(summary = "덤 요청 상세 조회", description = "고객의 적립 현황과 가게의 덤 정책을 조회합니다.")
