@@ -8,7 +8,6 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -44,17 +43,11 @@ public class OtpUsage {
     @Column(name = "status")
     private OtpStatus status; // 진행중, 승인, 거절, 완료
 
-    public void approve() {
+    public void setStatus(OtpStatus status) {
         if (this.status != OtpStatus.PENDING) {
             throw new OtpException(CommonErrorCode.OPT_ALREADY_PROCESSED);
         }
-        this.status = OtpStatus.APPROVED;
+        this.status = status;
     }
 
-    public void reject() {
-        if (this.status != OtpStatus.PENDING) {
-            throw new OtpException(CommonErrorCode.OPT_ALREADY_PROCESSED);
-        }
-        this.status = OtpStatus.REJECTED;
-    }
 }
