@@ -31,7 +31,7 @@ public class OtpOwnerStampService {
 
     // 적립 페이지
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getUserStampStatusAndStampPolicy(
+    public OwnerStampInfoResponse getUserStampStatusAndStampPolicy(
             Long otpCode, Long storeId) {
 
         OtpRedisDto otpUsage = otpRedisService.getOtpFromRedis(otpCode, storeId);
@@ -41,12 +41,12 @@ public class OtpOwnerStampService {
         OwnerStampInfoResponse response =
                 createStampInfoResponse(customerStampAmount, stampPolicyList);
 
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+        return response;
     }
 
     // 적립 승인
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(
+    public void approveOtpAndAddStamp(
             Long otpCode, Long storeId, int amount) {
 
         validateAmount(amount);
@@ -55,17 +55,16 @@ public class OtpOwnerStampService {
         otpUsage.approve();
         otpRepository.save(otpUsage);
         otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpCode, Long storeId) {
+    public void rejectStampOtp(Long otpCode, Long storeId) {
 
         OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
         otpUsage.reject();
         otpRepository.save(otpUsage);
         otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     private int getCustomerStampAmount(Long userId, Long storeId) {
