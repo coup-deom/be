@@ -8,6 +8,7 @@ import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import kr.kro.deom.domain.myStamp.exception.MyStampException;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
+import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
@@ -28,6 +29,8 @@ public class OtpOwnerStampService {
     private final MyStampRepository myStampRepository;
     private final OtpRedisService otpRedisService;
     private final StampPolicyService stampPolicyService;
+    private final OtpOwnerService otpOwnerService;
+
 
     // 적립 페이지
     @Transactional(readOnly = true)
@@ -47,24 +50,31 @@ public class OtpOwnerStampService {
     // 적립 승인
     @Transactional
     public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(
-            Long otpCode, Long storeId, int amount) {
+            OtpStampApproveRequest otpStampApproveRequest) {
+        Long customerId = otpStampApproveRequest.getUserId();
+        Long storeId = otpStampApproveRequest.getStoreId();
+        Long otpCode = otpStampApproveRequest.getOtpCode();
+        Integer amount = otpStampApproveRequest.getAmount();
 
         validateAmount(amount);
-        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
-        increaseStamp(otpUsage, amount);
-        otpUsage.approve();
-        otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
+        otpOwnerService.approveOtp(otpCode, customerId, storeId);
+        //TODO: 스탬프 적립 정보 레포에 저장
+        increaseStamp(customerId, storeId, amount);
+
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpCode, Long storeId) {
+    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(OtpStampApproveRequest otpStampApproveRequest) {
 
-        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
-        otpUsage.reject();
-        otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
+        Long customerId = otpStampApproveRequest.getUserId();
+        Long storeId = otpStampApproveRequest.getStoreId();
+        Long otpCode = otpStampApproveRequest.getOtpCode();
+        Integer amount = otpStampApproveRequest.getAmount();
+
+        otpOwnerService.rejectOtp(otpCode, customerId, storeId);
+        //TODO: 스탬프 적립 정보 레포에 저장
+
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
@@ -90,25 +100,25 @@ public class OtpOwnerStampService {
         }
     }
 
-    private void increaseStamp(OtpUsage otpUsage, int amount) {
+    private void increaseStamp(Long customerId, Long storeId, int amount) {
         Integer myStamp =
                 myStampRepository.incrementStamp(
-                        otpUsage.getUserId(), otpUsage.getStoreId(), amount);
+                        customerId, storeId, amount);
 
         if (myStamp != null) {
             myStampRepository.save(
-                    new MyStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount));
+                    new MyStamp(customerId, storeId, amount));
         }
     }
 
-    private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
-        OtpUsage otpUsage =
-                otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
-        if (otpUsage == null) {
-            throw new OtpException(CommonErrorCode.OTP_INVALID);
-        } else if (!otpUsage.getStoreId().equals(storeId)) {
-            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
-        }
-        return otpUsage;
-    }
+//    private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
+//        OtpUsage otpUsage =
+//                otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
+//        if (otpUsage == null) {
+//            throw new OtpException(CommonErrorCode.OTP_INVALID);
+//        } else if (!otpUsage.getStoreId().equals(storeId)) {
+//            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
+//        }
+//        return otpUsage;
+//    }
 }
