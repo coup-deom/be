@@ -12,6 +12,7 @@ import kr.kro.deom.domain.otp.repository.DeomUsageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -43,19 +44,16 @@ public class OtpOwnerDeomService {
         Long otpCode = deomUsageRequestDto.getOtpCode();
         Integer usedStampAmount = deomUsageRequestDto.getUsedStampAmount();
         // TODO: 서비스 참조로 변경
-        Integer stampAmount =
-                myStampRepository.findStampAmountByUserIdAndStoreId(customerId, storeId);
-        if (stampAmount == null || stampAmount < usedStampAmount) {
-            rejectOtp(deomUsageRequestDto); // 괜찮은코드인가...
-            throw new OtpException(CommonErrorCode.OTP_INVALID, "사용할 수 있는 스탬프가 부족합니다.");
-        }
+        validateStamp(customerId, storeId, usedStampAmount, otpCode);
+
         otpOwnerService.approveOtp(otpCode, customerId, storeId);
         DeomUsage deomUsage =
                 createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.APPROVED);
+
         deomUsageRepository.save(deomUsage);
-        // 스탬프 사용량 업데이트 -> 서비스 레이어 없이 직접 repository 호출 괜찮은가...
-        // TODO: 서비스 참조로 변경
-        myStampRepository.updateStampAmount(customerId, storeId, usedStampAmount);
+
+        updateStampAmount(customerId, storeId, usedStampAmount);
+
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
@@ -71,6 +69,22 @@ public class OtpOwnerDeomService {
                 createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.REJECTED);
         deomUsageRepository.save(deomUsage);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+    }
+
+
+    private void validateStamp(Long customerId, Long storeId, Integer usedStampAmount, Long otpCode) {
+
+        Integer stampAmount =
+                myStampRepository.findStampAmountByUserIdAndStoreId(customerId, storeId);
+
+        if (stampAmount == null || stampAmount < usedStampAmount) {
+            throw new OtpException(CommonErrorCode.INVALID_STAMP_USAGE);
+        }
+    }
+
+    private void updateStampAmount(Long customerId, Long storeId, Integer usedStampAmount) {
+        // TODO: 스탬프 서비스로 추출 예정
+        myStampRepository.updateStampAmount(customerId, storeId, usedStampAmount);
     }
 
     private DeomUsage createDeomUsage(
