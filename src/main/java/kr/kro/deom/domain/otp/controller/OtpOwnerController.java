@@ -71,6 +71,5 @@ public class OtpOwnerController {
         otpOwnerDeomService.rejectOtp(deomUsageRequestDto);
 
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
-
     }
 }

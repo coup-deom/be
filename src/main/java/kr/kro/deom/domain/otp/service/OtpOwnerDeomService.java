@@ -1,13 +1,10 @@
 package kr.kro.deom.domain.otp.service;
 
 import kr.kro.deom.common.exception.code.CommonErrorCode;
-import kr.kro.deom.common.response.ApiResponse;
-import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.request.DeomUsageRequestDto;
 import kr.kro.deom.domain.otp.exception.OtpException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
