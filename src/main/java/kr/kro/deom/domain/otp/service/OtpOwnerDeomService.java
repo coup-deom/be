@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class OtpOwnerDeomService {
     private final OtpOwnerService otpOwnerService;
-    private final DeomUsageRepository deomUsageRepository;
+//    private final DeomUsageRepository deomUsageRepository;
     private final MyStampRepository myStampRepository;
 
     @Transactional
@@ -32,10 +32,10 @@ public class OtpOwnerDeomService {
         validateStamp(customerId, storeId, usedStampAmount, otpCode);
 
         otpOwnerService.approveOtp(otpCode, customerId, storeId);
-        DeomUsage deomUsage =
-                createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.APPROVED);
-
-        deomUsageRepository.save(deomUsage);
+//        DeomUsage deomUsage =
+//                createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.APPROVED);
+//
+//        deomUsageRepository.save(deomUsage);
 
         updateStampAmount(customerId, storeId, usedStampAmount);
 
@@ -50,9 +50,9 @@ public class OtpOwnerDeomService {
         Integer usedStampAmount = deomUsageRequestDto.getUsedStampAmount();
 
         otpOwnerService.rejectOtp(otpCode, customerId, storeId);
-        DeomUsage deomUsage =
-                createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.REJECTED);
-        deomUsageRepository.save(deomUsage);
+//        DeomUsage deomUsage =
+//                createDeomUsage(customerId, storeId, usedStampAmount, TransactionStatus.REJECTED);
+//        deomUsageRepository.save(deomUsage);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
@@ -72,13 +72,13 @@ public class OtpOwnerDeomService {
         myStampRepository.updateStampAmount(customerId, storeId, usedStampAmount);
     }
 
-    private DeomUsage createDeomUsage(
-            Long customerId, Long storeId, Integer usedStampAmount, TransactionStatus status) {
-        return DeomUsage.builder()
-                .userId(customerId)
-                .storeId(storeId)
-                .usedStampAmount(usedStampAmount)
-                .status(status)
-                .build();
-    }
+//    private DeomUsage createDeomUsage(
+//            Long customerId, Long storeId, Integer usedStampAmount, TransactionStatus status) {
+//        return DeomUsage.builder()
+//                .userId(customerId)
+//                .storeId(storeId)
+//                .usedStampAmount(usedStampAmount)
+//                .status(status)
+//                .build();
+//    }
 }
