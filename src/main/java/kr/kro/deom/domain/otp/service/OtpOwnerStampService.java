@@ -2,8 +2,6 @@ package kr.kro.deom.domain.otp.service;
 
 import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
-import kr.kro.deom.common.response.ApiResponse;
-import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import kr.kro.deom.domain.myStamp.exception.MyStampException;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
@@ -16,7 +14,6 @@ import kr.kro.deom.domain.otp.repository.OtpRepository;
 import kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto;
 import kr.kro.deom.domain.stampPolicy.service.StampPolicyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,13 +28,12 @@ public class OtpOwnerStampService {
 
     // 적립 페이지
     @Transactional(readOnly = true)
-    public OwnerStampInfoResponse getUserStampStatusAndStampPolicy(
-            Long otpCode, Long storeId) {
+    public OwnerStampInfoResponse getUserStampStatusAndStampPolicy(Long otpCode, Long storeId) {
 
         OtpRedisDto otpUsage = otpRedisService.getOtpFromRedis(otpCode, storeId);
         int customerStampAmount =
                 getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
-        List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
+        List<StampPolicyDto> stampPolicyList = stampPolicyService.getStampPolicy(storeId);
         OwnerStampInfoResponse response =
                 createStampInfoResponse(customerStampAmount, stampPolicyList);
 
@@ -46,16 +42,14 @@ public class OtpOwnerStampService {
 
     // 적립 승인
     @Transactional
-    public void approveOtpAndAddStamp(
-            Long otpCode, Long storeId, int amount) {
+    public void approveOtpAndAddStamp(Long otpCode, Long storeId, int amount) {
 
         validateAmount(amount);
         OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
-        increaseStamp(otpUsage, amount);
+        increaseStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount);
         otpUsage.approve();
         otpRepository.save(otpUsage);
         otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-
     }
 
     @Transactional
@@ -89,14 +83,14 @@ public class OtpOwnerStampService {
         }
     }
 
-    private void increaseStamp(OtpUsage otpUsage, int amount) {
-        Integer myStamp =
+    private void increaseStamp(Long userId, Long storeId, int amount) {
+        Integer affectedRows =
                 myStampRepository.incrementStamp(
-                        otpUsage.getUserId(), otpUsage.getStoreId(), amount);
+                        userId, storeId, amount);
 
-        if (myStamp != null) {
+        if (affectedRows == null || affectedRows == 0) {
             myStampRepository.save(
-                    new MyStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount));
+                    new MyStamp(userId,storeId, amount));
         }
     }
 
