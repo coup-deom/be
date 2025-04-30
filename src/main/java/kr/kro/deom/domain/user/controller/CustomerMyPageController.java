@@ -1,6 +1,9 @@
 package kr.kro.deom.domain.user.controller;
 
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/customers/request")
+@Tag(name = "고객 마이페이지 API")
 public class CustomerMyPageController {
 
     private final CustomerOtpUsageService customerOtpUsageService;
@@ -23,6 +27,7 @@ public class CustomerMyPageController {
     public static final List<OtpStatus> COMPLETED = List.of(OtpStatus.APPROVED, OtpStatus.REJECTED);
 
     @GetMapping("/all")
+    @Operation(summary = "모든 요청 내역 조회", description = "유저가 요청한 내역을 모두 조회한다.")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getAll(
             @AuthenticationPrincipal CustomOAuth2User user) {
         List<OtpUsageResponse> response = customerOtpUsageService.getAllUsages(user.getUserId());
@@ -30,6 +35,7 @@ public class CustomerMyPageController {
     }
 
     @GetMapping("/pending")
+    @Operation(summary = "진행 중인 요청 조회", description = "진행 중인(PENDING) 요청 내역을 조회한다.")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getPending(
             @AuthenticationPrincipal CustomOAuth2User user) {
         List<OtpUsageResponse> response =
@@ -38,6 +44,7 @@ public class CustomerMyPageController {
     }
 
     @GetMapping("/completed")
+    @Operation(summary = "완료된 요청 조회", description = "완료된(APPROVED, REJECTED) 요청 내역을 조회한다.")
     public ResponseEntity<ApiResponse<List<OtpUsageResponse>>> getCompleted(
             @AuthenticationPrincipal CustomOAuth2User user) {
         List<OtpUsageResponse> response =
