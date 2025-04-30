@@ -1,6 +1,7 @@
 package kr.kro.deom.domain.user.entity;
 
 import jakarta.persistence.*;
+import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.common.security.oauth.OAuth2Provider;
 import lombok.*;
 
@@ -10,31 +11,31 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "users")
-public class User {
+public class User extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String socialId;
+    private String socialId;
 
-  @Enumerated(EnumType.STRING)
-  private OAuth2Provider provider;
+    @Enumerated(EnumType.STRING)
+    private OAuth2Provider provider;
 
-  private String email;
+    private String email;
 
-  private String nickname;
+    private String nickname;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-  private boolean deleted;
+    private boolean deleted;
 
-  public void updateRole(Role newRole) {
-    this.role = newRole;
-  }
+    public void updateRole(Role newRole) {
+        this.role = newRole;
+    }
 
-  public void updateDeleted(boolean deleted) {
-    this.deleted = deleted;
-  }
+    public void updateDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }
