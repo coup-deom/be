@@ -22,21 +22,6 @@ public class OtpOwnerDeomService {
     private final DeomUsageRepository deomUsageRepository;
     private final MyStampRepository myStampRepository;
 
-    // 덤 정책
-    //    public ResponseEntity<ApiResponse<OwnerStampInfoResponse>>
-    // getUserStampStatusAndDeomPolicy(
-    //            Long otpCode, Long storeId) {
-    //
-    //        OtpRedisDto otpUsage = otpRedisService.getOtpFromRedis(otpCode, storeId);
-    //        int customerStampAmount =
-    //                getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
-    //        List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
-    //        OwnerStampInfoResponse response =
-    //                createStampInfoResponse(customerStampAmount, stampPolicyList);
-    //
-    //        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
-    //    }
-
     @Transactional
     public ResponseEntity<ApiResponse<Void>> approveOtp(DeomUsageRequestDto deomUsageRequestDto) {
         Long customerId = deomUsageRequestDto.getUserId();

@@ -111,14 +111,4 @@ public class OtpOwnerStampService {
         }
     }
 
-//    private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
-//        OtpUsage otpUsage =
-//                otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
-//        if (otpUsage == null) {
-//            throw new OtpException(CommonErrorCode.OTP_INVALID);
-//        } else if (!otpUsage.getStoreId().equals(storeId)) {
-//            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
-//        }
-//        return otpUsage;
-//    }
 }
