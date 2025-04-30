@@ -62,24 +62,24 @@ public class HomeServiceTest {
     }
 
     private Store createStore(Long id, String name, String branch) {
-        Store store = new Store();
-        store.setId(id);
-        store.setStoreName(name);
-        store.setBranchName(branch);
-        store.setImage("image_" + id + ".jpg");
-        store.setAddressCity("서울");
-        store.setAddressStreet("테스트 거리 " + id);
-        store.setAddressDetail("상세주소 " + id);
-        return store;
+        return Store.builder()
+                .id(id)
+                .storeName(name)
+                .branchName(branch)
+                .image("image_" + id + ".jpg")
+                .addressCity("서울")
+                .addressStreet("테스트 거리 " + id)
+                .addressDetail("상세주소 " + id)
+                .build();
     }
 
     private Deom createDeom(Long id, Long storeId, String name, Integer requiredStampAmount) {
-        Deom deom = new Deom();
-        deom.setId(id);
-        deom.setStoreId(storeId);
-        deom.setName(name);
-        deom.setRequiredStampAmount(requiredStampAmount);
-        return deom;
+        return Deom.builder()
+                .id(id)
+                .storeId(storeId)
+                .name(name)
+                .requiredStampAmount(requiredStampAmount)
+                .build();
     }
 
     @Nested

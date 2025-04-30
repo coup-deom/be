@@ -53,19 +53,20 @@ class StoreServiceTest {
         request.setImage("store_image.jpg");
 
         // 저장된 상점 객체 설정
-        savedStore = Store.builder()
-                .id(1L)
-                .ownerId(request.getOwnerId())
-                .businessNumber(request.getBusinessNumber())
-                .storeName(request.getStoreName())
-                .branchName(request.getBranchName())
-                .addressCity(request.getAddressCity())
-                .addressStreet(request.getAddressStreet())
-                .addressDetail(request.getAddressDetail())
-                .isDeleted(false)
-                .image(request.getImage())
-                .status(StoreStatus.APPROVED)
-                .build();
+        savedStore =
+                Store.builder()
+                        .id(1L)
+                        .ownerId(request.getOwnerId())
+                        .businessNumber(request.getBusinessNumber())
+                        .storeName(request.getStoreName())
+                        .branchName(request.getBranchName())
+                        .addressCity(request.getAddressCity())
+                        .addressStreet(request.getAddressStreet())
+                        .addressDetail(request.getAddressDetail())
+                        .isDeleted(false)
+                        .image(request.getImage())
+                        .status(StoreStatus.APPROVED)
+                        .build();
 
         // 응답 객체 설정
         response = new StoreRegisterResponse();
