@@ -8,9 +8,6 @@ import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
-import kr.kro.deom.domain.otp.entity.OtpStatus;
-import kr.kro.deom.domain.otp.entity.OtpUsage;
-import kr.kro.deom.domain.otp.exception.OtpException;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto;
 import kr.kro.deom.domain.stampPolicy.service.StampPolicyService;
@@ -28,7 +25,6 @@ public class OtpOwnerStampService {
     private final StampPolicyService stampPolicyService;
     private final OtpOwnerService otpOwnerService;
 
-
     // 적립 페이지
     @Transactional(readOnly = true)
     public OwnerStampInfoResponse getUserStampStatusAndStampPolicy(Long otpCode, Long storeId) {
@@ -45,8 +41,7 @@ public class OtpOwnerStampService {
 
     // 적립 승인
     @Transactional
-    public void approveOtpAndAddStamp(
-            OtpStampApproveRequest otpStampApproveRequest) {
+    public void approveOtpAndAddStamp(OtpStampApproveRequest otpStampApproveRequest) {
         Long customerId = otpStampApproveRequest.getUserId();
         Long storeId = otpStampApproveRequest.getStoreId();
         Long otpCode = otpStampApproveRequest.getOtpCode();
@@ -54,9 +49,8 @@ public class OtpOwnerStampService {
 
         validateAmount(amount);
         otpOwnerService.approveOtp(otpCode, customerId, storeId);
-        //TODO: 스탬프 적립 정보 레포에 저장
+        // TODO: 스탬프 적립 정보 레포에 저장
         increaseStamp(customerId, storeId, amount);
-
     }
 
     @Transactional
@@ -68,7 +62,7 @@ public class OtpOwnerStampService {
         Integer amount = otpStampApproveRequest.getAmount();
 
         otpOwnerService.rejectOtp(otpCode, customerId, storeId);
-        //TODO: 스탬프 적립 정보 레포에 저장
+        // TODO: 스탬프 적립 정보 레포에 저장
 
     }
 
@@ -91,14 +85,10 @@ public class OtpOwnerStampService {
     }
 
     private void increaseStamp(Long customerId, Long storeId, int amount) {
-        Integer affectedRows =
-                myStampRepository.incrementStamp(
-                        customerId, storeId, amount);
+        Integer affectedRows = myStampRepository.incrementStamp(customerId, storeId, amount);
 
         if (affectedRows == null || affectedRows == 0) {
-            myStampRepository.save(
-                    new MyStamp(customerId, storeId, amount));
+            myStampRepository.save(new MyStamp(customerId, storeId, amount));
         }
     }
-
 }

@@ -46,5 +46,4 @@ public class OtpUsage extends BaseTimeEntity {
         }
         this.status = status;
     }
-
 }

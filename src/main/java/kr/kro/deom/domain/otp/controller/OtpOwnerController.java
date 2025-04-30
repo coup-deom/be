@@ -27,7 +27,8 @@ public class OtpOwnerController {
     public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getStampGuide(
             @PathVariable Long storeId, @PathVariable Long otpCode) {
 
-        OwnerStampInfoResponse response =otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
+        OwnerStampInfoResponse response =
+                otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 

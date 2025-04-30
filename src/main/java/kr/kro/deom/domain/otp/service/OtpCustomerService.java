@@ -2,7 +2,6 @@ package kr.kro.deom.domain.otp.service;
 
 import java.time.Instant;
 import java.util.Random;
-
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
@@ -25,7 +24,6 @@ public class OtpCustomerService {
     private final OtpRedisService otpRedisService;
     private final OtpRepository otpRepository;
     private final MyStampRepository myStampRepository;
-
 
     private static final Random RANDOM = new Random();
     private static final Long OTP_TTL_SECONDS = 10800L;
