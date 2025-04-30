@@ -18,7 +18,7 @@ public class OtpOwnerDeomService {
     private final MyStampRepository myStampRepository;
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveOtp(DeomUsageRequestDto deomUsageRequestDto) {
+    public void approveOtp(DeomUsageRequestDto deomUsageRequestDto) {
         Long customerId = deomUsageRequestDto.getUserId();
         Long storeId = deomUsageRequestDto.getStoreId();
         Long otpCode = deomUsageRequestDto.getOtpCode();
@@ -29,19 +29,15 @@ public class OtpOwnerDeomService {
         otpOwnerService.approveOtp(otpCode, customerId, storeId);
 
         updateStampAmount(customerId, storeId, usedStampAmount);
-
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectOtp(DeomUsageRequestDto deomUsageRequestDto) {
+    public void rejectOtp(DeomUsageRequestDto deomUsageRequestDto) {
         Long customerId = deomUsageRequestDto.getUserId();
         Long storeId = deomUsageRequestDto.getStoreId();
         Long otpCode = deomUsageRequestDto.getOtpCode();
 
         otpOwnerService.rejectOtp(otpCode, customerId, storeId);
-
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     private void validateStamp(

@@ -29,6 +29,7 @@ public class OtpOwnerController {
 
         OwnerStampInfoResponse response =
                 otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
+
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
@@ -56,13 +57,20 @@ public class OtpOwnerController {
     @PostMapping("/deom-requests/approval")
     public ResponseEntity<ApiResponse<Void>> approveDeomOtpRequest(
             @RequestBody @Valid DeomUsageRequestDto deomUsageRequestDto) {
-        return otpOwnerDeomService.approveOtp(deomUsageRequestDto);
+
+        otpOwnerDeomService.approveOtp(deomUsageRequestDto);
+
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Operation(summary = "덤 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
     @PostMapping("/deom-requests/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectDeomOthRequest(
             @RequestBody @Valid DeomUsageRequestDto deomUsageRequestDto) {
-        return otpOwnerDeomService.rejectOtp(deomUsageRequestDto);
+
+        otpOwnerDeomService.rejectOtp(deomUsageRequestDto);
+
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+
     }
 }
