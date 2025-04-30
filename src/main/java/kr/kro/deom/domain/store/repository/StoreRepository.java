@@ -10,4 +10,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Optional<Store> findByStoreNameAndBranchNameAndIsDeletedFalse(
             String storeName, String branchName);
+
+    Optional<Store> findByIdAndOwnerId(Long id, Long ownerId);
+
+    Optional<Store> findByIdAndOwnerIdAndIsDeletedFalse(Long id, Long ownerId);
 }

@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.otp.repository;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
@@ -24,4 +25,8 @@ public interface OtpRepository extends CrudRepository<OtpUsage, Long> {
             Long otp, Long storeId, OtpStatus status);
 
     Optional<OtpUsage> findById(Long id);
+
+    List<OtpUsage> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    List<OtpUsage> findByUserIdAndStatusInOrderByCreatedAtDesc(Long userId, List<OtpStatus> status);
 }

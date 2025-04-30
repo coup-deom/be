@@ -1,17 +1,16 @@
 package kr.kro.deom.domain.store.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
+import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import lombok.*;
 
 @Entity
 @Table(name = "store")
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Store {
+public class Store extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,18 +38,20 @@ public class Store {
     @Column(name = "address_detail")
     private String addressDetail;
 
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
-
-    @Column(name = "deleted_at", nullable = false)
-    private Instant deletedAt;
-
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
     @Column(name = "image")
     private String image;
+
+    @Column(name = "status")
+    private StoreStatus status;
+
+    public void approve() {
+        this.status = StoreStatus.APPROVED;
+    }
+
+    public void reject() {
+        this.status = StoreStatus.REJECTED;
+    }
 }

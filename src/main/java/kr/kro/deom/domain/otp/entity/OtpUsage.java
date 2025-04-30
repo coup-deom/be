@@ -1,8 +1,8 @@
 package kr.kro.deom.domain.otp.entity;
 
 import jakarta.persistence.*;
-import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.common.global.entity.BaseTimeEntity;
 import kr.kro.deom.domain.otp.exception.OtpException;
 import lombok.*;
 
@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OtpUsage {
+public class OtpUsage extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +35,6 @@ public class OtpUsage {
 
     @Column(name = "used_stamp_amount")
     private Integer usedStampAmount;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

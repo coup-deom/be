@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.kro.deom.common.response.ApiResponse;
+import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.otp.dto.request.DeomUsageRequestDto;
 import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
@@ -25,29 +26,30 @@ public class OtpOwnerController {
     @GetMapping("/stamp-requests/{storeId}/{otpCode}")
     public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getStampGuide(
             @PathVariable Long storeId, @PathVariable Long otpCode) {
-        return otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
+
+        OwnerStampInfoResponse response =otpOwnerStampService.getUserStampStatusAndStampPolicy(otpCode, storeId);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
     @Operation(summary = "스탬프 요청 승인", description = "OTP 요청을 승인하고 고객에게 스탬프를 적립합니다.")
     @PostMapping("/stamp-request/approval")
     public ResponseEntity<ApiResponse<Void>> approveStampOtpRequest(
             @RequestBody @Valid OtpStampApproveRequest request) {
-        return otpOwnerStampService.approveOtpAndAddStamp(request);
+
+        otpOwnerStampService.approveOtpAndAddStamp(request);
+
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 
     @Operation(summary = "스탬프 요청 거절", description = "OTP 요청을 거절하고 삭제합니다.")
     @PostMapping("/stamp-request/rejection")
     public ResponseEntity<ApiResponse<Void>> rejectStampOthRequest(
             @RequestBody @Valid OtpStampApproveRequest request) {
-        return otpOwnerStampService.rejectStampOtp(request);
-    }
 
-    //    @Operation(summary = "덤 요청 상세 조회", description = "고객의 적립 현황과 가게의 덤 정책을 조회합니다.")
-    //    @GetMapping("/deom-requests/{storeId}/{otpCode}")
-    //    public ResponseEntity<ApiResponse<OwnerDeomInfoResponse>> getStampGuide(
-    //            @PathVariable Long storeId, @PathVariable Long otpCode) {
-    //        return otpOwnerDeomService.getUserStampStatusAndDeomPolicy(otpCode, storeId);
-    //    }
+        otpOwnerStampService.rejectStampOtp(request);
+
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+    }
 
     @Operation(summary = "덤 요청 승인", description = "OTP 요청을 승인하고 고객 스탬프를 소진합니다.")
     @PostMapping("/deom-requests/approval")
