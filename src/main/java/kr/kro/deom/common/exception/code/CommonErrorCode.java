@@ -32,6 +32,7 @@ public enum CommonErrorCode implements BaseResponseCode {
 
     // stamp
     INVALID_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "AMOUNT_001", "수량은 1 이상이어야 합니다."),
+    INVALID_STAMP_USAGE(HttpStatus.BAD_REQUEST, "AMOUNT_002", "사용할 수 없는 스탬프 수량입니다."),
 
     // stamp policy
     INVALID_BASE_AMOUNT(HttpStatus.BAD_REQUEST, "POLICY_001", "기준 금액은 0보다 커야 합니다."),

@@ -2,21 +2,16 @@ package kr.kro.deom.domain.otp.service;
 
 import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
-import kr.kro.deom.common.response.ApiResponse;
-import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import kr.kro.deom.domain.myStamp.exception.MyStampException;
 import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
+import kr.kro.deom.domain.otp.dto.request.OtpStampApproveRequest;
 import kr.kro.deom.domain.otp.dto.response.OwnerStampInfoResponse;
-import kr.kro.deom.domain.otp.entity.OtpStatus;
-import kr.kro.deom.domain.otp.entity.OtpUsage;
-import kr.kro.deom.domain.otp.exception.OtpException;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto;
 import kr.kro.deom.domain.stampPolicy.service.StampPolicyService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,52 +23,51 @@ public class OtpOwnerStampService {
     private final MyStampRepository myStampRepository;
     private final OtpRedisService otpRedisService;
     private final StampPolicyService stampPolicyService;
+    private final OtpOwnerService otpOwnerService;
 
     // 적립 페이지
     @Transactional(readOnly = true)
-    public ResponseEntity<ApiResponse<OwnerStampInfoResponse>> getUserStampStatusAndStampPolicy(
-            Long otpCode, Long storeId) {
+    public OwnerStampInfoResponse getUserStampStatusAndStampPolicy(Long otpCode, Long storeId) {
 
         OtpRedisDto otpUsage = otpRedisService.getOtpFromRedis(otpCode, storeId);
         int customerStampAmount =
                 getCustomerStampAmount(otpUsage.getUserId(), otpUsage.getStoreId());
-        List<StampPolicyDto> stampPolicyList = getStoreStampPolicies(otpUsage.getStoreId());
+        List<StampPolicyDto> stampPolicyList = stampPolicyService.getStampPolicy(storeId);
         OwnerStampInfoResponse response =
                 createStampInfoResponse(customerStampAmount, stampPolicyList);
 
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+        return response;
     }
 
     // 적립 승인
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> approveOtpAndAddStamp(
-            Long otpCode, Long storeId, int amount) {
+    public void approveOtpAndAddStamp(OtpStampApproveRequest otpStampApproveRequest) {
+        Long customerId = otpStampApproveRequest.getUserId();
+        Long storeId = otpStampApproveRequest.getStoreId();
+        Long otpCode = otpStampApproveRequest.getOtpCode();
+        Integer amount = otpStampApproveRequest.getAmount();
 
         validateAmount(amount);
-        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
-        increaseStamp(otpUsage, amount);
-        otpUsage.approve();
-        otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+        otpOwnerService.approveOtp(otpCode, customerId, storeId);
+        // TODO: 스탬프 적립 정보 레포에 저장
+        increaseStamp(customerId, storeId, amount);
     }
 
     @Transactional
-    public ResponseEntity<ApiResponse<Void>> rejectStampOtp(Long otpCode, Long storeId) {
+    public void rejectStampOtp(OtpStampApproveRequest otpStampApproveRequest) {
 
-        OtpUsage otpUsage = findPendingOtp(otpCode, storeId);
-        otpUsage.reject();
-        otpRepository.save(otpUsage);
-        otpRedisService.deleteOtpFromRedis(otpCode, storeId);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+        Long customerId = otpStampApproveRequest.getUserId();
+        Long storeId = otpStampApproveRequest.getStoreId();
+        Long otpCode = otpStampApproveRequest.getOtpCode();
+        Integer amount = otpStampApproveRequest.getAmount();
+
+        otpOwnerService.rejectOtp(otpCode, customerId, storeId);
+        // TODO: 스탬프 적립 정보 레포에 저장
+
     }
 
     private int getCustomerStampAmount(Long userId, Long storeId) {
         return myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
-    }
-
-    private List<StampPolicyDto> getStoreStampPolicies(Long storeId) {
-        return stampPolicyService.getStampPolicy(storeId);
     }
 
     private OwnerStampInfoResponse createStampInfoResponse(
@@ -90,25 +84,11 @@ public class OtpOwnerStampService {
         }
     }
 
-    private void increaseStamp(OtpUsage otpUsage, int amount) {
-        Integer myStamp =
-                myStampRepository.incrementStamp(
-                        otpUsage.getUserId(), otpUsage.getStoreId(), amount);
+    private void increaseStamp(Long customerId, Long storeId, int amount) {
+        Integer affectedRows = myStampRepository.incrementStamp(customerId, storeId, amount);
 
-        if (myStamp != null) {
-            myStampRepository.save(
-                    new MyStamp(otpUsage.getUserId(), otpUsage.getStoreId(), amount));
+        if (affectedRows == null || affectedRows == 0) {
+            myStampRepository.save(new MyStamp(customerId, storeId, amount));
         }
-    }
-
-    private OtpUsage findPendingOtp(Long otpCode, Long storeId) {
-        OtpUsage otpUsage =
-                otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING);
-        if (otpUsage == null) {
-            throw new OtpException(CommonErrorCode.OTP_INVALID);
-        } else if (!otpUsage.getStoreId().equals(storeId)) {
-            throw new OtpException(CommonErrorCode.OTP_UNAUTHORIZED);
-        }
-        return otpUsage;
     }
 }

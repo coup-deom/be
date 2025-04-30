@@ -2,6 +2,8 @@ package kr.kro.deom.domain.otp.service;
 
 import java.time.Instant;
 import java.util.Random;
+import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.domain.myStamp.repository.MyStampRepository;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.dto.request.OtpDeomRequest;
 import kr.kro.deom.domain.otp.dto.request.OtpStampRequest;
@@ -9,6 +11,7 @@ import kr.kro.deom.domain.otp.dto.response.OtpResponse;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import kr.kro.deom.domain.otp.entity.OtpUsage;
+import kr.kro.deom.domain.otp.exception.OtpException;
 import kr.kro.deom.domain.otp.repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ public class OtpCustomerService {
 
     private final OtpRedisService otpRedisService;
     private final OtpRepository otpRepository;
+    private final MyStampRepository myStampRepository;
 
     private static final Random RANDOM = new Random();
     private static final Long OTP_TTL_SECONDS = 10800L;
@@ -46,6 +50,7 @@ public class OtpCustomerService {
 
     private OtpRedisDto createOtpInfo(
             Long userId, Long storeId, OtpType type, Long deomId, Integer usedStampAmount) {
+        validateStampAmount(userId, storeId, usedStampAmount);
         return OtpRedisDto.builder()
                 .userId(userId)
                 .storeId(storeId)
@@ -54,6 +59,14 @@ public class OtpCustomerService {
                 .usedStampAmount(usedStampAmount)
                 .createdAt(Instant.now())
                 .build();
+    }
+
+    private void validateStampAmount(Long customerId, Long storeId, Integer usedStampAmount) {
+        Integer stampAmount =
+                myStampRepository.findStampAmountByUserIdAndStoreId(customerId, storeId);
+        if (stampAmount == null || stampAmount < usedStampAmount) {
+            throw new OtpException(CommonErrorCode.INVALID_STAMP_USAGE);
+        }
     }
 
     private Long generateOtpCode(Long storeId) {

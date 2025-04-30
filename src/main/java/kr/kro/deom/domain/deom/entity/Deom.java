@@ -12,6 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Deom extends BaseTimeEntity {
 
     @Id
