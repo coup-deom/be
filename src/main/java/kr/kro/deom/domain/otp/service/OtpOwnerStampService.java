@@ -65,10 +65,6 @@ public class OtpOwnerStampService {
         return myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
     }
 
-    private List<StampPolicyDto> getStoreStampPolicies(Long storeId) {
-        return stampPolicyService.getStampPolicy(storeId);
-    }
-
     private OwnerStampInfoResponse createStampInfoResponse(
             int customerStampAmount, List<StampPolicyDto> stampPolicyList) {
         return OwnerStampInfoResponse.builder()
