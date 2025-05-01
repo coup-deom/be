@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.auth.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.kro.deom.common.response.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "토큰 재발급, 로그아웃")
 public class AuthController {
 
     private final AuthService authService;

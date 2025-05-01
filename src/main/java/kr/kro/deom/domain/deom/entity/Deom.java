@@ -9,9 +9,9 @@ import lombok.*;
 @Entity
 @Table(name = "service")
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Deom extends BaseTimeEntity {
 
     @Id
