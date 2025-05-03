@@ -40,6 +40,9 @@ public enum CommonErrorCode implements BaseResponseCode {
     ALREADY_REGISTERED_STAMP_POLICY(HttpStatus.CONFLICT, "POLICY_003", "이미 등록된 스탬프 정책이 있습니다."),
     INVALID_STAMP_POLICY(HttpStatus.NOT_FOUND, "POLICY_004", "존재하지 않는 스탬프 정책입니다."),
 
+    // stamp exchange
+    STAMP_EXCHANGE_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_EXCHANGE_001", "존재하지 않는 스탬프 거래입니다."),
+
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),
     DUPLICATE_STORE_NAME_AND_BRANCH(HttpStatus.CONFLICT, "STORE_002", "이미 등록된 가게명과 지점명입니다."),
