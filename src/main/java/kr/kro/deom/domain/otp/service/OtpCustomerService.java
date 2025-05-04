@@ -62,6 +62,9 @@ public class OtpCustomerService {
     }
 
     private void validateStampAmount(Long customerId, Long storeId, Integer usedStampAmount) {
+        if (usedStampAmount == null) {
+            return;
+        }
         Integer stampAmount =
                 myStampRepository.findStampAmountByUserIdAndStoreId(customerId, storeId);
         if (stampAmount == null || stampAmount < usedStampAmount) {
