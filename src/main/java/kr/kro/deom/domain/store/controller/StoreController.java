@@ -6,13 +6,13 @@ import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
+import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
 import kr.kro.deom.domain.store.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/stores")
@@ -26,6 +26,13 @@ public class StoreController {
     public ResponseEntity<ApiResponse<StoreRegisterResponse>> registerStore(
             @RequestBody @Valid StoreRegisterRequest request) {
         StoreRegisterResponse response = storeService.registerStore(request);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "모든 가게 목록 조회", description = "등록된 전체 가게 목록을 조회합니다(거래소 가게 선택에 사용)")
+    public ResponseEntity<ApiResponse<List<StoreSelectResponse>>> getAllStores() {
+        List<StoreSelectResponse> response = storeService.getAllStores();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }

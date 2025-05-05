@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
+import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
 import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.entity.StoreStatus;
 import kr.kro.deom.domain.store.exception.StoreException;
@@ -13,6 +14,8 @@ import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -74,5 +77,11 @@ public class StoreService {
         return storeRepository
                 .findById(storeId)
                 .orElseThrow(() -> new StoreException(CommonErrorCode.STORE_NOT_FOUND));
+    }
+
+    public List<StoreSelectResponse> getAllStores() {
+        return storeRepository.findAll().stream()
+                .map(StoreSelectResponse::from)
+                .toList();
     }
 }
