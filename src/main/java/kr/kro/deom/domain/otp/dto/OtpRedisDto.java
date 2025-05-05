@@ -15,5 +15,4 @@ public class OtpRedisDto {
     private Long deomId; // null 가능
     private Integer usedStampAmount;
     private Instant createdAt;
-
 }
