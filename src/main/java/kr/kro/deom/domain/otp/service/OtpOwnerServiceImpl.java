@@ -70,6 +70,17 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
             throw new OtpException(CommonErrorCode.OTP_INVALID);
         }
 
-        return OtpRedisDto.convertToOtpRedisDto(otpUsage);
+        return convertToOtpRedisDto(otpUsage);
+    }
+
+    private OtpRedisDto convertToOtpRedisDto(OtpUsage otpUsage) {
+        return OtpRedisDto.builder()
+                .userId(otpUsage.getUserId())
+                .storeId(otpUsage.getStoreId())
+                .type(otpUsage.getType())
+                .deomId(otpUsage.getDeomId())
+                .usedStampAmount(otpUsage.getUsedStampAmount())
+                .createdAt(otpUsage.getCreatedAt())
+                .build();
     }
 }
