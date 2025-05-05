@@ -43,7 +43,10 @@ public class StampExchange extends BaseTimeEntity {
         COMPLETED
     }
 
-    public void changeAmounts(Integer newSourceAmount, Integer newTargetAmount) {
+    public void updateExchangeTerms(Long newSourceStoreId, Long newTargetStoreId,
+                                    Integer newSourceAmount, Integer newTargetAmount) {
+        this.sourceStoreId = newSourceStoreId;
+        this.targetStoreId = newTargetStoreId;
         this.sourceAmount = newSourceAmount;
         this.targetAmount = newTargetAmount;
     }
