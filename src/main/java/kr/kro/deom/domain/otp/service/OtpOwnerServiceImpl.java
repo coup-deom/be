@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.otp.service;
 
+import java.time.Instant;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.otp.dto.OtpRedisDto;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
@@ -70,7 +71,20 @@ public class OtpOwnerServiceImpl implements OtpOwnerService {
             throw new OtpException(CommonErrorCode.OTP_INVALID);
         }
 
+        if (checkAndHandleOtpExpiration(otpUsage)) {
+            throw new OtpException(CommonErrorCode.OPT_EXPIRED);
+        }
+
         return convertToOtpRedisDto(otpUsage);
+    }
+
+    private boolean checkAndHandleOtpExpiration(OtpUsage otpUsage) {
+        if (otpUsage.getCreatedAt().plusSeconds(10800).isBefore(Instant.now())) {
+            otpUsage.setStatus(OtpStatus.EXPIRED);
+            otpRepository.save(otpUsage);
+            return true;
+        }
+        return false;
     }
 
     private OtpRedisDto convertToOtpRedisDto(OtpUsage otpUsage) {

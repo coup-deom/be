@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.otp.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,4 +30,6 @@ public interface OtpRepository extends CrudRepository<OtpUsage, Long> {
     List<OtpUsage> findByUserIdOrderByCreatedAtDesc(Long userId);
 
     List<OtpUsage> findByUserIdAndStatusInOrderByCreatedAtDesc(Long userId, List<OtpStatus> status);
+
+    List<OtpUsage> findByStatusAndCreatedAtBefore(OtpStatus status, Instant dateTime);
 }

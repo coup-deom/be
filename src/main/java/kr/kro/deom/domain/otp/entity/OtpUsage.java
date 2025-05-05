@@ -46,4 +46,10 @@ public class OtpUsage extends BaseTimeEntity {
         }
         this.status = status;
     }
+
+    public void expire() {
+        if (this.status == OtpStatus.PENDING) {
+            this.status = OtpStatus.EXPIRED;
+        }
+    }
 }
