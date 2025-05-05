@@ -252,5 +252,27 @@ public class OtpOwnerServiceImplTest {
 
             assertEquals(CommonErrorCode.OTP_UNAUTHORIZED, exception.getBaseResponseCode());
         }
+
+        @Test
+        @DisplayName("OTP가 만료되었을 때 예외가 발생해야 한다")
+        void throwExceptionWhenOtpExpired() {
+            // given
+            OtpUsage mockOtpUsage = mock(OtpUsage.class);
+            when(mockOtpUsage.getCreatedAt())
+                    .thenReturn(Instant.now().minusSeconds(10801)); // 3 hours 1 second ago
+
+            when(otpRepository.findByOtpAndStoreIdAndStatus(otpCode, storeId, OtpStatus.PENDING))
+                    .thenReturn(mockOtpUsage);
+
+            // when & then
+            OtpException exception =
+                    assertThrows(
+                            OtpException.class,
+                            () -> {
+                                otpOwnerService.verifyOtp(otpCode, storeId);
+                            });
+
+            assertEquals(CommonErrorCode.OPT_EXPIRED, exception.getBaseResponseCode());
+        }
     }
 }
