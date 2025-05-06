@@ -19,4 +19,8 @@ public class StampExchangeJoinProjection {
     public StampExchangeResponse toResponse() {
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
+
+    public StampExchange getExchange() {
+        return exchange;
+    }
 }

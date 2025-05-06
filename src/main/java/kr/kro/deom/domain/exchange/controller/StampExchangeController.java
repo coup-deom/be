@@ -30,8 +30,15 @@ public class StampExchangeController {
 
     @GetMapping("/my")
     @Operation(summary = "내가 등록한 가게만 목록", description = "내가 등록한 가게 거래 목록")
-    public ResponseEntity<List<StampExchangeResponse>> getMyStoreExchanges() {
-        return ResponseEntity.ok(stampExchangeService.getMyStoreExchanges());
+    public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getMyStoreExchanges() {
+        List<StampExchangeResponse> response = stampExchangeService.getMyStoreExchanges();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
+    @GetMapping("/tradable")
+    public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getTradableExchanges() {
+        List<StampExchangeResponse> response = stampExchangeService.getTradableExchanges();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
     @PostMapping

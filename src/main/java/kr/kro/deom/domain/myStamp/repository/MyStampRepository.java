@@ -33,4 +33,8 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
 
     @Query("SELECT ms.storeId FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount >= 0")
     List<Long> findStoreIdsByUserIdWithStamps(@Param("userId") Long userId);
+
+    // 가게별 스탬프 수량 확인용
+    @Query("SELECT ms FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount > 0")
+    List<MyStamp> findAllByUserIdWithStamps(@Param("userId") Long userId);
 }
