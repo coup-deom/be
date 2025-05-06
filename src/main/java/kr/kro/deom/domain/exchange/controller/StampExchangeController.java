@@ -36,6 +36,7 @@ public class StampExchangeController {
     }
 
     @GetMapping("/tradable")
+    @Operation(summary = "거래 가능한 가게만 목록", description = "내가 거래할 수 있는 가게 목록")
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getTradableExchanges() {
         List<StampExchangeResponse> response = stampExchangeService.getTradableExchanges();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
