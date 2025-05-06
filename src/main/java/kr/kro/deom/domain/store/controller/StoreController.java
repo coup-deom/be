@@ -2,6 +2,7 @@ package kr.kro.deom.domain.store.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
@@ -11,8 +12,6 @@ import kr.kro.deom.domain.store.service.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/stores")

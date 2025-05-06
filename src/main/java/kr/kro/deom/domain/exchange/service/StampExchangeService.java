@@ -1,5 +1,8 @@
 package kr.kro.deom.domain.exchange.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
@@ -15,9 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class StampExchangeService {
@@ -32,14 +32,15 @@ public class StampExchangeService {
 
         validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
 
-        StampExchange exchange = StampExchange.builder()
-                .creatorId(request.getCreatorId())
-                .sourceStoreId(request.getSourceStoreId())
-                .targetStoreId(request.getTargetStoreId())
-                .sourceAmount(request.getSourceAmount())
-                .targetAmount(request.getTargetAmount())
-                .status(StampExchange.Status.PENDING)
-                .build();
+        StampExchange exchange =
+                StampExchange.builder()
+                        .creatorId(request.getCreatorId())
+                        .sourceStoreId(request.getSourceStoreId())
+                        .targetStoreId(request.getTargetStoreId())
+                        .sourceAmount(request.getSourceAmount())
+                        .targetAmount(request.getTargetAmount())
+                        .status(StampExchange.Status.PENDING)
+                        .build();
 
         stampExchangeRepository.save(exchange);
 
@@ -50,18 +51,28 @@ public class StampExchangeService {
     }
 
     @Transactional
-    public StampExchangeResponse updateStampExchange(Long stampExchangeId, StampExchangeUpdateRequest request) {
+    public StampExchangeResponse updateStampExchange(
+            Long stampExchangeId, StampExchangeUpdateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
 
         validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
 
-        StampExchange exchange = stampExchangeRepository.findById(stampExchangeId)
-                .orElseThrow(() -> new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_NOT_FOUND));
+        StampExchange exchange =
+                stampExchangeRepository
+                        .findById(stampExchangeId)
+                        .orElseThrow(
+                                () ->
+                                        new StampExchangeException(
+                                                CommonErrorCode.STAMP_EXCHANGE_NOT_FOUND));
 
         Store sourceStore = storeService.getStore(request.getSourceStoreId());
         Store targetStore = storeService.getStore(request.getTargetStoreId());
 
-        exchange.updateExchangeTerms(request.getSourceStoreId(), request.getTargetStoreId(), request.getSourceAmount(), request.getSourceAmount());
+        exchange.updateExchangeTerms(
+                request.getSourceStoreId(),
+                request.getTargetStoreId(),
+                request.getSourceAmount(),
+                request.getSourceAmount());
 
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
@@ -87,5 +98,19 @@ public class StampExchangeService {
                 .collect(Collectors.toList());
     }
 
+    // 내가 스탬프를 보유한 가게만 조회하는 메서드
+    public List<StampExchangeResponse> getMyStoreExchanges() {
 
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        List<Long> myStoreIds = myStampService.getMyStoreIds(userId);
+
+        if (myStoreIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return stampExchangeRepository.findBySourceStoreIdInWithStoreInfo(myStoreIds).stream()
+                .map(StampExchangeJoinProjection::toResponse)
+                .collect(Collectors.toList());
+    }
 }

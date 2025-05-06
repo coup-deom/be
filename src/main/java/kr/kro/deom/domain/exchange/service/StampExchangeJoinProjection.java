@@ -9,7 +9,8 @@ public class StampExchangeJoinProjection {
     private final Store sourceStore;
     private final Store targetStore;
 
-    public StampExchangeJoinProjection(StampExchange exchange, Store sourceStore, Store targetStore) {
+    public StampExchangeJoinProjection(
+            StampExchange exchange, Store sourceStore, Store targetStore) {
         this.exchange = exchange;
         this.sourceStore = sourceStore;
         this.targetStore = targetStore;

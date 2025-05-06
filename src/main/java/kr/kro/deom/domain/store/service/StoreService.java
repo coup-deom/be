@@ -2,6 +2,7 @@ package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
@@ -14,8 +15,6 @@ import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -80,8 +79,6 @@ public class StoreService {
     }
 
     public List<StoreSelectResponse> getAllStores() {
-        return storeRepository.findAll().stream()
-                .map(StoreSelectResponse::from)
-                .toList();
+        return storeRepository.findAll().stream().map(StoreSelectResponse::from).toList();
     }
 }

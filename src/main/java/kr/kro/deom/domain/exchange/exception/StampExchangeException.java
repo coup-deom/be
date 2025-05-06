@@ -8,4 +8,3 @@ public class StampExchangeException extends CustomException {
         super(code);
     }
 }
-
