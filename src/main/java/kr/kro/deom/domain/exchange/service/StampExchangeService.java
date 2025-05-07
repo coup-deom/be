@@ -143,8 +143,7 @@ public class StampExchangeService {
                             Integer userStampAmount =
                                     storeStampAmountMap.getOrDefault(
                                             exchange.getSourceStoreId(), 0);
-                            return userStampAmount
-                                    >= exchange.getSourceAmount();
+                            return userStampAmount >= exchange.getSourceAmount();
                         })
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());
