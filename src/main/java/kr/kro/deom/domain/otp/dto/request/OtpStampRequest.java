@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import kr.kro.deom.domain.otp.entity.OtpType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
-@Setter
 @NoArgsConstructor
 public class OtpStampRequest {
     @NotNull(message = "사용자 ID는 필수입니다")

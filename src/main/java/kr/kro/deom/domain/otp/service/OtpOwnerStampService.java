@@ -49,7 +49,6 @@ public class OtpOwnerStampService {
 
         validateAmount(amount);
         otpOwnerService.approveOtp(otpCode, customerId, storeId);
-        // TODO: 스탬프 적립 정보 레포에 저장
         increaseStamp(customerId, storeId, amount);
     }
 
@@ -62,12 +61,12 @@ public class OtpOwnerStampService {
         Integer amount = otpStampApproveRequest.getAmount();
 
         otpOwnerService.rejectOtp(otpCode, customerId, storeId);
-        // TODO: 스탬프 적립 정보 레포에 저장
-
     }
 
+    // TODO: 없는 경우 어떻게 할지 고민해야함.
     private int getCustomerStampAmount(Long userId, Long storeId) {
-        return myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
+        Integer stampAmount = myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
+        return stampAmount != null ? stampAmount : 0;
     }
 
     private OwnerStampInfoResponse createStampInfoResponse(
