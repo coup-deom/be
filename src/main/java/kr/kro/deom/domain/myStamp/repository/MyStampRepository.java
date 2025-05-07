@@ -1,6 +1,7 @@
 package kr.kro.deom.domain.myStamp.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -29,4 +30,11 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
+
+    @Query("SELECT ms.storeId FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount >= 0")
+    List<Long> findStoreIdsByUserIdWithStamps(@Param("userId") Long userId);
+
+    // 가게별 스탬프 수량 확인용
+    @Query("SELECT ms FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount > 0")
+    List<MyStamp> findAllByUserIdWithStamps(@Param("userId") Long userId);
 }

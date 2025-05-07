@@ -52,6 +52,6 @@ public class UserController {
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
 
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, "role 설정 완료"));
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, newAccessToken));
     }
 }

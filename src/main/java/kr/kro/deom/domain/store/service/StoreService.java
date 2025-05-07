@@ -2,9 +2,13 @@ package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.common.utils.SecurityUtils;
+import kr.kro.deom.domain.myStamp.service.MyStampService;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
+import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
 import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.entity.StoreStatus;
 import kr.kro.deom.domain.store.exception.StoreException;
@@ -16,12 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Tag(name = "store API", description = "")
 public class StoreService {
 
     private final StoreRepository storeRepository;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final MyStampService myStampService;
 
     @Transactional
     public StoreRegisterResponse registerStore(StoreRegisterRequest request) {
@@ -74,5 +78,17 @@ public class StoreService {
         return storeRepository
                 .findById(storeId)
                 .orElseThrow(() -> new StoreException(CommonErrorCode.STORE_NOT_FOUND));
+    }
+
+    public List<StoreSelectResponse> getAllStores() {
+        return storeRepository.findAll().stream().map(StoreSelectResponse::from).toList();
+    }
+
+    public List<StoreSelectResponse> getMyStampStores() {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        List<Long> myStoreIds = myStampService.getMyStoreIds(userId);
+
+        return storeRepository.findByIdIn(myStoreIds).stream().map(StoreSelectResponse::from).toList();
     }
 }
