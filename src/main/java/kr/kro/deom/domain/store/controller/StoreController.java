@@ -1,6 +1,7 @@
 package kr.kro.deom.domain.store.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/stores")
 @RequiredArgsConstructor
+@Tag(name = "Store", description = "가게 API")
 public class StoreController {
 
     private final StoreService storeService;
@@ -32,6 +34,13 @@ public class StoreController {
     @Operation(summary = "모든 가게 목록 조회", description = "등록된 전체 가게 목록을 조회합니다(거래소 가게 선택에 사용)")
     public ResponseEntity<ApiResponse<List<StoreSelectResponse>>> getAllStores() {
         List<StoreSelectResponse> response = storeService.getAllStores();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
+    @GetMapping("/my-stamps")
+    @Operation(summary = "스탬프 보유 목록 조회", description = "사용자가 스탬프를 보유한 가게를 조회합니다(거래소 가게 선택에 사용)")
+    public ResponseEntity<ApiResponse<List<StoreSelectResponse>>> getMyStampStores() {
+        List<StoreSelectResponse> response = storeService.getMyStampStores();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }
