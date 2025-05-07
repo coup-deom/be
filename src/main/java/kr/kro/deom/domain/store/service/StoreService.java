@@ -1,7 +1,6 @@
 package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
@@ -89,6 +88,8 @@ public class StoreService {
 
         List<Long> myStoreIds = myStampService.getMyStoreIds(userId);
 
-        return storeRepository.findByIdIn(myStoreIds).stream().map(StoreSelectResponse::from).toList();
+        return storeRepository.findByIdIn(myStoreIds).stream()
+                .map(StoreSelectResponse::from)
+                .toList();
     }
 }
