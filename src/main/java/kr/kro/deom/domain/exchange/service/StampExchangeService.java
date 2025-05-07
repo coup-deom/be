@@ -102,7 +102,6 @@ public class StampExchangeService {
                 .collect(Collectors.toList());
     }
 
-    // 내가 스탬프를 보유한 가게만 조회하는 메서드
     public List<StampExchangeResponse> getMyStoreExchanges() {
 
         Long userId = SecurityUtils.getCurrentUserId();
@@ -118,31 +117,25 @@ public class StampExchangeService {
                 .collect(Collectors.toList());
     }
 
-    // 거래가능한 가게만 조회하는 메서드 (새로 추가)
     public List<StampExchangeResponse> getTradableExchanges() {
 
         Long userId = SecurityUtils.getCurrentUserId();
-        // 사용자의 모든 스탬프 정보 조회 (가게별 스탬프 수량)
         List<MyStamp> userStamps = myStampRepository.findAllByUserIdWithStamps(userId);
 
         if (userStamps.isEmpty()) {
             return Collections.emptyList();
         }
 
-        // 사용자가 스탬프를 보유한 가게 ID 목록
         List<Long> myStoreIds =
                 userStamps.stream().map(MyStamp::getStoreId).collect(Collectors.toList());
 
-        // 가게별 보유 스탬프 수량 맵 생성
         Map<Long, Integer> storeStampAmountMap =
                 userStamps.stream()
                         .collect(Collectors.toMap(MyStamp::getStoreId, MyStamp::getStampAmount));
 
-        // 사용자가 스탬프를 보유한 가게 관련 교환 조회
         List<StampExchangeJoinProjection> allExchanges =
                 stampExchangeRepository.findBySourceStoreIdInWithStoreInfo(myStoreIds);
 
-        // 거래 가능한 교환만 필터링 (보유 스탬프 수량 >= 필요 스탬프 수량)
         return allExchanges.stream()
                 .filter(
                         projection -> {
@@ -151,7 +144,7 @@ public class StampExchangeService {
                                     storeStampAmountMap.getOrDefault(
                                             exchange.getSourceStoreId(), 0);
                             return userStampAmount
-                                    >= exchange.getSourceAmount(); // 보유 스탬프가 필요 스탬프보다 많거나 같은 경우만
+                                    >= exchange.getSourceAmount();
                         })
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());
