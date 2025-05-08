@@ -30,6 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         if (oAuth2User.getRole() == Role.PENDING) {
             String targetUrl = "http://localhost:5173/user/role?userId=" + oAuth2User.getId();
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
+            return;
         }
 
         String accessToken = jwtUtil.createAccessToken(oAuth2User.getId(), oAuth2User.getRole());
