@@ -69,7 +69,8 @@ jobs:
                   dialect: org.hibernate.dialect.PostgreSQLDialect
             data:
               redis:
-                url: redis:6379
+                host: redis
+                port: 6379
                 username: default
                 password:
                 timeout: 6000
@@ -187,6 +188,7 @@ jobs:
           WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
           # Redis 환경 변수
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           # JWT 환경 변수
@@ -241,6 +243,7 @@ jobs:
           WEB_LOG_LEVEL: ${{ secrets.WEB_LOG_LEVEL || 'INFO' }}
           # Redis 환경 변수
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           # JWT 환경 변수
@@ -287,6 +290,7 @@ jobs:
           WEB_LOG_LEVEL=${WEB_LOG_LEVEL:-INFO}
 
           REDIS_URL=${REDIS_URL}
+          REDIS_PORT: ${REDIS_PORT}
           REDIS_USERNAME=${REDIS_USERNAME}
           REDIS_PASSWORD=${REDIS_PASSWORD}
 

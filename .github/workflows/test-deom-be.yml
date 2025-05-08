@@ -60,7 +60,8 @@ jobs:
                   dialect: org.hibernate.dialect.PostgreSQLDialect
             data:
               redis:
-                url: redis:6379
+                host: redis
+                port: 6379
                 username: default
                 password:
                 timeout: 6000

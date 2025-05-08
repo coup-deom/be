@@ -16,9 +16,10 @@ spring:
   data:
     redis:
       client-type: lettuce
+      host: ${REDIS_URL}
+      port: ${REDIS_PORT}
       username: ${REDIS_USERNAME}
       password: ${REDIS_PASSWORD}
-      url: ${REDIS_URL}
       timeout: 6000
       lettuce:
         pool:
