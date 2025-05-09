@@ -41,26 +41,34 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(
-            long userId, Role role, String nickname, boolean storeApproved) {
-        JwtBuilder builder =
-                Jwts.builder()
-                        .subject(String.valueOf(userId))
-                        .claim("role", role.name())
-                        .claim("nickname", nickname)
-                        .issuedAt(new Date())
-                        .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                        .signWith(key);
+    public String createAccessToken(Long userId, Role role) {
+        return Jwts.builder()
+                .subject(String.valueOf(userId))
+                .claim("role", role.name())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .signWith(key)
+                .compact();
+    }
+
+    public String createIdToken(Long userId, Role role, String nickname, Boolean storeApproved, Long storeId) {
+        JwtBuilder builder = Jwts.builder()
+                .claim("userId", userId)
+                .claim("role", role.name())
+                .claim("nickname", nickname)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration)) // 짧게 유지
+                .signWith(key);
 
         if (role == Role.OWNER) {
             builder.claim("storeApproved", storeApproved);
+            builder.claim("storeId", storeId);
         }
 
         return builder.compact();
     }
 
-    public String createRefreshToken(long userId, Role role) {
-
+    public String createRefreshToken(Long userId, Role role) {
         String refreshToken =
                 Jwts.builder()
                         .subject(String.valueOf(userId))

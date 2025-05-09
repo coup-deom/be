@@ -7,8 +7,10 @@ import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
+import kr.kro.deom.domain.auth.dto.TokenResponse;
 import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
+import kr.kro.deom.domain.user.entity.Role;
 import kr.kro.deom.domain.user.entity.User;
 import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -43,16 +45,11 @@ public class UserController {
 
     @PostMapping("/role")
     @Operation(summary = "역할 설정", description = "유저가 자신의 역할을 설정한다.")
-    public ResponseEntity<ApiResponse<String>> setRole(
+    public ResponseEntity<ApiResponse<TokenResponse>> setRole(
             @RequestBody RoleRequest request, HttpServletResponse response) {
-        User user = userService.setUserRole(request.getUserId(), request.getRole());
 
-        String newAccessToken =
-                jwtUtil.createAccessToken(user.getId(), user.getRole(), user.getNickname(), false);
-        String newRefreshToken = jwtUtil.createRefreshToken(user.getId(), user.getRole());
+        TokenResponse tokens = userService.setUserRole(request, response);
 
-        response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
-
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, newAccessToken));
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, tokens));
     }
 }
