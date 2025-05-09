@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
+import kr.kro.deom.domain.auth.dto.TokenResponse;
 import kr.kro.deom.domain.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/reissue")
-    public ResponseEntity<ApiResponse<String>> reissueToken(
+    public ResponseEntity<ApiResponse<TokenResponse>> reissueToken(
             HttpServletRequest request, HttpServletResponse response) {
-        String accessToken = authService.refreshAccessToken(request, response);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, accessToken));
+        TokenResponse tokens = authService.refreshAccessToken(request, response);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, tokens));
     }
 
     @PostMapping("/logout")

@@ -1,5 +1,6 @@
 package kr.kro.deom.common.security.jwt;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -40,8 +41,7 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(long userId, Role role) {
-
+    public String createAccessToken(Long userId, Role role) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("role", role.name())
@@ -51,8 +51,29 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String createRefreshToken(long userId, Role role) {
+    public String createIdToken(
+            Long userId, Role role, String nickname, Boolean storeApproved, Long storeId) {
+        JwtBuilder builder =
+                Jwts.builder()
+                        .claim("userId", userId)
+                        .claim("role", role.name())
+                        .claim("nickname", nickname)
+                        .issuedAt(new Date())
+                        .expiration(
+                                new Date(
+                                        System.currentTimeMillis()
+                                                + accessTokenExpiration)) // 짧게 유지
+                        .signWith(key);
 
+        if (role == Role.OWNER) {
+            builder.claim("storeApproved", storeApproved);
+            builder.claim("storeId", storeId);
+        }
+
+        return builder.compact();
+    }
+
+    public String createRefreshToken(Long userId, Role role) {
         String refreshToken =
                 Jwts.builder()
                         .subject(String.valueOf(userId))
@@ -86,6 +107,15 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("role", String.class);
+    }
+
+    public String getNickname(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("nickname", String.class);
     }
 
     public boolean validateToken(String token) {
