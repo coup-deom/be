@@ -55,7 +55,12 @@ public enum CommonErrorCode implements BaseResponseCode {
     INVALID_REQUIRED_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "DEOM_001", "스탬프 개수는 0보다 커야 합니다."),
     ALREADY_REGISTERED_DEOM(HttpStatus.CONFLICT, "DEOM_002", "이미 등록된 덤 정책이 있습니다."),
     INVALID_DEOM_POLICY(HttpStatus.NOT_FOUND, "DEOM_003", "존재하지 않는 덤 정책입니다."),
-    INVALID_DEOM_NAME(HttpStatus.BAD_REQUEST, "DEON_004", "덤 이름이 존재해야 합니다.");
+    INVALID_DEOM_NAME(HttpStatus.BAD_REQUEST, "DEON_004", "덤 이름이 존재해야 합니다."),
+
+    // file
+    EMPTY_FILE_NAME(HttpStatus.BAD_REQUEST, "FILE_001", "파일 이름이 비었습니다"),
+    INVALID_FILE_EXTENSION(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "FILE_002", "알맞지 않은 파일 형식입니다"),
+    FILE_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "FILE_003", "파일 업로드를 실패했습니다");
 
     private final HttpStatus status;
     private final String code;
