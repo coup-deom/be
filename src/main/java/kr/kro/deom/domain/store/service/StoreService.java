@@ -92,4 +92,11 @@ public class StoreService {
                 .map(StoreSelectResponse::from)
                 .toList();
     }
+
+    public boolean isStoreApproved(Long ownerId) {
+        return storeRepository
+                .findByOwnerId(ownerId)
+                .map(store -> store.getStatus() == StoreStatus.APPROVED)
+                .orElse(false);
+    }
 }
