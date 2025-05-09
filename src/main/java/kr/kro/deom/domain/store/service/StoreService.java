@@ -8,6 +8,7 @@ import kr.kro.deom.domain.myStamp.service.MyStampService;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
 import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
+import kr.kro.deom.domain.store.dto.response.StoreStatusResponse;
 import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.entity.StoreStatus;
 import kr.kro.deom.domain.store.exception.StoreException;
@@ -98,5 +99,15 @@ public class StoreService {
                 .findByOwnerId(ownerId)
                 .map(store -> store.getStatus() == StoreStatus.APPROVED)
                 .orElse(false);
+    }
+
+    public Long getStoreIdByOwnerId(Long ownerId) {
+        return storeRepository.findByOwnerId(ownerId)
+                .map(Store::getId)
+                .orElse(null);
+    }
+
+    public StoreStatusResponse getStoreStatus(Long storeId) {
+        return new StoreStatusResponse(getStore(storeId).getStatus().name());
     }
 }
