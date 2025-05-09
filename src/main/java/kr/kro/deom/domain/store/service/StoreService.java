@@ -107,7 +107,9 @@ public class StoreService {
                 .orElse(null);
     }
 
-    public StoreStatusResponse getStoreStatus(Long storeId) {
-        return new StoreStatusResponse(getStore(storeId).getStatus().name());
+    public StoreStatusResponse getStoreStatus() {
+        Long ownerId = SecurityUtils.getCurrentUserId();
+        StoreStatus status = storeRepository.findByOwnerId(ownerId).map(Store::getStatus).orElse(null);
+        return new StoreStatusResponse(status);
     }
 }

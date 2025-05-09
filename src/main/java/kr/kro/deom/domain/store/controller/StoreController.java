@@ -9,7 +9,6 @@ import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
 import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
-import kr.kro.deom.domain.store.dto.response.StoreStatusRequest;
 import kr.kro.deom.domain.store.dto.response.StoreStatusResponse;
 import kr.kro.deom.domain.store.service.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -46,10 +45,10 @@ public class StoreController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @GetMapping("/{storeId}/status")
+    @GetMapping("/status")
     @Operation(summary = "가게 입점 상태", description = "가게의 입점 상태를 조회합니다.")
-    public ResponseEntity<ApiResponse<StoreStatusResponse>> getStoreStatus(@RequestBody StoreStatusRequest request) {
-        StoreStatusResponse response = storeService.getStoreStatus(request.getStoreId());
+    public ResponseEntity<ApiResponse<StoreStatusResponse>> getStoreStatus() {
+        StoreStatusResponse response = storeService.getStoreStatus();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
