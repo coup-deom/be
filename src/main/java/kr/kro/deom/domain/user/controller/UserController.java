@@ -42,12 +42,13 @@ public class UserController {
     }
 
     @PostMapping("/role")
-    @Operation(summary = "역할 변경", description = "유저가 자신의 역할을 설정한다.")
+    @Operation(summary = "역할 설정", description = "유저가 자신의 역할을 설정한다.")
     public ResponseEntity<ApiResponse<String>> setRole(
             @RequestBody RoleRequest request, HttpServletResponse response) {
         User user = userService.setUserRole(request.getUserId(), request.getRole());
 
-        String newAccessToken = jwtUtil.createAccessToken(user.getId(), user.getRole());
+        String newAccessToken =
+                jwtUtil.createAccessToken(user.getId(), user.getRole(), user.getNickname(), false);
         String newRefreshToken = jwtUtil.createRefreshToken(user.getId(), user.getRole());
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));

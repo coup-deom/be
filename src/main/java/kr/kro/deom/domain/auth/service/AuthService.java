@@ -6,7 +6,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.domain.auth.exception.InvalidRefreshTokenException;
 import kr.kro.deom.domain.auth.exception.RefreshTokenExpiredException;
+import kr.kro.deom.domain.store.service.StoreService;
 import kr.kro.deom.domain.user.entity.Role;
+import kr.kro.deom.domain.user.entity.User;
+import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class AuthService {
 
     private final JwtUtil jwtUtil;
+    private final StoreService storeService;
+    private final UserService userService;
 
     public String refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = null;
@@ -32,13 +37,22 @@ public class AuthService {
         }
 
         Long userId = jwtUtil.getUserId(refreshToken);
-        Role role = Role.valueOf(jwtUtil.getRole(refreshToken));
+
+        User user = userService.getUser(userId);
+
+        Role role = user.getRole();
+        String nickname = user.getNickname();
+
+        boolean storeApproved = false;
+        if (role == Role.OWNER) {
+            storeApproved = storeService.isStoreApproved(userId);
+        }
 
         if (refreshToken != null && !refreshToken.equals(jwtUtil.getRefreshToken(userId))) {
             throw new InvalidRefreshTokenException();
         }
 
-        String newAccessToken = jwtUtil.createAccessToken(userId, role);
+        String newAccessToken = jwtUtil.createAccessToken(userId, role, nickname, storeApproved);
         String newRefreshToken = jwtUtil.createRefreshToken(userId, role);
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));

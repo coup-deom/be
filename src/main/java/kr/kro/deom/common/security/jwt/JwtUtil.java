@@ -1,5 +1,6 @@
 package kr.kro.deom.common.security.jwt;
 
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -40,15 +41,22 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(long userId, Role role) {
+    public String createAccessToken(
+            long userId, Role role, String nickname, boolean storeApproved) {
+        JwtBuilder builder =
+                Jwts.builder()
+                        .subject(String.valueOf(userId))
+                        .claim("role", role.name())
+                        .claim("nickname", nickname)
+                        .issuedAt(new Date())
+                        .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                        .signWith(key);
 
-        return Jwts.builder()
-                .subject(String.valueOf(userId))
-                .claim("role", role.name())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
-                .signWith(key)
-                .compact();
+        if (role == Role.OWNER) {
+            builder.claim("storeApproved", storeApproved);
+        }
+
+        return builder.compact();
     }
 
     public String createRefreshToken(long userId, Role role) {
