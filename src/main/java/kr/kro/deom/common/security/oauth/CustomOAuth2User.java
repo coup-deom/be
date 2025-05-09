@@ -16,6 +16,7 @@ public class CustomOAuth2User implements OAuth2User {
 
     private final Long id;
     private final Role role;
+    private final String nickname;
     private final Map<String, Object> attributes;
 
     @Override

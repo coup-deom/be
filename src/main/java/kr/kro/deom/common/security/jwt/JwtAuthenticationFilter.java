@@ -27,8 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && jwtUtil.validateToken(token)) {
             Long id = jwtUtil.getUserId(token);
             Role role = Role.valueOf(jwtUtil.getRole(token));
+            String nickname = jwtUtil.getNickname(token);
 
-            CustomOAuth2User oAuth2User = new CustomOAuth2User(id, role, null);
+            CustomOAuth2User oAuth2User = new CustomOAuth2User(id, role, nickname, null);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
