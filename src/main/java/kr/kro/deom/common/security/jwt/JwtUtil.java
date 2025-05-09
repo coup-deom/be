@@ -51,14 +51,19 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String createIdToken(Long userId, Role role, String nickname, Boolean storeApproved, Long storeId) {
-        JwtBuilder builder = Jwts.builder()
-                .claim("userId", userId)
-                .claim("role", role.name())
-                .claim("nickname", nickname)
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration)) // 짧게 유지
-                .signWith(key);
+    public String createIdToken(
+            Long userId, Role role, String nickname, Boolean storeApproved, Long storeId) {
+        JwtBuilder builder =
+                Jwts.builder()
+                        .claim("userId", userId)
+                        .claim("role", role.name())
+                        .claim("nickname", nickname)
+                        .issuedAt(new Date())
+                        .expiration(
+                                new Date(
+                                        System.currentTimeMillis()
+                                                + accessTokenExpiration)) // 짧게 유지
+                        .signWith(key);
 
         if (role == Role.OWNER) {
             builder.claim("storeApproved", storeApproved);

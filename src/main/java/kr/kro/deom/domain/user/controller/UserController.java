@@ -10,8 +10,6 @@ import kr.kro.deom.common.security.oauth.CustomOAuth2User;
 import kr.kro.deom.domain.auth.dto.TokenResponse;
 import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
-import kr.kro.deom.domain.user.entity.Role;
-import kr.kro.deom.domain.user.entity.User;
 import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

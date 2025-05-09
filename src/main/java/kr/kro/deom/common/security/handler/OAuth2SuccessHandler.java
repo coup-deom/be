@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
-import kr.kro.deom.domain.store.entity.Store;
-import kr.kro.deom.domain.store.entity.StoreStatus;
 import kr.kro.deom.domain.store.service.StoreService;
 import kr.kro.deom.domain.user.entity.Role;
 import kr.kro.deom.domain.user.entity.User;
@@ -38,11 +36,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Role role = oAuth2User.getRole();
 
         if (oAuth2User.getRole() == Role.PENDING) {
-            String targetUrl = UriComponentsBuilder
-                    .fromUriString("http://localhost:5173/user/role")
-                    .queryParam("userId", userId)
-                    .build()
-                    .toUriString();
+            String targetUrl =
+                    UriComponentsBuilder.fromUriString("http://localhost:5173/user/role")
+                            .queryParam("userId", userId)
+                            .build()
+                            .toUriString();
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
             return;
         }
@@ -64,12 +62,12 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(refreshToken));
 
-        String targetUrl = UriComponentsBuilder
-                .fromUriString("http://localhost:5173/signin/callback")
-                .queryParam("accessToken", accessToken)
-                .queryParam("idToken", idToken)
-                .build()
-                .toUriString();
+        String targetUrl =
+                UriComponentsBuilder.fromUriString("http://localhost:5173/signin/callback")
+                        .queryParam("accessToken", accessToken)
+                        .queryParam("idToken", idToken)
+                        .build()
+                        .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }

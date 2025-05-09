@@ -51,6 +51,4 @@ public class StoreController {
         StoreStatusResponse response = storeService.getStoreStatus();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
-
-
 }

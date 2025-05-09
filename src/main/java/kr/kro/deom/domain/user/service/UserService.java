@@ -65,15 +65,17 @@ public class UserService {
 
     @Transactional
     public TokenResponse setUserRole(RoleRequest roleRequest, HttpServletResponse response) {
-        User user = userRepository.findById(roleRequest.getUserId()).orElseThrow(UserNotFoundException::new);
+        User user =
+                userRepository
+                        .findById(roleRequest.getUserId())
+                        .orElseThrow(UserNotFoundException::new);
         user.updateRole(roleRequest.getRole());
 
         Long userId = user.getId();
         Role role = user.getRole();
         String nickname = user.getNickname();
 
-        String newAccessToken =
-                jwtUtil.createAccessToken(userId, role);
+        String newAccessToken = jwtUtil.createAccessToken(userId, role);
         String newIdToken = jwtUtil.createIdToken(userId, role, nickname, false, null);
         String newRefreshToken = jwtUtil.createRefreshToken(userId, role);
 

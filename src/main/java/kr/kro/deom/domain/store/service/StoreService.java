@@ -102,14 +102,13 @@ public class StoreService {
     }
 
     public Long getStoreIdByOwnerId(Long ownerId) {
-        return storeRepository.findByOwnerId(ownerId)
-                .map(Store::getId)
-                .orElse(null);
+        return storeRepository.findByOwnerId(ownerId).map(Store::getId).orElse(null);
     }
 
     public StoreStatusResponse getStoreStatus() {
         Long ownerId = SecurityUtils.getCurrentUserId();
-        StoreStatus status = storeRepository.findByOwnerId(ownerId).map(Store::getStatus).orElse(null);
+        StoreStatus status =
+                storeRepository.findByOwnerId(ownerId).map(Store::getStatus).orElse(null);
         return new StoreStatusResponse(status);
     }
 }
