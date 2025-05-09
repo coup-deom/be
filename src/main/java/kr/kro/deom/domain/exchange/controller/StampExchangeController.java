@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
+import kr.kro.deom.domain.exchange.dto.StampExchangeExecutionResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
 import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
@@ -65,5 +66,13 @@ public class StampExchangeController {
             @PathVariable Long stampExchangeId) {
         stampExchangeService.deleteStampExchange(stampExchangeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
+    }
+
+    @PostMapping("/{exchangeId}/execute")
+    @Operation(summary = "스탬프 거래 실행", description = "스탬프가 교환됩니다.")
+    public ResponseEntity<ApiResponse<StampExchangeExecutionResponse>> executeExchange(
+            @PathVariable Long exchangeId) {
+        StampExchangeExecutionResponse response = stampExchangeService.executeExchange(exchangeId);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }

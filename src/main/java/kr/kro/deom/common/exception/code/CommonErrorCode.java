@@ -43,6 +43,13 @@ public enum CommonErrorCode implements BaseResponseCode {
     // stamp exchange
     STAMP_EXCHANGE_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_EXCHANGE_001", "존재하지 않는 스탬프 거래입니다."),
     INSUFFICIENT_STAMP_AMOUNT(HttpStatus.BAD_REQUEST, "STAMP_EXCHANGE_002", "가진 스탬프 수량을 초과합니다."),
+    STAMP_EXCHANGE_ALREADY_COMPLETED(
+            HttpStatus.BAD_REQUEST, "STAMP_EXCHANGE_003", "이미 완료된 스탬프 교환입니다."),
+    STAMP_EXCHANGE_EXECUTION_FAILED(
+            HttpStatus.INTERNAL_SERVER_ERROR, "STAMP_EXCHANGE_004", "스탬프 교환 실행 중 오류가 발생했습니다."),
+    CONCURRENT_STAMP_EXCHANGE_DETECTED(
+            HttpStatus.CONFLICT, "STAMP_EXCHANGE_005", "다른 사용자가 이미 이 교환을 처리했습니다."),
+    MY_STAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_EXCHANGE_006", "해당 가게에 대해 보유한 스탬프가 없습니다."),
 
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),

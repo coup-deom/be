@@ -4,6 +4,7 @@ import java.util.List;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
 import kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface StampExchangeRepository extends JpaRepository<StampExchange, Long> {
@@ -24,4 +25,10 @@ public interface StampExchangeRepository extends JpaRepository<StampExchange, Lo
                     + "WHERE e.sourceStoreId IN :storeIds "
                     + "ORDER BY e.updatedAt DESC")
     List<StampExchangeJoinProjection> findBySourceStoreIdInWithStoreInfo(List<Long> storeIds);
+
+    @Modifying
+    @Query(
+            "UPDATE StampExchange e SET e.status = 'COMPLETED', e.responderId = :userId "
+                    + "WHERE e.id = :id AND e.status = 'PENDING'")
+    int updateStatusIfPending(Long id, Long userId);
 }
