@@ -1,9 +1,8 @@
 package kr.kro.deom.domain.user.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.OAuth2UserInfo;
-import kr.kro.deom.domain.auth.dto.TokenResponse;
+import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
 import kr.kro.deom.domain.user.entity.Role;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
 
     public User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
@@ -64,24 +62,13 @@ public class UserService {
     }
 
     @Transactional
-    public TokenResponse setUserRole(RoleRequest roleRequest, HttpServletResponse response) {
-        User user =
-                userRepository
-                        .findById(roleRequest.getUserId())
-                        .orElseThrow(UserNotFoundException::new);
+    public UserResponse setUserRole(RoleRequest roleRequest, HttpServletResponse response) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         user.updateRole(roleRequest.getRole());
 
-        Long userId = user.getId();
-        Role role = user.getRole();
-        String nickname = user.getNickname();
-
-        String newAccessToken = jwtUtil.createAccessToken(userId, role);
-        String newIdToken = jwtUtil.createIdToken(userId, role, nickname, false, null);
-        String newRefreshToken = jwtUtil.createRefreshToken(userId, role);
-
-        response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
-
-        return new TokenResponse(newAccessToken, newIdToken);
+        return UserResponse.from(user);
     }
 
     public void validateUserByUserId(Long userId) {

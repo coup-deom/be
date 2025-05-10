@@ -41,10 +41,9 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(Long userId, Role role) {
+    public String createAccessToken(Long userId) {
         return Jwts.builder()
                 .subject(String.valueOf(userId))
-                .claim("role", role.name())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key)
@@ -59,10 +58,7 @@ public class JwtUtil {
                         .claim("role", role.name())
                         .claim("nickname", nickname)
                         .issuedAt(new Date())
-                        .expiration(
-                                new Date(
-                                        System.currentTimeMillis()
-                                                + accessTokenExpiration)) // 짧게 유지
+                        .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                         .signWith(key);
 
         if (role == Role.OWNER) {
@@ -73,11 +69,10 @@ public class JwtUtil {
         return builder.compact();
     }
 
-    public String createRefreshToken(Long userId, Role role) {
+    public String createRefreshToken(Long userId) {
         String refreshToken =
                 Jwts.builder()
                         .subject(String.valueOf(userId))
-                        .claim("role", role.name())
                         .issuedAt(new Date())
                         .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
                         .signWith(key)
@@ -107,15 +102,6 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload()
                 .get("role", String.class);
-    }
-
-    public String getNickname(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .get("nickname", String.class);
     }
 
     public boolean validateToken(String token) {
