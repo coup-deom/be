@@ -7,7 +7,6 @@ import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
-import kr.kro.deom.domain.auth.dto.TokenResponse;
 import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
 import kr.kro.deom.domain.user.service.UserService;
@@ -43,11 +42,11 @@ public class UserController {
 
     @PostMapping("/role")
     @Operation(summary = "역할 설정", description = "유저가 자신의 역할을 설정한다.")
-    public ResponseEntity<ApiResponse<TokenResponse>> setRole(
-            @RequestBody RoleRequest request, HttpServletResponse response) {
+    public ResponseEntity<ApiResponse<UserResponse>> setRole(
+            @RequestBody RoleRequest request, HttpServletResponse httpServletResponse) {
 
-        TokenResponse tokens = userService.setUserRole(request, response);
+        UserResponse response = userService.setUserRole(request, httpServletResponse);
 
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, tokens));
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }
