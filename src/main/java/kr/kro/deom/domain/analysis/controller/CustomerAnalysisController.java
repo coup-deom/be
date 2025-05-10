@@ -5,8 +5,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
+import kr.kro.deom.domain.analysis.dto.UserStampRankDto;
 import kr.kro.deom.domain.analysis.service.CustomerAnalysisService;
-import kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +24,9 @@ public class CustomerAnalysisController {
 
     @Operation(summary = "누적 스탬프 고객 순위 조회", description = "누적 적립 스탬프가 많은 순서로 고객을 조회합니다.")
     @GetMapping("/customer")
-    public ResponseEntity<ApiResponse<List<UserAccumulatedStampsDto>>> getCustomerRanking(
+    public ResponseEntity<ApiResponse<List<UserStampRankDto>>> getCustomerRanking(
             @RequestParam Long storeId) {
-        List<UserAccumulatedStampsDto> response =
+        List<UserStampRankDto> response =
                 customerAnalysisService.getCustomerRankingByAccumulatedStamp(storeId);
 
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
