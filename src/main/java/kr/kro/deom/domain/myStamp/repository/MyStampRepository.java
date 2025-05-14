@@ -53,7 +53,8 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             value =
                     "INSERT INTO my_stamp (user_id, store_id, stamp_amount, created_at, updated_at) "
                             + "VALUES (:userId, :storeId, :amount, NOW(), NOW()) "
-                            + "ON DUPLICATE KEY UPDATE stamp_amount = stamp_amount + :amount, updated_at = NOW()",
+                            + "ON CONFLICT (user_id, store_id) DO UPDATE "
+                            + "SET stamp_amount = my_stamp.stamp_amount + :amount, updated_at = NOW()",
             nativeQuery = true)
     int createOrIncrementStamp(
             @Param("userId") Long userId,
