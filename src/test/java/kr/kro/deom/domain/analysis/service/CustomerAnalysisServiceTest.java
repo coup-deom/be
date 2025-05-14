@@ -9,6 +9,8 @@ import java.util.List;
 import kr.kro.deom.domain.analysis.dto.UserStampRankDto;
 import kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto;
 import kr.kro.deom.domain.myStamp.service.MyStampService;
+import kr.kro.deom.domain.user.entity.User;
+import kr.kro.deom.domain.user.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CustomerAnalysisServiceTest {
 
     @Mock private MyStampService myStampService;
+
+    @Mock private UserService userService;
 
     @InjectMocks private CustomerAnalysisService customerAnalysisService;
 
@@ -37,6 +41,10 @@ class CustomerAnalysisServiceTest {
 
         when(myStampService.getUserAccumulatedStamps(storeId)).thenReturn(userAccumulatedStamps);
 
+        mockUserNickname(1L, "User1");
+        mockUserNickname(2L, "User2");
+        mockUserNickname(3L, "User3");
+
         // when
         List<UserStampRankDto> result =
                 customerAnalysisService.getCustomerRankingByAccumulatedStamp(storeId);
@@ -46,16 +54,19 @@ class CustomerAnalysisServiceTest {
 
         // 1등 검증
         assertEquals(1L, result.get(0).getUserId());
+        assertEquals("User1", result.get(0).getNickname());
         assertEquals(100, result.get(0).getAccumulatedStampAmount());
         assertEquals(1, result.get(0).getRank());
 
         // 2등 검증
         assertEquals(2L, result.get(1).getUserId());
+        assertEquals("User2", result.get(1).getNickname());
         assertEquals(80, result.get(1).getAccumulatedStampAmount());
         assertEquals(2, result.get(1).getRank());
 
         // 3등 검증
         assertEquals(3L, result.get(2).getUserId());
+        assertEquals("User3", result.get(2).getNickname());
         assertEquals(50, result.get(2).getAccumulatedStampAmount());
         assertEquals(3, result.get(2).getRank());
 
@@ -81,6 +92,10 @@ class CustomerAnalysisServiceTest {
                         );
 
         when(myStampService.getUserAccumulatedStamps(storeId)).thenReturn(userAccumulatedStamps);
+
+        for (int i = 1; i <= 9; i++) {
+            mockUserNickname((long) i, "User" + i);
+        }
 
         // when
         List<UserStampRankDto> result =
@@ -131,6 +146,7 @@ class CustomerAnalysisServiceTest {
                 Arrays.asList(new UserAccumulatedStampsDto(1L, 100));
 
         when(myStampService.getUserAccumulatedStamps(storeId)).thenReturn(singleUser);
+        mockUserNickname(1L, "User1");
 
         // when
         List<UserStampRankDto> result =
@@ -139,9 +155,16 @@ class CustomerAnalysisServiceTest {
         // then
         assertEquals(1, result.size());
         assertEquals(1L, result.get(0).getUserId());
+        assertEquals("User1", result.get(0).getNickname());
         assertEquals(100, result.get(0).getAccumulatedStampAmount());
         assertEquals(1, result.get(0).getRank());
 
         verify(myStampService, times(1)).getUserAccumulatedStamps(storeId);
+    }
+
+    private void mockUserNickname(Long userId, String nickname) {
+        User mockUser = mock(User.class);
+        when(mockUser.getNickname()).thenReturn(nickname);
+        when(userService.getUser(userId)).thenReturn(mockUser);
     }
 }
