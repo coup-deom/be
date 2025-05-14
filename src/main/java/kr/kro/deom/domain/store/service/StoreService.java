@@ -1,11 +1,15 @@
 package kr.kro.deom.domain.store.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.List;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
+import kr.kro.deom.common.file.exception.S3FileUploadException;
+import kr.kro.deom.common.file.service.S3FileService;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.myStamp.service.MyStampService;
 import kr.kro.deom.domain.store.dto.request.StoreRegisterRequest;
+import kr.kro.deom.domain.store.dto.response.StoreImageResponse;
 import kr.kro.deom.domain.store.dto.response.StoreRegisterResponse;
 import kr.kro.deom.domain.store.dto.response.StoreSelectResponse;
 import kr.kro.deom.domain.store.dto.response.StoreStatusResponse;
@@ -17,6 +21,7 @@ import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class StoreService {
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final MyStampService myStampService;
+    private final S3FileService s3FileService;
 
     @Transactional
     public StoreRegisterResponse registerStore(StoreRegisterRequest request) {
@@ -110,5 +116,16 @@ public class StoreService {
         StoreStatus status =
                 storeRepository.findByOwnerId(ownerId).map(Store::getStatus).orElse(null);
         return new StoreStatusResponse(status);
+    }
+
+    public StoreImageResponse uploadStoreImage(MultipartFile file) {
+        String imageUrl = null;
+        try {
+            imageUrl = s3FileService.uploadFile(file, "store");
+        } catch (IOException e) {
+            throw new S3FileUploadException(CommonErrorCode.FILE_UPLOAD_ERROR);
+        }
+
+        return new StoreImageResponse(imageUrl);
     }
 }

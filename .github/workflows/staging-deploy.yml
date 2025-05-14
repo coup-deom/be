@@ -80,7 +80,15 @@ jobs:
                     max-idle: 5
                     min-idle: 0
                     max-wait: 1000
-
+            cloud:
+              aws:
+                region:
+                  static: test-region
+                credentials:
+                  access-key: test-access-key
+                  secret-key: test-secret-key
+                s3:
+                  bucket: test-bucket-name 
             security:
               oauth2:
                 client:
@@ -202,6 +210,10 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         run: |
           docker-compose build
           docker-compose push
@@ -257,6 +269,11 @@ jobs:
           KAKAO_CLIENT_SECRET: ${{ secrets.KAKAO_CLIENT_SECRET }}
           NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
           NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+          AWS_BUCKET_NAME: ${{ secrets.AWS_BUCKET_NAME }}
         run: |
           # 배포 디렉토리 생성
           ssh -i ~/.ssh/id_rsa ${{ secrets.DEPLOY_USER }}@${{ secrets.PUBLIC_SERVER_IP }} "mkdir -p ~/deom"
@@ -304,6 +321,10 @@ jobs:
           KAKAO_CLIENT_SECRET=${KAKAO_CLIENT_SECRET}
           NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
           NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+          AWS_REGION=${AWS_REGION}
+          AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+          AWS_SECRET_KEY=${AWS_SECRET_KEY}
+          AWS_BUCKET_NAME=${AWS_BUCKET_NAME}
           EOL
 
           sudo docker network create deom || true
