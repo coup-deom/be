@@ -27,6 +27,17 @@ spring:
           max-idle: 20
           min-idle: 0
           max-wait: 5000
+
+  cloud:
+    aws:
+      region:
+        static: ${AWS_REGION}
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: ${AWS_BUCKET_NAME}
+
   security:
     oauth2:
       client:
@@ -104,6 +115,7 @@ management:
   endpoint:
     health:
       show-details: when_authorized
+
 jwt:
   secret: ${JWT_SECRET}
   access-expiration: ${JWT_ACCESS_EXPIRATION}
