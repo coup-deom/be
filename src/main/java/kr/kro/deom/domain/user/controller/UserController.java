@@ -9,7 +9,6 @@ import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
 import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
-import kr.kro.deom.domain.user.entity.User;
 import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +41,12 @@ public class UserController {
     }
 
     @PostMapping("/role")
-    @Operation(summary = "역할 변경", description = "유저가 자신의 역할을 설정한다.")
-    public ResponseEntity<ApiResponse<String>> setRole(
-            @RequestBody RoleRequest request, HttpServletResponse response) {
-        User user = userService.setUserRole(request.getUserId(), request.getRole());
+    @Operation(summary = "역할 설정", description = "유저가 자신의 역할을 설정한다.")
+    public ResponseEntity<ApiResponse<UserResponse>> setRole(
+            @RequestBody RoleRequest request, HttpServletResponse httpServletResponse) {
 
-        String newAccessToken = jwtUtil.createAccessToken(user.getId(), user.getRole());
-        String newRefreshToken = jwtUtil.createRefreshToken(user.getId(), user.getRole());
+        UserResponse response = userService.setUserRole(request, httpServletResponse);
 
-        response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
-
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, newAccessToken));
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 }

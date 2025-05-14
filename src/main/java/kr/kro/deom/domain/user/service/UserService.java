@@ -1,6 +1,9 @@
 package kr.kro.deom.domain.user.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import kr.kro.deom.common.security.oauth.OAuth2UserInfo;
+import kr.kro.deom.common.utils.SecurityUtils;
+import kr.kro.deom.domain.user.dto.RoleRequest;
 import kr.kro.deom.domain.user.dto.UserResponse;
 import kr.kro.deom.domain.user.entity.Role;
 import kr.kro.deom.domain.user.entity.User;
@@ -58,10 +61,14 @@ public class UserService {
         user.updateDeleted(true);
     }
 
-    public User setUserRole(Long userId, Role role) {
+    @Transactional
+    public UserResponse setUserRole(RoleRequest roleRequest, HttpServletResponse response) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
         User user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
-        user.updateRole(role);
-        return userRepository.save(user);
+        user.updateRole(roleRequest.getRole());
+
+        return UserResponse.from(user);
     }
 
     public void validateUserByUserId(Long userId) {

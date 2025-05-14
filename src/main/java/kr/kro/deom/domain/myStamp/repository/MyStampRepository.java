@@ -2,6 +2,7 @@ package kr.kro.deom.domain.myStamp.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
+import kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -25,7 +26,7 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
 
     @Modifying
     @Query(
-            "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount + :amount WHERE ms.userId = :userId AND ms.storeId = :storeId")
+            "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount + :amount, ms.accumulatedStampAmount = ms.accumulatedStampAmount + :amount WHERE ms.userId = :userId AND ms.storeId = :storeId")
     Integer incrementStamp(
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
@@ -58,4 +59,12 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
+
+    @Query(
+            "SELECT new kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto("
+                    + "ms.userId, ms.accumulatedStampAmount) "
+                    + "FROM MyStamp ms "
+                    + "WHERE ms.storeId = :storeId "
+                    + "ORDER BY ms.accumulatedStampAmount DESC")
+    List<UserAccumulatedStampsDto> findUserAccumulatedByStoreId(@Param("storeId") Long storeId);
 }

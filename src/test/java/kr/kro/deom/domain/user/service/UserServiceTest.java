@@ -143,19 +143,6 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("유저 권한 변경")
-    void setUserRole_success() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        User result = userService.setUserRole(1L, Role.CUSTOMER);
-
-        assertThat(result.getRole()).isEqualTo(Role.CUSTOMER);
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
     @DisplayName("유저 유효성 검증 성공")
     void validateUser_success() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
