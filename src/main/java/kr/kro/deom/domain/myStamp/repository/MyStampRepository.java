@@ -37,4 +37,25 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
     // 가게별 스탬프 수량 확인용
     @Query("SELECT ms FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount > 0")
     List<MyStamp> findAllByUserIdWithStamps(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(
+            "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :amount "
+                    + "WHERE ms.userId = :userId AND ms.storeId = :storeId AND ms.stampAmount >= :amount")
+    int deductStampAmountIfSufficient(
+            @Param("userId") Long userId,
+            @Param("storeId") Long storeId,
+            @Param("amount") int amount);
+
+    @Modifying
+    @Query(
+            value =
+                    "INSERT INTO my_stamp (user_id, store_id, stamp_amount, created_at, updated_at) "
+                            + "VALUES (:userId, :storeId, :amount, NOW(), NOW()) "
+                            + "ON DUPLICATE KEY UPDATE stamp_amount = stamp_amount + :amount, updated_at = NOW()",
+            nativeQuery = true)
+    int createOrIncrementStamp(
+            @Param("userId") Long userId,
+            @Param("storeId") Long storeId,
+            @Param("amount") int amount);
 }

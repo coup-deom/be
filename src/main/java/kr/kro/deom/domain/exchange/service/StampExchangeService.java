@@ -163,9 +163,9 @@ public class StampExchangeService {
 
         StampExchange exchange = getExchangeOrThrow(exchangeId);
 
-        validateStampAmountBeforeExchange(exchange, userId);
-
         completeExchangeOrThrow(exchangeId, userId);
+
+        validateStampAmountBeforeExchange(exchange, userId);
 
         performStampExchange(exchange, userId);
 
@@ -197,23 +197,23 @@ public class StampExchangeService {
     }
 
     private void performStampExchange(StampExchange exchange, Long responderId) {
+        Long creatorId = exchange.getCreatorId();
+        Long targetStoreId = exchange.getTargetStoreId();
+        Long sourceStoreId = exchange.getSourceStoreId();
+        Integer sourceAmount = exchange.getSourceAmount();
+        Integer targetAmount = exchange.getTargetAmount();
 
-        deductOrThrow(
-                exchange.getCreatorId(), exchange.getSourceStoreId(), exchange.getSourceAmount());
-        deductOrThrow(responderId, exchange.getTargetStoreId(), exchange.getTargetAmount());
+        deductOrThrow(creatorId, sourceStoreId, sourceAmount);
+        deductOrThrow(responderId, targetStoreId, targetAmount);
 
-        myStampRepository.incrementStamp(
-                exchange.getCreatorId(), exchange.getTargetStoreId(), exchange.getTargetAmount());
-
-        myStampRepository.incrementStamp(
-                responderId, exchange.getSourceStoreId(), exchange.getSourceAmount());
+        myStampRepository.createOrIncrementStamp(creatorId, targetStoreId, targetAmount);
+        myStampRepository.createOrIncrementStamp(responderId, sourceStoreId, sourceAmount);
     }
 
     private void deductOrThrow(Long userId, Long storeId, int amount) {
-        int currentAmount = myStampRepository.findStampAmountByUserIdAndStoreId(userId, storeId);
-        if (currentAmount < amount) {
+        int updated = myStampRepository.deductStampAmountIfSufficient(userId, storeId, amount);
+        if (updated == 0) {
             throw new StampExchangeException(CommonErrorCode.INSUFFICIENT_STAMP_AMOUNT);
         }
-        myStampRepository.updateStampAmount(userId, storeId, amount);
     }
 }
