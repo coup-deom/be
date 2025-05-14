@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import kr.kro.deom.common.security.oauth.CustomOAuth2User;
 import kr.kro.deom.domain.user.entity.Role;
+import kr.kro.deom.domain.user.entity.User;
 import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,9 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null && jwtUtil.validateToken(token)) {
             Long id = jwtUtil.getUserId(token);
-            Role role = userService.getUser(id).getRole();
+            User user = userService.getUser(id);
 
-            CustomOAuth2User oAuth2User = new CustomOAuth2User(id, role, null);
+            CustomOAuth2User oAuth2User = new CustomOAuth2User(user.getId(), user.getRole(), null);
 
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
