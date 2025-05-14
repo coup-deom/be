@@ -34,13 +34,13 @@ public class AuthService {
             }
         }
 
-        if (refreshToken == null && !jwtUtil.validateToken(refreshToken)) {
+        if (refreshToken == null || !jwtUtil.validateToken(refreshToken)) {
             throw new RefreshTokenExpiredException();
         }
 
         Long userId = jwtUtil.getUserId(refreshToken);
 
-        if (refreshToken != null && !refreshToken.equals(jwtUtil.getRefreshToken(userId))) {
+        if (!refreshToken.equals(jwtUtil.getRefreshToken(userId))) {
             throw new InvalidRefreshTokenException();
         }
 
