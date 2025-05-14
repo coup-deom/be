@@ -6,6 +6,7 @@ import kr.kro.deom.common.security.handler.OAuth2SuccessHandler;
 import kr.kro.deom.common.security.jwt.JwtAuthenticationFilter;
 import kr.kro.deom.common.security.jwt.JwtUtil;
 import kr.kro.deom.common.security.oauth.CustomOAuth2UserService;
+import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final UserService userService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtUtil jwtUtil;
 
@@ -55,7 +57,7 @@ public class SecurityConfig {
 
                 // JWT 필터 등록
                 .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtUtil),
+                        new JwtAuthenticationFilter(jwtUtil, userService),
                         UsernamePasswordAuthenticationFilter.class)
 
                 // OAuth2 설정

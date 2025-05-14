@@ -56,9 +56,9 @@ public class AuthService {
             storeId = storeService.getStoreIdByOwnerId(userId);
         }
 
-        String newAccessToken = jwtUtil.createAccessToken(userId, role);
+        String newAccessToken = jwtUtil.createAccessToken(userId);
         String newIdToken = jwtUtil.createIdToken(userId, role, nickname, storeApproved, storeId);
-        String newRefreshToken = jwtUtil.createRefreshToken(userId, role);
+        String newRefreshToken = jwtUtil.createRefreshToken(userId);
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(newRefreshToken));
 

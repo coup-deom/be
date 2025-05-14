@@ -35,16 +35,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         Long userId = oAuth2User.getId();
         Role role = oAuth2User.getRole();
 
-        if (oAuth2User.getRole() == Role.PENDING) {
-            String targetUrl =
-                    UriComponentsBuilder.fromUriString("http://localhost:5173/user/role")
-                            .queryParam("userId", userId)
-                            .build()
-                            .toUriString();
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            return;
-        }
-
         User user = userService.getUser(userId);
         String nickname = user.getNickname();
 
@@ -56,9 +46,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             storeId = storeService.getStoreIdByOwnerId(userId);
         }
 
-        String accessToken = jwtUtil.createAccessToken(userId, role);
+        String accessToken = jwtUtil.createAccessToken(userId);
         String idToken = jwtUtil.createIdToken(userId, role, nickname, storeApproved, storeId);
-        String refreshToken = jwtUtil.createRefreshToken(userId, role);
+        String refreshToken = jwtUtil.createRefreshToken(userId);
 
         response.addCookie(jwtUtil.createRefreshTokenCookie(refreshToken));
 
