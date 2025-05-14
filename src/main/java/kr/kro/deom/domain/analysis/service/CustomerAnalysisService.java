@@ -5,6 +5,7 @@ import java.util.List;
 import kr.kro.deom.domain.analysis.dto.UserStampRankDto;
 import kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto;
 import kr.kro.deom.domain.myStamp.service.MyStampService;
+import kr.kro.deom.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomerAnalysisService {
     private final MyStampService myStampService;
+    private final UserService userService;
 
     public List<UserStampRankDto> getCustomerRankingByAccumulatedStamp(Long storeId) {
         List<UserAccumulatedStampsDto> userAccumulatedStamps =
@@ -32,6 +34,8 @@ public class CustomerAnalysisService {
         int sameRankCount = 1;
 
         for (UserAccumulatedStampsDto user : userAccumulatedStamps) {
+            Long userId = user.getUserId();
+            String nickname = userService.getUser(userId).getNickname();
             int accumulated = user.getAccumulatedStampAmount();
 
             if (accumulated == previousAccumulated) {
@@ -46,7 +50,8 @@ public class CustomerAnalysisService {
 
             result.add(
                     UserStampRankDto.builder()
-                            .userId(user.getUserId())
+                            .userId(userId)
+                            .nickname(nickname)
                             .accumulatedStampAmount(accumulated)
                             .rank(currentRank)
                             .build());

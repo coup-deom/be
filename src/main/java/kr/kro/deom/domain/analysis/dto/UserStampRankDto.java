@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UserStampRankDto {
     private Long userId;
+    private String nickname;
     private Integer accumulatedStampAmount;
     private Integer rank;
 }
