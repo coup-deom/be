@@ -29,7 +29,8 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
-        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(redisHost, redisPort);
+        RedisStandaloneConfiguration configuration =
+                new RedisStandaloneConfiguration(redisHost, redisPort);
 
         if (redisUsername != null && !redisUsername.isEmpty()) {
             configuration.setUsername(redisUsername);

@@ -25,9 +25,13 @@ public class MyStamp extends BaseTimeEntity {
     @Column(name = "stamp_amount", nullable = false)
     private Integer stampAmount;
 
+    @Column(name = "accumulated_stamp_amount", nullable = false)
+    private Integer accumulatedStampAmount;
+
     public MyStamp(Long userId, Long storeId, Integer stampAmount) {
         this.userId = userId;
         this.storeId = storeId;
         this.stampAmount = stampAmount;
+        this.accumulatedStampAmount = stampAmount;
     }
 }
