@@ -11,6 +11,7 @@ import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
 import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
+import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.exchange.exception.StampExchangeException;
 import kr.kro.deom.domain.exchange.repository.StampExchangeRepository;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
@@ -44,7 +45,7 @@ public class StampExchangeService {
                         .targetStoreId(request.getTargetStoreId())
                         .sourceAmount(request.getSourceAmount())
                         .targetAmount(request.getTargetAmount())
-                        .status(StampExchange.Status.PENDING)
+                        .status(StampExchangeStatus.PENDING)
                         .build();
 
         stampExchangeRepository.save(exchange);
@@ -105,7 +106,7 @@ public class StampExchangeService {
     }
 
     public List<StampExchangeResponse> getAllExchanges() {
-        return stampExchangeRepository.findAllWithStoreInfo().stream()
+        return stampExchangeRepository.findPendingAllExchanges().stream()
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());
     }

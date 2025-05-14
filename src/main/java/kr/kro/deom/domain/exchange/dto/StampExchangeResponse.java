@@ -2,6 +2,7 @@ package kr.kro.deom.domain.exchange.dto;
 
 import java.time.Instant;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
+import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.store.entity.Store;
 
 public record StampExchangeResponse(
@@ -16,7 +17,8 @@ public record StampExchangeResponse(
         String targetStoreName,
         String targetBranchName,
         Integer sourceAmount,
-        Integer targetAmount) {
+        Integer targetAmount,
+        StampExchangeStatus status) {
     public static StampExchangeResponse from(
             StampExchange exchange, Store sourceStore, Store targetStore) {
         return new StampExchangeResponse(
@@ -31,6 +33,7 @@ public record StampExchangeResponse(
                 targetStore.getStoreName(),
                 targetStore.getBranchName(),
                 exchange.getSourceAmount(),
-                exchange.getTargetAmount());
+                exchange.getTargetAmount(),
+                exchange.getStatus());
     }
 }

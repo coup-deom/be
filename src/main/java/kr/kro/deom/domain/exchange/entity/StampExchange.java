@@ -36,12 +36,7 @@ public class StampExchange extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private Status status;
-
-    public enum Status {
-        PENDING,
-        COMPLETED
-    }
+    private StampExchangeStatus status;
 
     public void updateExchangeTerms(
             Long newSourceStoreId,
