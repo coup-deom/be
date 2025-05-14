@@ -33,6 +33,7 @@ public class CustomerAnalysisController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
+    @Operation(summary = "내 가게의 스탬프 거래 조회 ", description = "내 가게의 스탬프 거래를 조회합니다.")
     @GetMapping("/customers/recent-coupons")
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getRecentExchanges(
             @RequestParam Long storeId) {
