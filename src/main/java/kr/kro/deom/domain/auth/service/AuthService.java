@@ -39,8 +39,9 @@ public class AuthService {
         }
 
         Long userId = jwtUtil.getUserId(refreshToken);
+        String storedToken = jwtUtil.getRefreshToken(userId);
 
-        if (!refreshToken.equals(jwtUtil.getRefreshToken(userId))) {
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
             throw new InvalidRefreshTokenException();
         }
 
