@@ -206,8 +206,8 @@ public class StampExchangeService {
         deductOrThrow(creatorId, sourceStoreId, sourceAmount);
         deductOrThrow(responderId, targetStoreId, targetAmount);
 
-        myStampRepository.createOrIncrementStamp(creatorId, targetStoreId, targetAmount);
-        myStampRepository.createOrIncrementStamp(responderId, sourceStoreId, sourceAmount);
+        myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
+        myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
     }
 
     private void deductOrThrow(Long userId, Long storeId, int amount) {
