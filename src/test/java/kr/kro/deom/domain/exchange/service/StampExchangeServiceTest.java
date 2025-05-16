@@ -26,6 +26,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 class StampExchangeServiceTest {
@@ -406,7 +408,7 @@ class StampExchangeServiceTest {
         }
     }
 
-    /*
+    @MockitoSettings(strictness = Strictness.LENIENT)
     @Test
     @DisplayName("보유 수량이 충분한 교환만 필터링되어 반환되는지 확인")
     void getTradableExchanges_Success() {
@@ -475,8 +477,6 @@ class StampExchangeServiceTest {
             assertEquals("S1", result.get(0).sourceStoreName());
         }
     }
-
-    */
 
     @Test
     @DisplayName("스탬프가 없을 때 교환 가능한 스탬프 조회 테스트")
