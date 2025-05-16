@@ -20,6 +20,15 @@ public interface StampExchangeRepository extends JpaRepository<StampExchange, Lo
 """)
     List<StampExchangeJoinProjection> findPendingAllExchanges();
 
+    @Query("""
+    SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
+    FROM StampExchange e
+    INNER JOIN Store s1 ON e.sourceStoreId = s1.id
+    INNER JOIN Store s2 ON e.targetStoreId = s2.id
+    WHERE e.sourceStoreId = :storeId OR e.targetStoreId = :storeId
+    ORDER BY e.updatedAt DESC""")
+    List<StampExchangeJoinProjection> findAllValidExchanges(Long storeId);
+
     @Query(
             "SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2) "
                     + "FROM StampExchange e "
@@ -34,15 +43,4 @@ public interface StampExchangeRepository extends JpaRepository<StampExchange, Lo
             "UPDATE StampExchange e SET e.status = 'COMPLETED', e.responderId = :userId "
                     + "WHERE e.id = :id AND e.status = 'PENDING'")
     int updateStatusIfPending(Long id, Long userId);
-
-    @Query(
-            """
-    SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
-    FROM StampExchange e
-    LEFT JOIN Store s1 ON e.sourceStoreId = s1.id
-    LEFT JOIN Store s2 ON e.targetStoreId = s2.id
-    WHERE e.sourceStoreId = :storeId OR e.targetStoreId = :storeId
-    ORDER BY e.updatedAt DESC
-""")
-    List<StampExchangeJoinProjection> findAllExchanges(Long storeId);
 }

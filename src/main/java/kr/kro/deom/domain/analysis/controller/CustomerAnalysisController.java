@@ -34,7 +34,7 @@ public class CustomerAnalysisController {
     }
 
     @Operation(summary = "내 가게의 스탬프 거래 조회 ", description = "내 가게의 스탬프 거래를 조회합니다.")
-    @GetMapping("/customers/recent-coupons")
+    @GetMapping("/recent-coupons")
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getRecentExchanges(
             @RequestParam Long storeId) {
         List<StampExchangeResponse> responses =
