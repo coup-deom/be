@@ -20,7 +20,8 @@ public interface StampExchangeRepository extends JpaRepository<StampExchange, Lo
 """)
     List<StampExchangeJoinProjection> findPendingAllExchanges();
 
-    @Query("""
+    @Query(
+            """
     SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
     FROM StampExchange e
     INNER JOIN Store s1 ON e.sourceStoreId = s1.id

@@ -22,7 +22,6 @@ public class CustomerAnalysisService {
 
     private final UserService userService;
 
-
     public List<UserStampRankDto> getCustomerRankingByAccumulatedStamp(Long storeId) {
         List<UserAccumulatedStampsDto> userAccumulatedStamps =
                 myStampService.getUserAccumulatedStamps(storeId);
