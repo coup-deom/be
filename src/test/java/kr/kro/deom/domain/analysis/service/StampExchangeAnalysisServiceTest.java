@@ -107,7 +107,7 @@ class StampExchangeAnalysisServiceTest {
         when(stampExchangeRepository.findAllValidExchanges(storeId)).thenReturn(mockProjections);
 
         // When
-        List<StampExchangeResponse> result = customerAnalysisService.findMyStoreExchange(storeId);
+        List<StampExchangeResponse> result = customerAnalysisService.findAllExchangesForStore(storeId);
 
         // Then
         assertEquals(1, result.size());
@@ -142,7 +142,7 @@ class StampExchangeAnalysisServiceTest {
         when(stampExchangeRepository.findAllValidExchanges(storeId)).thenReturn(List.of());
 
         // When
-        List<StampExchangeResponse> result = customerAnalysisService.findMyStoreExchange(storeId);
+        List<StampExchangeResponse> result = customerAnalysisService.findAllExchangesForStore(storeId);
 
         // Then
         assertEquals(0, result.size());
@@ -220,7 +220,7 @@ class StampExchangeAnalysisServiceTest {
         when(stampExchangeRepository.findAllValidExchanges(storeId)).thenReturn(mockProjections);
 
         // When
-        List<StampExchangeResponse> result = customerAnalysisService.findMyStoreExchange(storeId);
+        List<StampExchangeResponse> result = customerAnalysisService.findAllExchangesForStore(storeId);
 
         // Then
         assertEquals(2, result.size());

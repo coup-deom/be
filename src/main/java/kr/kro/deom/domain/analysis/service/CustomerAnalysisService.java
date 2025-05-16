@@ -69,7 +69,7 @@ public class CustomerAnalysisService {
         return result;
     }
 
-    public List<StampExchangeResponse> findMyStoreExchange(Long storeId) {
+    public List<StampExchangeResponse> findAllExchangesForStore (Long storeId) {
         return stampExchangeRepository.findAllValidExchanges(storeId).stream()
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());

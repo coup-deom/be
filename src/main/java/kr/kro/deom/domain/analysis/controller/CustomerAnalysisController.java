@@ -38,7 +38,7 @@ public class CustomerAnalysisController {
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getRecentExchanges(
             @RequestParam Long storeId) {
         List<StampExchangeResponse> responses =
-                customerAnalysisService.findMyStoreExchange(storeId);
+                customerAnalysisService.findAllExchangesForStore(storeId);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, responses));
     }
 }
