@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.auth.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +25,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/reissue")
+    @Operation(summary = "토큰 재발급", description = "현재 가진 토큰을 이용해 엑세스 토큰을 재발급합니다.")
     public ResponseEntity<ApiResponse<TokenResponse>> reissueToken(
             HttpServletRequest request, HttpServletResponse response) {
         TokenResponse tokens = authService.refreshAccessToken(request, response);
@@ -31,6 +33,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "사용자가 로그아웃합니다.")
     public ResponseEntity<ApiResponse<String>> logout(
             @AuthenticationPrincipal CustomOAuth2User user, HttpServletResponse response) {
         authService.logout(user.getUserId(), response);

@@ -71,7 +71,16 @@ jobs:
                     max-idle: 5
                     min-idle: 0
                     max-wait: 1000
-
+            cloud:
+              aws:
+                region:
+                  static: test-region
+                credentials:
+                  access-key: test-access-key
+                  secret-key: test-secret-key
+                s3:
+                  bucket: test-bucket-name 
+          
             security:
               oauth2:
                 client:
