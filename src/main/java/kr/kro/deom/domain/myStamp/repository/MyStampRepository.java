@@ -19,7 +19,7 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
     @Modifying
     @Query(
             "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :usedStampAmount WHERE ms.userId = :userId AND ms.storeId = :storeId")
-    void updateStampAmount(
+    Integer updateStampAmount(
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("usedStampAmount") Integer usedStampAmount);

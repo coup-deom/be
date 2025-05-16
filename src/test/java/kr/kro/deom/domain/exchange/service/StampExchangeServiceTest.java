@@ -527,16 +527,12 @@ class StampExchangeServiceTest {
                             eq(SOURCE_AMOUNT)))
                     .thenReturn(1);
 
-            // 스탬프 추가 (void 메서드의 경우 doNothing().when() 사용)
-            doNothing()
-                    .when(myStampRepository)
-                    .updateStampAmount(eq(CURRENT_USER_ID), eq(SOURCE_STORE_ID), eq(SOURCE_AMOUNT));
-            doNothing()
-                    .when(myStampRepository)
-                    .updateStampAmount(
-                            eq(testExchange.getCreatorId()),
-                            eq(TARGET_STORE_ID),
-                            eq(TARGET_AMOUNT));
+            when(myStampRepository.updateStampAmount(
+                            CURRENT_USER_ID, SOURCE_STORE_ID, SOURCE_AMOUNT))
+                    .thenReturn(1);
+            when(myStampRepository.updateStampAmount(
+                            testExchange.getCreatorId(), TARGET_STORE_ID, TARGET_AMOUNT))
+                    .thenReturn(1);
 
             // When
             StampExchangeExecutionResponse response =
