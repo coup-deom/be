@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
+import kr.kro.deom.domain.exchange.dto.StampExchangeExecutionResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
 import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
@@ -91,7 +92,14 @@ public class StampExchangeService {
     }
 
     private void validateStampAmount(Long userId, Long storeId, Integer requested) {
-        if (myStampService.getMyStampAmount(userId, storeId) < requested) {
+
+        Integer stampAmount = myStampService.getMyStampAmount(userId, storeId);
+
+        if (stampAmount == null) {
+            throw new StampExchangeException(CommonErrorCode.MY_STAMP_NOT_FOUND);
+        }
+
+        if (stampAmount < requested) {
             throw new StampExchangeException(CommonErrorCode.INSUFFICIENT_STAMP_AMOUNT);
         }
     }
@@ -147,5 +155,70 @@ public class StampExchangeService {
                         })
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public StampExchangeExecutionResponse executeExchange(Long exchangeId) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        StampExchange exchange = getExchangeOrThrow(exchangeId);
+
+        completeExchangeOrThrow(exchangeId, userId);
+
+        validateStampAmountBeforeExchange(exchange, userId);
+
+        performStampExchange(exchange, userId);
+
+        Store sourceStore = storeService.getStore(exchange.getSourceStoreId());
+        Store targetStore = storeService.getStore(exchange.getTargetStoreId());
+
+        return StampExchangeExecutionResponse.from(
+                exchange, sourceStore, targetStore, exchange.getCreatorId(), userId);
+    }
+
+    private StampExchange getExchangeOrThrow(Long exchangeId) {
+        return stampExchangeRepository
+                .findById(exchangeId)
+                .orElseThrow(
+                        () -> new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_NOT_FOUND));
+    }
+
+    private void validateStampAmountBeforeExchange(StampExchange exchange, Long responderId) {
+        validateStampAmount(responderId, exchange.getTargetStoreId(), exchange.getTargetAmount());
+        validateStampAmount(
+                exchange.getCreatorId(), exchange.getSourceStoreId(), exchange.getSourceAmount());
+    }
+
+    private void completeExchangeOrThrow(Long exchangeId, Long userId) {
+        int updated = stampExchangeRepository.updateStatusIfPending(exchangeId, userId);
+        if (updated == 0) {
+            throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_ALREADY_COMPLETED);
+        }
+    }
+
+    private void performStampExchange(StampExchange exchange, Long responderId) {
+        Long creatorId = exchange.getCreatorId();
+        Long targetStoreId = exchange.getTargetStoreId();
+        Long sourceStoreId = exchange.getSourceStoreId();
+        Integer sourceAmount = exchange.getSourceAmount();
+        Integer targetAmount = exchange.getTargetAmount();
+
+        deductOrThrow(creatorId, sourceStoreId, sourceAmount);
+        deductOrThrow(responderId, targetStoreId, targetAmount);
+
+        int updated1 = myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
+        int updated2 =
+                myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
+
+        if (updated1 != 1 || updated2 != 1) {
+            throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_EXECUTION_FAILED);
+        }
+    }
+
+    private void deductOrThrow(Long userId, Long storeId, int amount) {
+        int updated = myStampRepository.deductStampAmountIfSufficient(userId, storeId, amount);
+        if (updated == 0) {
+            throw new StampExchangeException(CommonErrorCode.INSUFFICIENT_STAMP_AMOUNT);
+        }
     }
 }

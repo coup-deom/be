@@ -19,7 +19,7 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
     @Modifying
     @Query(
             "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :usedStampAmount WHERE ms.userId = :userId AND ms.storeId = :storeId")
-    void updateStampAmount(
+    Integer updateStampAmount(
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("usedStampAmount") Integer usedStampAmount);
@@ -38,6 +38,15 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
     // 가게별 스탬프 수량 확인용
     @Query("SELECT ms FROM MyStamp ms WHERE ms.userId = :userId AND ms.stampAmount > 0")
     List<MyStamp> findAllByUserIdWithStamps(@Param("userId") Long userId);
+
+    @Modifying
+    @Query(
+            "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :amount "
+                    + "WHERE ms.userId = :userId AND ms.storeId = :storeId AND ms.stampAmount >= :amount")
+    int deductStampAmountIfSufficient(
+            @Param("userId") Long userId,
+            @Param("storeId") Long storeId,
+            @Param("amount") int amount);
 
     @Query(
             "SELECT new kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto("
