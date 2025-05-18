@@ -19,7 +19,7 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
     @Modifying
     @Query(
             "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :usedStampAmount WHERE ms.userId = :userId AND ms.storeId = :storeId")
-    void updateStampAmount(
+    Integer updateStampAmount(
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("usedStampAmount") Integer usedStampAmount);
@@ -44,19 +44,6 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount - :amount "
                     + "WHERE ms.userId = :userId AND ms.storeId = :storeId AND ms.stampAmount >= :amount")
     int deductStampAmountIfSufficient(
-            @Param("userId") Long userId,
-            @Param("storeId") Long storeId,
-            @Param("amount") int amount);
-
-    @Modifying
-    @Query(
-            value =
-                    "INSERT INTO my_stamp (user_id, store_id, stamp_amount, created_at, updated_at) "
-                            + "VALUES (:userId, :storeId, :amount, NOW(), NOW()) "
-                            + "ON CONFLICT (user_id, store_id) DO UPDATE "
-                            + "SET stamp_amount = my_stamp.stamp_amount + :amount, updated_at = NOW()",
-            nativeQuery = true)
-    int createOrIncrementStamp(
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
