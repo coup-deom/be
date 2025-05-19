@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.otp.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import kr.kro.deom.domain.otp.entity.OtpStatus;
 import kr.kro.deom.domain.otp.entity.OtpType;
@@ -15,7 +16,13 @@ public class OtpUsageResponse {
     private String storeName;
     private OtpType type;
     private Integer usedStampAmount;
+
+    @JsonFormat(
+            shape = JsonFormat.Shape.STRING,
+            pattern = "yyyy-MM-dd'T'HH:mm:ssXXX",
+            timezone = "Asia/Seoul")
     private Instant createdAt;
+
     private OtpStatus status;
     private Long otpCode;
 

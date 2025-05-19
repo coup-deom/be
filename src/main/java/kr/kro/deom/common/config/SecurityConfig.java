@@ -1,6 +1,5 @@
 package kr.kro.deom.common.config;
 
-import java.util.List;
 import kr.kro.deom.common.security.handler.CustomAuthenticationEntryPoint;
 import kr.kro.deom.common.security.handler.OAuth2SuccessHandler;
 import kr.kro.deom.common.security.jwt.JwtAuthenticationFilter;
@@ -16,9 +15,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -36,9 +32,6 @@ public class SecurityConfig {
                 // 기본 보안 설정 OFF
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-
-                // cors 설정
-//                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
                 // 세션 사용 안 함 (JWT 기반)
                 .sessionManagement(
@@ -70,18 +63,4 @@ public class SecurityConfig {
                                         .successHandler(oAuth2SuccessHandler))
                 .build();
     }
-
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowedOrigins(List.of("http://localhost:5173"));
-//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        config.setAllowCredentials(true);
-//        config.setAllowedHeaders(List.of("*"));
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", config);
-//        return source;
-//    }
 }

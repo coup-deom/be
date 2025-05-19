@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.exchange.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.Instant;
 import java.util.Map;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
@@ -7,7 +8,11 @@ import kr.kro.deom.domain.store.entity.Store;
 
 public record StampExchangeExecutionResponse(
         Long exchangeId,
-        Instant completedAt,
+        @JsonFormat(
+                        shape = JsonFormat.Shape.STRING,
+                        pattern = "yyyy-MM-dd'T'HH:mm:ssXXX",
+                        timezone = "Asia/Seoul")
+                Instant completedAt,
         Long sourceStoreId,
         String sourceStoreName,
         Long targetStoreId,

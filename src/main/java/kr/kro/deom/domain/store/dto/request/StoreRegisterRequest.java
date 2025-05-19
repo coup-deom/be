@@ -24,7 +24,6 @@ public class StoreRegisterRequest {
     @NotBlank(message = "주소(시)는 필수입니다.")
     private String addressCity;
 
-    @NotBlank(message = "주소(구/동)는 필수입니다.")
     private String addressStreet;
 
     private String addressDetail;
