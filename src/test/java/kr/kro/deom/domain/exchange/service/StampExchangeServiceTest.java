@@ -10,6 +10,7 @@ import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.exchange.dto.*;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
+import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.exchange.exception.StampExchangeException;
 import kr.kro.deom.domain.exchange.repository.StampExchangeRepository;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
@@ -63,7 +64,7 @@ class StampExchangeServiceTest {
                         .targetStoreId(TARGET_STORE_ID)
                         .sourceAmount(SOURCE_AMOUNT)
                         .targetAmount(TARGET_AMOUNT)
-                        .status(StampExchange.Status.PENDING)
+                        .status(StampExchangeStatus.PENDING)
                         .build();
     }
 
@@ -93,7 +94,7 @@ class StampExchangeServiceTest {
                         .targetStoreId(targetStoreId)
                         .sourceAmount(sourceAmount)
                         .targetAmount(TARGET_AMOUNT)
-                        .status(StampExchange.Status.PENDING)
+                        .status(StampExchangeStatus.PENDING)
                         .build();
 
         Store source =
@@ -135,7 +136,7 @@ class StampExchangeServiceTest {
                     .targetStoreId(TARGET_STORE_ID)
                     .sourceAmount(1)
                     .targetAmount(1)
-                    .status(StampExchange.Status.PENDING)
+                    .status(StampExchangeStatus.PENDING)
                     .build();
         }
         return input;
@@ -154,7 +155,7 @@ class StampExchangeServiceTest {
                 .targetStoreId(targetId)
                 .sourceAmount(sourceAmount)
                 .targetAmount(targetAmount)
-                .status(StampExchange.Status.PENDING)
+                .status(StampExchangeStatus.PENDING)
                 .build();
     }
 
@@ -357,14 +358,14 @@ class StampExchangeServiceTest {
     void getAllExchanges_Success() {
         // Given
         List<StampExchangeJoinProjection> projections = createMockProjections(3);
-        when(stampExchangeRepository.findAllWithStoreInfo()).thenReturn(projections);
+        when(stampExchangeRepository.findPendingAllExchanges()).thenReturn(projections);
 
         // When
         List<StampExchangeResponse> responses = stampExchangeService.getAllExchanges();
 
         // Then
         assertEquals(3, responses.size());
-        verify(stampExchangeRepository).findAllWithStoreInfo();
+        verify(stampExchangeRepository).findPendingAllExchanges();
     }
 
     @Test
@@ -602,7 +603,7 @@ class StampExchangeServiceTest {
                             .targetStoreId(TARGET_STORE_ID)
                             .sourceAmount(SOURCE_AMOUNT)
                             .targetAmount(TARGET_AMOUNT)
-                            .status(StampExchange.Status.PENDING)
+                            .status(StampExchangeStatus.PENDING)
                             .build();
 
             when(stampExchangeRepository.findById(EXCHANGE_ID)).thenReturn(Optional.of(exchange));
