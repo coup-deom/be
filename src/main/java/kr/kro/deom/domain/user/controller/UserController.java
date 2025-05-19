@@ -32,7 +32,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @GetMapping("/withdrawal")
+    @PostMapping("/withdrawal")
     @Operation(summary = "회원 탈퇴", description = "유저가 회원을 탈퇴한다.")
     public ResponseEntity<ApiResponse<String>> deleteMyAccount(
             @AuthenticationPrincipal CustomOAuth2User user) {
