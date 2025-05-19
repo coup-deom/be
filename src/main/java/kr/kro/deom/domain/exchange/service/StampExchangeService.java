@@ -11,6 +11,7 @@ import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
 import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
 import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
+import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.exchange.exception.StampExchangeException;
 import kr.kro.deom.domain.exchange.repository.StampExchangeRepository;
 import kr.kro.deom.domain.myStamp.entity.MyStamp;
@@ -44,7 +45,7 @@ public class StampExchangeService {
                         .targetStoreId(request.getTargetStoreId())
                         .sourceAmount(request.getSourceAmount())
                         .targetAmount(request.getTargetAmount())
-                        .status(StampExchange.Status.PENDING)
+                        .status(StampExchangeStatus.PENDING)
                         .build();
 
         stampExchangeRepository.save(exchange);
@@ -105,7 +106,7 @@ public class StampExchangeService {
     }
 
     public List<StampExchangeResponse> getAllExchanges() {
-        return stampExchangeRepository.findAllWithStoreInfo().stream()
+        return stampExchangeRepository.findPendingAllExchanges().stream()
                 .map(StampExchangeJoinProjection::toResponse)
                 .collect(Collectors.toList());
     }
@@ -206,6 +207,7 @@ public class StampExchangeService {
         deductOrThrow(creatorId, sourceStoreId, sourceAmount);
         deductOrThrow(responderId, targetStoreId, targetAmount);
 
+
         int updated1 = myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
         int updated2 =
                 myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
@@ -213,6 +215,7 @@ public class StampExchangeService {
         if (updated1 != 1 || updated2 != 1) {
             throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_EXECUTION_FAILED);
         }
+
     }
 
     private void deductOrThrow(Long userId, Long storeId, int amount) {

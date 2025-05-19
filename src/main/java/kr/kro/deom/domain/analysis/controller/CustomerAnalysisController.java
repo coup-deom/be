@@ -7,6 +7,7 @@ import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
 import kr.kro.deom.domain.analysis.dto.UserStampRankDto;
 import kr.kro.deom.domain.analysis.service.CustomerAnalysisService;
+import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,5 +31,14 @@ public class CustomerAnalysisController {
                 customerAnalysisService.getCustomerRankingByAccumulatedStamp(storeId);
 
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
+    @Operation(summary = "내 가게의 스탬프 거래 조회 ", description = "내 가게의 스탬프 거래를 조회합니다.")
+    @GetMapping("/recent-coupons")
+    public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getRecentExchanges(
+            @RequestParam Long storeId) {
+        List<StampExchangeResponse> responses =
+                customerAnalysisService.findAllExchangesForStore(storeId);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, responses));
     }
 }

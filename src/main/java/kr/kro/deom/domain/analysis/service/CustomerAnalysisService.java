@@ -2,7 +2,11 @@ package kr.kro.deom.domain.analysis.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import kr.kro.deom.domain.analysis.dto.UserStampRankDto;
+import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
+import kr.kro.deom.domain.exchange.repository.StampExchangeRepository;
+import kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection;
 import kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto;
 import kr.kro.deom.domain.myStamp.service.MyStampService;
 import kr.kro.deom.domain.user.service.UserService;
@@ -13,6 +17,9 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomerAnalysisService {
     private final MyStampService myStampService;
+
+    private final StampExchangeRepository stampExchangeRepository;
+
     private final UserService userService;
 
     public List<UserStampRankDto> getCustomerRankingByAccumulatedStamp(Long storeId) {
@@ -60,5 +67,11 @@ public class CustomerAnalysisService {
         }
 
         return result;
+    }
+
+    public List<StampExchangeResponse> findAllExchangesForStore (Long storeId) {
+        return stampExchangeRepository.findAllValidExchanges(storeId).stream()
+                .map(StampExchangeJoinProjection::toResponse)
+                .collect(Collectors.toList());
     }
 }

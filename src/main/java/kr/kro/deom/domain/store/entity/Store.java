@@ -16,7 +16,6 @@ public class Store extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // FK: 업주 회원 ID
     @Column(name = "owner_id", nullable = false)
     private Long ownerId;
 
@@ -45,6 +44,7 @@ public class Store extends BaseTimeEntity {
     private String image;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private StoreStatus status;
 
     public void approve() {

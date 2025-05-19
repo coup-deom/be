@@ -48,6 +48,19 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
 
+    @Modifying
+    @Query(
+            value =
+                    "INSERT INTO my_stamp (user_id, store_id, stamp_amount, created_at, updated_at) "
+                            + "VALUES (:userId, :storeId, :amount, NOW(), NOW()) "
+                            + "ON DUPLICATE KEY UPDATE stamp_amount = stamp_amount + :amount, updated_at = NOW()",
+            nativeQuery = true)
+    int createOrIncrementStamp(
+            @Param("userId") Long userId,
+            @Param("storeId") Long storeId,
+            @Param("amount") int amount);
+
+
     @Query(
             "SELECT new kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto("
                     + "ms.userId, ms.accumulatedStampAmount) "
