@@ -10,7 +10,7 @@ spring:
       maximum-pool-size: 5
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
 
   data:
@@ -28,6 +28,10 @@ spring:
           min-idle: 0
           max-wait: 5000
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
 
   cloud:
     aws:
