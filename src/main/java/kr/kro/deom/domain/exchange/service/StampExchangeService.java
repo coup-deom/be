@@ -207,15 +207,16 @@ public class StampExchangeService {
         deductOrThrow(creatorId, sourceStoreId, sourceAmount);
         deductOrThrow(responderId, targetStoreId, targetAmount);
 
-
-        int updated1 = myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
-        int updated2 =
-                myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
-
-        if (updated1 != 1 || updated2 != 1) {
-            throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_EXECUTION_FAILED);
+        int updated1 = myStampRepository.addStampAmount(creatorId, targetStoreId, targetAmount);
+        if (updated1 == 0) {
+            MyStamp myStamp = new MyStamp(creatorId, targetStoreId, targetAmount);
+            myStampRepository.save(myStamp);
         }
-
+        int updated2 = myStampRepository.addStampAmount(responderId, sourceStoreId, sourceAmount);
+        if (updated2 == 0) {
+            MyStamp myStamp = new MyStamp(responderId, sourceStoreId, sourceAmount);
+            myStampRepository.save(myStamp);
+        }
     }
 
     private void deductOrThrow(Long userId, Long storeId, int amount) {

@@ -26,6 +26,14 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
 
     @Modifying
     @Query(
+            "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount + :stampAmount WHERE ms.userId = :userId AND ms.storeId = :storeId")
+    Integer addStampAmount(
+            @Param("userId") Long userId,
+            @Param("storeId") Long storeId,
+            @Param("stampAmount") Integer stampAmount);
+
+    @Modifying
+    @Query(
             "UPDATE MyStamp ms SET ms.stampAmount = ms.stampAmount + :amount, ms.accumulatedStampAmount = ms.accumulatedStampAmount + :amount WHERE ms.userId = :userId AND ms.storeId = :storeId")
     Integer incrementStamp(
             @Param("userId") Long userId,
@@ -59,7 +67,6 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             @Param("userId") Long userId,
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
-
 
     @Query(
             "SELECT new kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto("

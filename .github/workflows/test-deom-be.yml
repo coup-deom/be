@@ -79,8 +79,8 @@ jobs:
                   access-key: test-access-key
                   secret-key: test-secret-key
                 s3:
-                  bucket: test-bucket-name 
-          
+                  bucket: test-bucket-name
+
             security:
               oauth2:
                 client:
