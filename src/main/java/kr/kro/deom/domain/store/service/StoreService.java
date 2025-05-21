@@ -119,11 +119,16 @@ public class StoreService {
     }
 
     public StoreImageResponse uploadStoreImage(MultipartFile file) {
-        String imageUrl = null;
-        try {
-            imageUrl = s3FileService.uploadFile(file, "store");
-        } catch (IOException e) {
-            throw new S3FileUploadException(CommonErrorCode.FILE_UPLOAD_ERROR);
+        String imageUrl;
+
+        if (file == null || file.isEmpty()) {
+            imageUrl = "https://deom-s3-bucket.s3.ap-northeast-2.amazonaws.com/store/default.png";
+        } else {
+            try {
+                imageUrl = s3FileService.uploadFile(file, "store");
+            } catch (IOException e) {
+                throw new S3FileUploadException(CommonErrorCode.FILE_UPLOAD_ERROR);
+            }
         }
 
         return new StoreImageResponse(imageUrl);
