@@ -33,6 +33,14 @@ public class StampPolicyController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
+    @PutMapping("/{storeId}")
+    public ResponseEntity<ApiResponse<StampPoliciesResponse>> updateStampPolicies(
+            @PathVariable Long storeId,
+            @RequestBody StampPoliciesRequest stampPolicies){
+        StampPoliciesResponse response =  stampPolicyService.updateAllStampPolicies(storeId, stampPolicies);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
     @PostMapping
     @Operation(summary = "스탬프 정책 생성", description = "새로운 스탬프 정책을 생성합니다.")
     public ResponseEntity<ApiResponse<StampPolicyResponse>> saveStampPolicy(

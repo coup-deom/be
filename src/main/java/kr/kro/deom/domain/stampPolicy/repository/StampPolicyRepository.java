@@ -1,5 +1,6 @@
 package kr.kro.deom.domain.stampPolicy.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import kr.kro.deom.domain.stampPolicy.dto.StampPolicyDto;
@@ -17,7 +18,10 @@ public interface StampPolicyRepository extends JpaRepository<StampPolicy, Long> 
                     + "FROM StampPolicy sp WHERE sp.storeId = :storeId AND sp.deletedAt IS NULL ORDER BY sp.baseAmount")
     List<StampPolicyDto> findPoliciesByStoreId(@Param("storeId") long storeId);
 
+    List<StampPolicy> findByStoreIdAndDeletedAtIsNull(long storeId);
     Optional<StampPolicy> findByIdAndDeletedAtIsNull(Long id);
 
     boolean existsByStoreIdAndBaseAmountAndDeletedAtIsNull(Long storeId, Integer baseAmount);
+
+    List<StampPolicy> findByStoreIdAndDeletedAtIsNull(Long storeId, Instant deletedAt);
 }
