@@ -33,6 +33,9 @@ public class StoreService {
     private final MyStampService myStampService;
     private final S3FileService s3FileService;
 
+    private static final String DEFAULT_STORE_IMAGE_URL =
+            "https://deom-s3-bucket.s3.ap-northeast-2.amazonaws.com/store/default.png";
+
     @Transactional
     public StoreRegisterResponse registerStore(StoreRegisterRequest request) {
 
@@ -122,7 +125,7 @@ public class StoreService {
         String imageUrl;
 
         if (file == null || file.isEmpty()) {
-            imageUrl = "https://deom-s3-bucket.s3.ap-northeast-2.amazonaws.com/store/default.png";
+            imageUrl = DEFAULT_STORE_IMAGE_URL;
         } else {
             try {
                 imageUrl = s3FileService.uploadFile(file, "store");
