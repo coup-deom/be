@@ -119,6 +119,7 @@ public class JwtUtil {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
+        cookie.setDomain("localhost");
 
         return cookie;
     }
