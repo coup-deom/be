@@ -14,6 +14,7 @@ public class OtpUsageResponse {
     private Long otpId;
     private Long storeId;
     private String storeName;
+    private String storeImage;
     private OtpType type;
     private Integer usedStampAmount;
 

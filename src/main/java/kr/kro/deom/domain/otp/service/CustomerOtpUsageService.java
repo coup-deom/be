@@ -41,6 +41,7 @@ public class CustomerOtpUsageService {
                                             .otpId(usage.getId())
                                             .storeId(store.getId())
                                             .storeName(store.getStoreName())
+                                            .storeImage(store.getImage())
                                             .type(usage.getType())
                                             .usedStampAmount(usage.getUsedStampAmount())
                                             .createdAt(usage.getCreatedAt())
