@@ -50,6 +50,7 @@ public enum CommonErrorCode implements BaseResponseCode {
     CONCURRENT_STAMP_EXCHANGE_DETECTED(
             HttpStatus.CONFLICT, "STAMP_EXCHANGE_005", "다른 사용자가 이미 이 교환을 처리했습니다."),
     MY_STAMP_NOT_FOUND(HttpStatus.NOT_FOUND, "STAMP_EXCHANGE_006", "해당 가게에 대해 보유한 스탬프가 없습니다."),
+    INVALID_STAMP_EXCHANGE_STATUS(HttpStatus.NOT_FOUND, "STAMP_EXCHANGE_007", "잘못된 거래 상태입니다."),
 
     // store
     DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "STORE_001", "이미 등록된 사업자번호입니다."),
