@@ -22,6 +22,29 @@ public interface StampExchangeRepository extends JpaRepository<StampExchange, Lo
 
     @Query(
             """
+SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
+FROM StampExchange e
+LEFT JOIN Store s1 ON e.sourceStoreId = s1.id
+LEFT JOIN Store s2 ON e.targetStoreId = s2.id
+WHERE e.status = 'PENDING'
+  AND (e.creatorId = :userId OR e.responderId = :userId)
+ORDER BY e.updatedAt DESC
+""")
+    List<StampExchangeJoinProjection> findAllPendingExchangesByUserId(Long userId);
+
+    @Query(
+            """
+SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
+FROM StampExchange e
+LEFT JOIN Store s1 ON e.sourceStoreId = s1.id
+LEFT JOIN Store s2 ON e.targetStoreId = s2.id
+WHERE e.creatorId = :userId
+ORDER BY e.updatedAt DESC
+""")
+    List<StampExchangeJoinProjection> findAllExchangesByUserId(Long userId);
+
+    @Query(
+            """
     SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2)
     FROM StampExchange e
     INNER JOIN Store s1 ON e.sourceStoreId = s1.id

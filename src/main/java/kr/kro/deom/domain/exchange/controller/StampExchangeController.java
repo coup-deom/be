@@ -5,10 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
-import kr.kro.deom.domain.exchange.dto.StampExchangeExecutionResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
-import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
+import kr.kro.deom.domain.exchange.dto.*;
 import kr.kro.deom.domain.exchange.service.StampExchangeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +26,8 @@ public class StampExchangeController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @GetMapping("/my")
-    @Operation(summary = "내가 등록한 가게만 목록", description = "내가 등록한 가게 거래 목록")
+    @GetMapping("/desire")
+    @Operation(summary = "더 모을 수 있는 거래 목록", description = "내가 모으고 있는 가게의 스탬프를 받을 수 있는 거래 목록")
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getMyStoreExchanges() {
         List<StampExchangeResponse> response = stampExchangeService.getMyStoreExchanges();
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
@@ -40,6 +37,14 @@ public class StampExchangeController {
     @Operation(summary = "거래 가능한 가게만 목록", description = "내가 거래할 수 있는 가게 목록")
     public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getTradableExchanges() {
         List<StampExchangeResponse> response = stampExchangeService.getTradableExchanges();
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
+    @GetMapping("/my")
+    @Operation(summary = "내가 등록한 거래만 ", description = "내가 등록한 거래 목록")
+    public ResponseEntity<ApiResponse<List<StampExchangeResponse>>> getMyExchanges(
+            @RequestParam ExchangeStatus status) {
+        List<StampExchangeResponse> response = stampExchangeService.getAllMyStampExchanges(status);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 

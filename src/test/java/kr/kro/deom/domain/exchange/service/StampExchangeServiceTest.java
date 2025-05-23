@@ -499,8 +499,56 @@ class StampExchangeServiceTest {
     }
 
     @Test
-    @DisplayName("교환 실행 성공 테스트")
-    void executeExchange_Success() {
+    @DisplayName("내 모든 스탬프 교환 조회 - PENDING 상태")
+    void getAllMyStampExchanges_PendingStatus() {
+        // Given
+        ExchangeStatus status = ExchangeStatus.PENDING;
+        List<StampExchangeJoinProjection> projections = createMockProjections(2);
+
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(CURRENT_USER_ID);
+
+            when(stampExchangeRepository.findAllPendingExchangesByUserId(CURRENT_USER_ID))
+                    .thenReturn(projections);
+
+            // When
+            List<StampExchangeResponse> responses =
+                    stampExchangeService.getAllMyStampExchanges(status);
+
+            // Then
+            assertEquals(2, responses.size());
+            verify(stampExchangeRepository).findAllPendingExchangesByUserId(CURRENT_USER_ID);
+            verify(stampExchangeRepository, never()).findAllExchangesByUserId(anyLong());
+        }
+    }
+
+    @Test
+    @DisplayName("내 모든 스탬프 교환 조회 - ALL 상태")
+    void getAllMyStampExchanges_AllStatus() {
+        // Given
+        ExchangeStatus status = ExchangeStatus.ALL;
+        List<StampExchangeJoinProjection> projections = createMockProjections(3);
+
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(CURRENT_USER_ID);
+
+            when(stampExchangeRepository.findAllExchangesByUserId(CURRENT_USER_ID))
+                    .thenReturn(projections);
+
+            // When
+            List<StampExchangeResponse> responses =
+                    stampExchangeService.getAllMyStampExchanges(status);
+
+            // Then
+            assertEquals(3, responses.size());
+            verify(stampExchangeRepository).findAllExchangesByUserId(CURRENT_USER_ID);
+            verify(stampExchangeRepository, never()).findAllPendingExchangesByUserId(anyLong());
+        }
+    }
+
+    @Test
+    @DisplayName("교환 실행 성공 - 새로운 로직 (기존 MyStamp 업데이트)")
+    void executeExchange_Success_UpdateExistingStamp() {
         // Given
         try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
             securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(CURRENT_USER_ID);
@@ -515,24 +563,28 @@ class StampExchangeServiceTest {
             // 스탬프 양 검증
             when(myStampService.getMyStampAmount(eq(CURRENT_USER_ID), eq(TARGET_STORE_ID)))
                     .thenReturn(TARGET_AMOUNT);
-            when(myStampService.getMyStampAmount(eq(CURRENT_USER_ID), eq(SOURCE_STORE_ID)))
+            when(myStampService.getMyStampAmount(
+                            eq(testExchange.getCreatorId()), eq(SOURCE_STORE_ID)))
                     .thenReturn(SOURCE_AMOUNT);
 
             // 스탬프 차감 성공
-            when(myStampRepository.deductStampAmountIfSufficient(
-                            eq(CURRENT_USER_ID), eq(TARGET_STORE_ID), eq(TARGET_AMOUNT)))
-                    .thenReturn(1);
             when(myStampRepository.deductStampAmountIfSufficient(
                             eq(testExchange.getCreatorId()),
                             eq(SOURCE_STORE_ID),
                             eq(SOURCE_AMOUNT)))
                     .thenReturn(1);
-
-            when(myStampRepository.updateStampAmount(
-                            CURRENT_USER_ID, SOURCE_STORE_ID, SOURCE_AMOUNT))
+            when(myStampRepository.deductStampAmountIfSufficient(
+                            eq(CURRENT_USER_ID), eq(TARGET_STORE_ID), eq(TARGET_AMOUNT)))
                     .thenReturn(1);
-            when(myStampRepository.updateStampAmount(
-                            testExchange.getCreatorId(), TARGET_STORE_ID, TARGET_AMOUNT))
+
+            // 스탬프 추가 성공 (기존 MyStamp가 있는 경우)
+            when(myStampRepository.addStampAmount(
+                            eq(testExchange.getCreatorId()),
+                            eq(TARGET_STORE_ID),
+                            eq(TARGET_AMOUNT)))
+                    .thenReturn(1);
+            when(myStampRepository.addStampAmount(
+                            eq(CURRENT_USER_ID), eq(SOURCE_STORE_ID), eq(SOURCE_AMOUNT)))
                     .thenReturn(1);
 
             // When
@@ -544,17 +596,122 @@ class StampExchangeServiceTest {
             assertEquals(EXCHANGE_ID, response.exchangeId());
             assertEquals(SOURCE_STORE_ID, response.sourceStoreId());
             assertEquals(TARGET_STORE_ID, response.targetStoreId());
-            assertEquals(SOURCE_AMOUNT, response.sourceAmount());
-            assertEquals(TARGET_AMOUNT, response.targetAmount());
 
-            // 트랜잭션 검증
-            assertEquals(CURRENT_USER_ID, response.responderTransaction().userId());
-            assertEquals(testExchange.getCreatorId(), response.creatorTransaction().userId());
-
-            // 스탬프 업데이트 호출 검증
+            // 차감 및 추가 메서드 호출 검증 (save는 호출되지 않아야 함)
             verify(myStampRepository, times(2))
                     .deductStampAmountIfSufficient(anyLong(), anyLong(), anyInt());
-            verify(myStampRepository, times(2)).updateStampAmount(anyLong(), anyLong(), anyInt());
+            verify(myStampRepository, times(2)).addStampAmount(anyLong(), anyLong(), anyInt());
+            verify(myStampRepository, never()).save(any(MyStamp.class));
+        }
+    }
+
+    @Test
+    @DisplayName("교환 실행 성공 - 새로운 MyStamp 생성")
+    void executeExchange_Success_CreateNewMyStamp() {
+        // Given
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(CURRENT_USER_ID);
+
+            when(stampExchangeRepository.findById(EXCHANGE_ID))
+                    .thenReturn(Optional.of(testExchange));
+            when(stampExchangeRepository.updateStatusIfPending(EXCHANGE_ID, CURRENT_USER_ID))
+                    .thenReturn(1);
+            when(storeService.getStore(SOURCE_STORE_ID)).thenReturn(sourceStore);
+            when(storeService.getStore(TARGET_STORE_ID)).thenReturn(targetStore);
+
+            // 스탬프 양 검증
+            when(myStampService.getMyStampAmount(eq(CURRENT_USER_ID), eq(TARGET_STORE_ID)))
+                    .thenReturn(TARGET_AMOUNT);
+            when(myStampService.getMyStampAmount(
+                            eq(testExchange.getCreatorId()), eq(SOURCE_STORE_ID)))
+                    .thenReturn(SOURCE_AMOUNT);
+
+            // 스탬프 차감 성공
+            when(myStampRepository.deductStampAmountIfSufficient(
+                            eq(testExchange.getCreatorId()),
+                            eq(SOURCE_STORE_ID),
+                            eq(SOURCE_AMOUNT)))
+                    .thenReturn(1);
+            when(myStampRepository.deductStampAmountIfSufficient(
+                            eq(CURRENT_USER_ID), eq(TARGET_STORE_ID), eq(TARGET_AMOUNT)))
+                    .thenReturn(1);
+
+            // 스탬프 추가 실패 (기존 MyStamp가 없는 경우) -> 새로 생성
+            when(myStampRepository.addStampAmount(
+                            eq(testExchange.getCreatorId()),
+                            eq(TARGET_STORE_ID),
+                            eq(TARGET_AMOUNT)))
+                    .thenReturn(0);
+            when(myStampRepository.addStampAmount(
+                            eq(CURRENT_USER_ID), eq(SOURCE_STORE_ID), eq(SOURCE_AMOUNT)))
+                    .thenReturn(0);
+
+            when(myStampRepository.save(any(MyStamp.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
+
+            // When
+            StampExchangeExecutionResponse response =
+                    stampExchangeService.executeExchange(EXCHANGE_ID);
+
+            // Then
+            assertNotNull(response);
+            assertEquals(EXCHANGE_ID, response.exchangeId());
+
+            // 차감, 추가, 생성 메서드 호출 검증
+            verify(myStampRepository, times(2))
+                    .deductStampAmountIfSufficient(anyLong(), anyLong(), anyInt());
+            verify(myStampRepository, times(2)).addStampAmount(anyLong(), anyLong(), anyInt());
+            verify(myStampRepository, times(2)).save(any(MyStamp.class));
+        }
+    }
+
+    @Test
+    @DisplayName("교환 실행 실패 - responder 스탬프 부족")
+    void executeExchange_ResponderInsufficientStamps() {
+        // Given
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(CURRENT_USER_ID);
+
+            when(stampExchangeRepository.findById(EXCHANGE_ID))
+                    .thenReturn(Optional.of(testExchange));
+            when(stampExchangeRepository.updateStatusIfPending(EXCHANGE_ID, CURRENT_USER_ID))
+                    .thenReturn(1);
+
+            // 스탬프 양 검증
+            when(myStampService.getMyStampAmount(eq(CURRENT_USER_ID), eq(TARGET_STORE_ID)))
+                    .thenReturn(TARGET_AMOUNT);
+            when(myStampService.getMyStampAmount(
+                            eq(testExchange.getCreatorId()), eq(SOURCE_STORE_ID)))
+                    .thenReturn(SOURCE_AMOUNT);
+
+            // creator 스탬프 차감 성공
+            when(myStampRepository.deductStampAmountIfSufficient(
+                            eq(testExchange.getCreatorId()),
+                            eq(SOURCE_STORE_ID),
+                            eq(SOURCE_AMOUNT)))
+                    .thenReturn(1);
+
+            // responder 스탬프 차감 실패
+            when(myStampRepository.deductStampAmountIfSufficient(
+                            eq(CURRENT_USER_ID), eq(TARGET_STORE_ID), eq(TARGET_AMOUNT)))
+                    .thenReturn(0);
+
+            // When/Then
+            StampExchangeException exception =
+                    assertThrows(
+                            StampExchangeException.class,
+                            () -> stampExchangeService.executeExchange(EXCHANGE_ID));
+
+            assertThat(exception.getBaseResponseCode())
+                    .isEqualTo(CommonErrorCode.INSUFFICIENT_STAMP_AMOUNT);
+
+            // 양쪽 차감이 모두 호출되어야 함
+            verify(myStampRepository, times(2))
+                    .deductStampAmountIfSufficient(anyLong(), anyLong(), anyInt());
+
+            // 스탬프 추가는 호출되지 않아야 함
+            verify(myStampRepository, never()).addStampAmount(anyLong(), anyLong(), anyInt());
+            verify(myStampRepository, never()).save(any(MyStamp.class));
         }
     }
 

@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
-import kr.kro.deom.domain.exchange.dto.StampExchangeExecutionResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
-import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
+import kr.kro.deom.domain.exchange.dto.*;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
 import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.exchange.exception.StampExchangeException;
@@ -31,6 +28,24 @@ public class StampExchangeService {
     private final StoreService storeService;
     private final MyStampService myStampService;
     private final MyStampRepository myStampRepository;
+
+    @Transactional(readOnly = true)
+    public List<StampExchangeResponse> getAllMyStampExchanges(ExchangeStatus status) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        if (status == ExchangeStatus.PENDING) {
+            return stampExchangeRepository.findAllPendingExchangesByUserId(userId).stream()
+                    .map(StampExchangeJoinProjection::toResponse)
+                    .collect(Collectors.toList());
+
+        } else if (status == ExchangeStatus.ALL) {
+            return stampExchangeRepository.findAllExchangesByUserId(userId).stream()
+                    .map(StampExchangeJoinProjection::toResponse)
+                    .collect(Collectors.toList());
+        } else {
+            throw new StampExchangeException(CommonErrorCode.INVALID_STAMP_EXCHANGE_STATUS);
+        }
+    }
 
     @Transactional
     public StampExchangeResponse createStampExchange(StampExchangeRequest request) {
@@ -207,15 +222,16 @@ public class StampExchangeService {
         deductOrThrow(creatorId, sourceStoreId, sourceAmount);
         deductOrThrow(responderId, targetStoreId, targetAmount);
 
-
-        int updated1 = myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
-        int updated2 =
-                myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
-
-        if (updated1 != 1 || updated2 != 1) {
-            throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_EXECUTION_FAILED);
+        int updated1 = myStampRepository.addStampAmount(creatorId, targetStoreId, targetAmount);
+        if (updated1 == 0) {
+            MyStamp myStamp = new MyStamp(creatorId, targetStoreId, targetAmount);
+            myStampRepository.save(myStamp);
         }
-
+        int updated2 = myStampRepository.addStampAmount(responderId, sourceStoreId, sourceAmount);
+        if (updated2 == 0) {
+            MyStamp myStamp = new MyStamp(responderId, sourceStoreId, sourceAmount);
+            myStampRepository.save(myStamp);
+        }
     }
 
     private void deductOrThrow(Long userId, Long storeId, int amount) {
