@@ -50,23 +50,28 @@ public class StampExchangeService {
     @Transactional
     public StampExchangeResponse createStampExchange(StampExchangeRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
+        Long sourceStoreId = request.getSourceStoreId();
+        Integer sourceAmount = request.getSourceAmount();
+        Long targetStoreId = request.getTargetStoreId();
+        Integer targetAmount = request.getTargetAmount();
+        Long creatorId = request.getCreatorId();
 
-        validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
+        validateStampAmount(userId, sourceStoreId, sourceAmount);
 
         StampExchange exchange =
                 StampExchange.builder()
-                        .creatorId(request.getCreatorId())
-                        .sourceStoreId(request.getSourceStoreId())
-                        .targetStoreId(request.getTargetStoreId())
-                        .sourceAmount(request.getSourceAmount())
-                        .targetAmount(request.getTargetAmount())
+                        .creatorId(creatorId)
+                        .sourceStoreId(sourceStoreId)
+                        .targetStoreId(targetStoreId)
+                        .sourceAmount(sourceAmount)
+                        .targetAmount(targetAmount)
                         .status(StampExchangeStatus.PENDING)
                         .build();
 
         stampExchangeRepository.save(exchange);
 
-        Store sourceStore = storeService.getStore(request.getSourceStoreId());
-        Store targetStore = storeService.getStore(request.getTargetStoreId());
+        Store sourceStore = storeService.getStore(sourceStoreId);
+        Store targetStore = storeService.getStore(targetStoreId);
 
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
@@ -75,8 +80,11 @@ public class StampExchangeService {
     public StampExchangeResponse updateStampExchange(
             Long stampExchangeId, StampExchangeUpdateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
-
-        validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
+        Long sourceStoreId = request.getSourceStoreId();
+        Long targetStoreId = request.getTargetStoreId();
+        Integer sourceAmount = request.getSourceAmount();
+        Integer targetAmount = request.getTargetAmount();
+        validateStampAmount(userId, sourceStoreId, sourceAmount);
 
         StampExchange exchange =
                 stampExchangeRepository
@@ -86,14 +94,10 @@ public class StampExchangeService {
                                         new StampExchangeException(
                                                 CommonErrorCode.STAMP_EXCHANGE_NOT_FOUND));
 
-        Store sourceStore = storeService.getStore(request.getSourceStoreId());
-        Store targetStore = storeService.getStore(request.getTargetStoreId());
+        Store sourceStore = storeService.getStore(sourceStoreId);
+        Store targetStore = storeService.getStore(targetStoreId);
 
-        exchange.updateExchangeTerms(
-                request.getSourceStoreId(),
-                request.getTargetStoreId(),
-                request.getSourceAmount(),
-                request.getSourceAmount());
+        exchange.updateExchangeTerms(sourceStoreId, targetStoreId, sourceAmount, targetAmount);
 
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
