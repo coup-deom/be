@@ -60,7 +60,6 @@ public interface MyStampRepository extends JpaRepository<MyStamp, Long> {
             @Param("storeId") Long storeId,
             @Param("amount") int amount);
 
-
     @Query(
             "SELECT new kr.kro.deom.domain.myStamp.dto.UserAccumulatedStampsDto("
                     + "ms.userId, ms.accumulatedStampAmount) "

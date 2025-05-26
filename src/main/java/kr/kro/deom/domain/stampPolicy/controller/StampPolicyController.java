@@ -35,9 +35,9 @@ public class StampPolicyController {
 
     @PutMapping("/{storeId}")
     public ResponseEntity<ApiResponse<StampPoliciesResponse>> updateStampPolicies(
-            @PathVariable Long storeId,
-            @RequestBody StampPoliciesRequest stampPolicies){
-        StampPoliciesResponse response =  stampPolicyService.updateAllStampPolicies(storeId, stampPolicies);
+            @PathVariable Long storeId, @RequestBody StampPoliciesRequest stampPolicies) {
+        StampPoliciesResponse response =
+                stampPolicyService.updateAllStampPolicies(storeId, stampPolicies);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
@@ -49,7 +49,7 @@ public class StampPolicyController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @PutMapping("/{policyId}")
+    @PutMapping("/{storeId}/{policyId}")
     @Operation(summary = "스탬프 정책 수정", description = "기존 스탬프 정책을 수정합니다.")
     public ResponseEntity<ApiResponse<StampPolicyResponse>> updateStampPolicy(
             @Parameter(description = "정책 ID", required = true) @PathVariable Long policyId,
