@@ -36,10 +36,6 @@ public class StampPolicyService {
                 stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId);
         velidateNoDuplicateBaseAmounts(request.policies());
 
-        System.out.println(
-                "기존 정책 IDs: " + existingPolicies.stream().map(StampPolicy::getId).toList());
-        System.out.println("요청 정책들: " + request.policies());
-
         List<Long> requestedExisting =
                 request.policies().stream()
                         .map(StampPolicyDto::id)
@@ -91,7 +87,6 @@ public class StampPolicyService {
         }
     }
 
-    // 소유권 검증
     private void validateStoreOwnership(Long storeId) {
         storeRepository
                 .findByIdAndOwnerIdAndIsDeletedFalse(storeId, SecurityUtils.getCurrentUserId())
