@@ -37,17 +37,14 @@ public class StampPolicyService {
         velidateNoDuplicateBaseAmounts(request.policies());
 
         System.out.println(
-                "기존 정책 IDs: "
-                        + existingPolicies.stream()
-                                .map(StampPolicy::getId)
-                                .collect(Collectors.toList()));
+                "기존 정책 IDs: " + existingPolicies.stream().map(StampPolicy::getId).toList());
         System.out.println("요청 정책들: " + request.policies());
 
         List<Long> requestedExisting =
                 request.policies().stream()
-                        .filter(p -> p.id() != null)
                         .map(StampPolicyDto::id)
-                        .collect(Collectors.toList());
+                        .filter(id -> id != null)
+                        .toList();
 
         existingPolicies.stream()
                 .filter(policy -> !requestedExisting.contains(policy.getId()))
@@ -94,58 +91,10 @@ public class StampPolicyService {
         }
     }
 
-    @Transactional
-    public StampPolicyResponse createStampPolicy(StampPolicyRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        checkDuplicatePolicy(request.storeId(), request.baseAmount());
-
-        StampPolicy stampPolicy =
-                StampPolicy.create(request.storeId(), request.baseAmount(), request.stampCount());
-
-        StampPolicy savedPolicy = stampPolicyRepository.save(stampPolicy);
-        return StampPolicyResponse.from(savedPolicy);
-    }
-
-    @Transactional
-    public StampPolicyResponse updateStampPolicy(Long policyId, StampPolicyUpdateRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
-
-        stampPolicy.update(request.baseAmount(), request.stampCount());
-
-        return StampPolicyResponse.from(stampPolicy);
-    }
-
-    @Transactional
-    public void deleteStampPolicy(Long policyId, Long storeId) {
-        validateStoreOwnership(storeId);
-        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
-        stampPolicy.markAsDeleted();
-    }
-
     // 소유권 검증
     private void validateStoreOwnership(Long storeId) {
         storeRepository
                 .findByIdAndOwnerIdAndIsDeletedFalse(storeId, SecurityUtils.getCurrentUserId())
                 .orElseThrow(() -> new StoreException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
-    }
-
-    // policy 중복 검증
-    private void checkDuplicatePolicy(Long storeId, int baseAmount) {
-        if (stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
-                storeId, baseAmount)) {
-            throw new StampPolicyException(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
-        }
-    }
-
-    // policy 조회
-    private StampPolicy getValidStampPolicyById(Long stampPolicyId) {
-        return stampPolicyRepository
-                .findByIdAndDeletedAtIsNull(stampPolicyId)
-                .orElseThrow(() -> new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY));
     }
 }
