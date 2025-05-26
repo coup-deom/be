@@ -66,7 +66,8 @@ class DeomServiceTest {
     @DisplayName("덤 정책 목록 조회 성공")
     void getDeomPolicy_Success() {
         // given
-        when(deomRepository.findPoliciesByStoreId(storeId)).thenReturn(deomDtoList);
+        when(deomRepository.findPoliciesByStoreIdAndDeletedAtIsNull(storeId))
+                .thenReturn(deomDtoList);
 
         // when
         List<DeomDto> result = deomService.getDeomPolicy(storeId);
@@ -77,7 +78,7 @@ class DeomServiceTest {
         assertThat(result.get(0).name()).isEqualTo(deomName);
         assertThat(result.get(0).requiredStampAmount()).isEqualTo(requiredStampAmount);
 
-        verify(deomRepository).findPoliciesByStoreId(storeId);
+        verify(deomRepository).findPoliciesByStoreIdAndDeletedAtIsNull(storeId);
     }
 
     @Test

@@ -1,12 +1,13 @@
 package kr.kro.deom.domain.deom.service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
-import kr.kro.deom.domain.deom.dto.DeomDto;
-import kr.kro.deom.domain.deom.dto.DeomRequest;
-import kr.kro.deom.domain.deom.dto.DeomResponse;
-import kr.kro.deom.domain.deom.dto.DeomUpdateRequest;
+import kr.kro.deom.domain.deom.dto.*;
 import kr.kro.deom.domain.deom.entity.Deom;
 import kr.kro.deom.domain.deom.exception.DeomException;
 import kr.kro.deom.domain.deom.repository.DeomRepository;
@@ -23,7 +24,64 @@ public class DeomService {
     private final StoreRepository storeRepository;
 
     public List<DeomDto> getDeomPolicy(long storeId) {
-        return deomRepository.findPoliciesByStoreId(storeId);
+        return deomRepository.findPoliciesByStoreIdAndDeletedAtIsNull(storeId);
+    }
+
+    @Transactional
+    public DeomsResponse updateAllDeomPolicies(Long storeId, DeomsRequest request) {
+
+        validateStoreOwnership(storeId);
+        List<Deom> existingPolicies = deomRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+        validateNoDuplicateNames(request.policies());
+
+        List<Long> retainedPolicyIds =
+                request.policies().stream().map(DeomDto::id).filter(id -> id != null).toList();
+
+
+        existingPolicies.stream()
+                .filter(policy -> !retainedPolicyIds.contains(policy.getId()))
+                .forEach(Deom::markAsDeleted);
+
+        List<Deom> updatedPolicies = new ArrayList<>();
+
+        for (DeomDto policyDto : request.policies()) {
+            if (policyDto.id() == null) {
+
+                checkDuplicatePolicy(storeId, policyDto.name());
+                Deom newPolicy =
+                        Deom.create(storeId, policyDto.name(), policyDto.requiredStampAmount());
+                updatedPolicies.add(deomRepository.save(newPolicy));
+            } else {
+
+                Deom existingPolicy =
+                        existingPolicies.stream()
+                                .filter(p -> p.getId().equals(policyDto.id()))
+                                .findFirst()
+                                .orElseThrow(
+                                        () ->
+                                                new DeomException(
+                                                        CommonErrorCode.INVALID_DEOM_POLICY));
+                existingPolicy.update(policyDto.name(), policyDto.requiredStampAmount());
+                updatedPolicies.add(existingPolicy);
+            }
+        }
+
+        List<DeomDto> results =
+                updatedPolicies.stream()
+                        .map(p -> new DeomDto(p.getId(), p.getName(), p.getRequiredStampAmount()))
+                        .collect(Collectors.toList());
+
+        return new DeomsResponse(results);
+    }
+
+
+    private void validateNoDuplicateNames(List<DeomDto> policies) {
+        List<String> names = policies.stream().map(DeomDto::name).collect(Collectors.toList());
+
+        Set<String> uniqueNames = new HashSet<>(names);
+        if (names.size() != uniqueNames.size()) {
+            throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM); // 기존 에러코드 재사용
+        }
     }
 
     @Transactional
@@ -65,14 +123,14 @@ public class DeomService {
                 .orElseThrow(() -> new DeomException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
     }
 
-    // policy 중복 검증
+
     private void checkDuplicatePolicy(Long storeId, String name) {
         if (deomRepository.existsByStoreIdAndName(storeId, name)) {
             throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
         }
     }
 
-    // policy 조회
+
     private Deom getValidDeomById(Long deomId) {
         return deomRepository
                 .findById(deomId)

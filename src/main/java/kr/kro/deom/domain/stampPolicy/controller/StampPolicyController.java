@@ -35,7 +35,7 @@ public class StampPolicyController {
     @PutMapping("/{storeId}")
     @Operation(
             summary = "스탬프 정책 등록/수정/삭제",
-            description = "해당 매장의 스탬프 정책ㄷ에 대해 등록/수정/삭제합니다.",
+            description = "해당 매장의 스탬프 정책에 대해 등록/수정/삭제합니다.",
             security = @SecurityRequirement(name = "access-token"))
     public ResponseEntity<ApiResponse<StampPoliciesResponse>> updateStampPolicies(
             @PathVariable Long storeId, @RequestBody StampPoliciesRequest stampPolicies) {

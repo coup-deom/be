@@ -8,10 +8,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
-import kr.kro.deom.domain.deom.dto.DeomDto;
-import kr.kro.deom.domain.deom.dto.DeomRequest;
-import kr.kro.deom.domain.deom.dto.DeomResponse;
-import kr.kro.deom.domain.deom.dto.DeomUpdateRequest;
+import kr.kro.deom.domain.deom.dto.*;
 import kr.kro.deom.domain.deom.service.DeomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +33,17 @@ public class DeomController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
+    @PutMapping("/{storeId}")
+    @Operation(
+            summary = "덤 정책 등록/수정/삭제",
+            description = "해당 매장의 덤 정책에 대해 등록/수정/삭제합니다.",
+            security = @SecurityRequirement(name = "access-token"))
+    public ResponseEntity<ApiResponse<DeomsResponse>> updateDeomPolicies(
+            @PathVariable Long storeId, @RequestBody DeomsRequest deomsRequest) {
+        DeomsResponse response = deomService.updateAllDeomPolicies(storeId, deomsRequest);
+        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
+    }
+
     @PostMapping
     @Operation(summary = "덤 정책 생성", description = "새로운 덤 정책을 생성합니다.")
     public ResponseEntity<ApiResponse<DeomResponse>> saveDeomPolicy(
@@ -44,7 +52,7 @@ public class DeomController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @PutMapping("/{deomId}")
+    @PutMapping("/{storeId}/{deomId}")
     @Operation(summary = "덤 정책 수정", description = "기존 덤 정책을 수정합니다.")
     public ResponseEntity<ApiResponse<DeomResponse>> updateDeomPolicy(
             @Parameter(description = "덤 ID", required = true) @PathVariable Long deomId,
