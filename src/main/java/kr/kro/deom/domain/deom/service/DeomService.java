@@ -37,7 +37,6 @@ public class DeomService {
         List<Long> retainedPolicyIds =
                 request.policies().stream().map(DeomDto::id).filter(id -> id != null).toList();
 
-
         existingPolicies.stream()
                 .filter(policy -> !retainedPolicyIds.contains(policy.getId()))
                 .forEach(Deom::markAsDeleted);
@@ -74,7 +73,6 @@ public class DeomService {
         return new DeomsResponse(results);
     }
 
-
     private void validateNoDuplicateNames(List<DeomDto> policies) {
         List<String> names = policies.stream().map(DeomDto::name).collect(Collectors.toList());
 
@@ -84,57 +82,16 @@ public class DeomService {
         }
     }
 
-    @Transactional
-    public DeomResponse createDeomPolicy(DeomRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        checkDuplicatePolicy(request.storeId(), request.name());
-
-        Deom deom = Deom.create(request.storeId(), request.name(), request.requiredStampAmount());
-
-        Deom savedDeom = deomRepository.save(deom);
-        return DeomResponse.from(savedDeom);
-    }
-
-    @Transactional
-    public DeomResponse updateDeomPolicy(Long deomId, DeomUpdateRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        Deom deom = getValidDeomById(deomId);
-
-        deom.update(request.name(), request.requiredStampAmount());
-
-        return DeomResponse.from(deom);
-    }
-
-    @Transactional
-    public void deleteDeomPolicy(Long deomId, Long storeId) {
-        validateStoreOwnership(storeId);
-        Deom deom = getValidDeomById(deomId);
-        deom.markAsDeleted();
-    }
-
-    // 소유권 검증
     private void validateStoreOwnership(Long storeId) {
         storeRepository
                 .findByIdAndOwnerId(storeId, SecurityUtils.getCurrentUserId())
                 .orElseThrow(() -> new DeomException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
     }
 
-
     private void checkDuplicatePolicy(Long storeId, String name) {
         if (deomRepository.existsByStoreIdAndName(storeId, name)) {
             throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
         }
-    }
-
-
-    private Deom getValidDeomById(Long deomId) {
-        return deomRepository
-                .findById(deomId)
-                .orElseThrow(() -> new DeomException(CommonErrorCode.INVALID_DEOM_POLICY));
     }
 
     public Deom getDeom(Long deomId) {
