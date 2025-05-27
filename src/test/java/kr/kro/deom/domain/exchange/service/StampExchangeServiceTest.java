@@ -414,36 +414,28 @@ class StampExchangeServiceTest {
     @DisplayName("보유 수량이 충분한 교환만 필터링되어 반환되는지 확인")
     void getTradableExchanges_Success() {
         // given
+        // 내가 가진 스탬프들
         MyStamp stamp1 = mock(MyStamp.class);
         when(stamp1.getUserId()).thenReturn(CURRENT_USER_ID);
-        when(stamp1.getStoreId()).thenReturn(SOURCE_STORE_ID);
+        when(stamp1.getStoreId()).thenReturn(TARGET_STORE_ID);
         when(stamp1.getStampAmount()).thenReturn(10);
 
         MyStamp stamp2 = mock(MyStamp.class);
         when(stamp2.getUserId()).thenReturn(CURRENT_USER_ID);
         when(stamp2.getStoreId()).thenReturn(101L);
-        when(stamp2.getStampAmount()).thenReturn(5);
+        when(stamp2.getStampAmount()).thenReturn(3);
 
         List<MyStamp> userStamps = List.of(stamp1, stamp2);
-        List<Long> storeIds = List.of(SOURCE_STORE_ID, 101L);
 
-        // 교환 가능
-        StampExchange tradable =
-                createMockExchange(CURRENT_USER_ID, SOURCE_STORE_ID, TARGET_STORE_ID, 10, 5);
-        // 교환 불가능 (요구량 > 보유량)
-        StampExchange untradable =
-                createMockExchange(CURRENT_USER_ID, 101L, TARGET_STORE_ID, 10, 5);
+        StampExchange tradable = createMockExchange(999L, SOURCE_STORE_ID, TARGET_STORE_ID, 8, 5);
+
+        StampExchange untradable = createMockExchange(999L, SOURCE_STORE_ID, 101L, 10, 7);
 
         StampExchangeJoinProjection proj1 = mock(StampExchangeJoinProjection.class);
         StampExchangeJoinProjection proj2 = mock(StampExchangeJoinProjection.class);
 
-        // 주의: 아래 부분이 문제였습니다. getExchange()는 StampExchange를 반환해야 함
         when(proj1.getExchange()).thenReturn(tradable);
         when(proj2.getExchange()).thenReturn(untradable);
-
-        // 아래 코드 제거 - 이 부분이 문제였습니다
-        // when(proj1.getExchange().getId()).thenReturn(1L);
-        // when(proj2.getExchange().getId()).thenReturn(2L);
 
         when(proj1.toResponse())
                 .thenReturn(
@@ -456,8 +448,8 @@ class StampExchangeServiceTest {
                 .thenReturn(
                         StampExchangeResponse.from(
                                 untradable,
-                                createMockStore(101L, "S2", "Branch C"),
-                                createMockStore(TARGET_STORE_ID, "T2", "Branch D")));
+                                createMockStore(SOURCE_STORE_ID, "S2", "Branch C"),
+                                createMockStore(101L, "T2", "Branch D")));
 
         List<StampExchangeJoinProjection> projections = List.of(proj1, proj2);
 
@@ -466,16 +458,26 @@ class StampExchangeServiceTest {
 
             when(myStampRepository.findAllByUserIdWithStamps(CURRENT_USER_ID))
                     .thenReturn(userStamps);
-            when(stampExchangeRepository.findBySourceStoreIdInWithStoreInfo(anyList()))
+
+            // 변경된 부분: findByTargetStoreIdInWithStoreInfo 사용
+            when(stampExchangeRepository.findByTargetStoreIdInWithStoreInfo(anyList()))
                     .thenReturn(projections);
 
             // when
             List<StampExchangeResponse> result = stampExchangeService.getTradableExchanges();
 
             // then
-            assertEquals(1, result.size());
+            assertEquals(1, result.size()); // 교환 가능한 것만 1개 반환
             assertEquals(SOURCE_STORE_ID, result.get(0).sourceStoreId());
             assertEquals("S1", result.get(0).sourceStoreName());
+
+            // 추가 검증: findByTargetStoreIdInWithStoreInfo가 올바른 파라미터로 호출되었는지 확인
+            verify(stampExchangeRepository)
+                    .findByTargetStoreIdInWithStoreInfo(
+                            argThat(
+                                    storeIds ->
+                                            storeIds.contains(TARGET_STORE_ID)
+                                                    && storeIds.contains(101L)));
         }
     }
 

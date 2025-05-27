@@ -62,6 +62,15 @@ ORDER BY e.updatedAt DESC
                     + "ORDER BY e.updatedAt DESC")
     List<StampExchangeJoinProjection> findBySourceStoreIdInWithStoreInfo(List<Long> storeIds);
 
+    @Query(
+            "SELECT new kr.kro.deom.domain.exchange.service.StampExchangeJoinProjection(e, s1, s2) "
+                    + "FROM StampExchange e "
+                    + "LEFT JOIN Store s1 ON e.sourceStoreId = s1.id "
+                    + "LEFT JOIN Store s2 ON e.targetStoreId = s2.id "
+                    + "WHERE e.targetStoreId IN :storeIds AND e.status = 'PENDING'"
+                    + "ORDER BY e.updatedAt DESC")
+    List<StampExchangeJoinProjection> findByTargetStoreIdInWithStoreInfo(List<Long> storeIds);
+
     @Modifying
     @Query(
             "UPDATE StampExchange e SET e.status = 'COMPLETED', e.responderId = :userId "
