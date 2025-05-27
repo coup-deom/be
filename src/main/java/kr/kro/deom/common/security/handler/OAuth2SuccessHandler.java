@@ -25,7 +25,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtUtil jwtUtil;
     private final StoreService storeService;
     private final UserService userService;
-     private static final String REDIRECT_URL = "https://staging.deom.kro.kr/signin/callback";
+    private static final String REDIRECT_URL = "https://staging.deom.kro.kr/signin/callback";
 
     @Override
     public void onAuthenticationSuccess(
