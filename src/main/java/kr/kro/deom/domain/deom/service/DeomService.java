@@ -1,16 +1,16 @@
 package kr.kro.deom.domain.deom.service;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
-import kr.kro.deom.domain.deom.dto.DeomDto;
-import kr.kro.deom.domain.deom.dto.DeomRequest;
-import kr.kro.deom.domain.deom.dto.DeomResponse;
-import kr.kro.deom.domain.deom.dto.DeomUpdateRequest;
+import kr.kro.deom.domain.deom.dto.*;
 import kr.kro.deom.domain.deom.entity.Deom;
 import kr.kro.deom.domain.deom.exception.DeomException;
 import kr.kro.deom.domain.deom.repository.DeomRepository;
 import kr.kro.deom.domain.store.repository.StoreRepository;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,60 +23,155 @@ public class DeomService {
     private final StoreRepository storeRepository;
 
     public List<DeomDto> getDeomPolicy(long storeId) {
-        return deomRepository.findPoliciesByStoreId(storeId);
+        return deomRepository.findPoliciesByStoreIdAndDeletedAtIsNull(storeId);
     }
 
     @Transactional
-    public DeomResponse createDeomPolicy(DeomRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        checkDuplicatePolicy(request.storeId(), request.name());
-
-        Deom deom = Deom.create(request.storeId(), request.name(), request.requiredStampAmount());
-
-        Deom savedDeom = deomRepository.save(deom);
-        return DeomResponse.from(savedDeom);
-    }
-
-    @Transactional
-    public DeomResponse updateDeomPolicy(Long deomId, DeomUpdateRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        Deom deom = getValidDeomById(deomId);
-
-        deom.update(request.name(), request.requiredStampAmount());
-
-        return DeomResponse.from(deom);
-    }
-
-    @Transactional
-    public void deleteDeomPolicy(Long deomId, Long storeId) {
+    public DeomsResponse updateAllDeomPolicies(Long storeId, DeomsRequest request) {
         validateStoreOwnership(storeId);
-        Deom deom = getValidDeomById(deomId);
-        deom.markAsDeleted();
+        validateNoDuplicateNames(request.policies());
+
+        List<Deom> existingPolicies = getExistingPolicies(storeId);
+        DeomUpdateContext context = createUpdateContext(storeId, request, existingPolicies);
+
+        markPoliciesForDeletion(context.getPoliciesToDelete());
+        List<Deom> updatedPolicies = processDeomPolicies(storeId, context);
+
+        return createResponse(updatedPolicies);
     }
 
-    // 소유권 검증
-    private void validateStoreOwnership(Long storeId) {
-        storeRepository
-                .findByIdAndOwnerId(storeId, SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new DeomException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
+    @Getter
+    private static class DeomUpdateContext {
+        private final List<Deom> policiesToDelete;
+        private final List<DeomDto> policiesToCreate;
+        private final List<DeomUpdatePair> policiesToUpdate;
+
+        public DeomUpdateContext(
+                List<Deom> policiesToDelete,
+                List<DeomDto> policiesToCreate,
+                List<DeomUpdatePair> policiesToUpdate) {
+            this.policiesToDelete = policiesToDelete;
+            this.policiesToCreate = policiesToCreate;
+            this.policiesToUpdate = policiesToUpdate;
+        }
+
+        @Getter
+        private static class DeomUpdatePair {
+            private final Deom existing;
+            private final DeomDto dto;
+
+            public DeomUpdatePair(Deom existing, DeomDto dto) {
+                this.existing = existing;
+                this.dto = dto;
+            }
+        }
     }
 
-    // policy 중복 검증
-    private void checkDuplicatePolicy(Long storeId, String name) {
-        if (deomRepository.existsByStoreIdAndName(storeId, name)) {
+    private List<Deom> getExistingPolicies(Long storeId) {
+        return deomRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+    }
+
+    private DeomUpdateContext createUpdateContext(
+            Long storeId, DeomsRequest request, List<Deom> existingPolicies) {
+
+        Map<Long, Deom> existingPolicyMap =
+                existingPolicies.stream()
+                        .collect(Collectors.toMap(Deom::getId, Function.identity()));
+
+        Set<String> existingNames =
+                existingPolicies.stream().map(Deom::getName).collect(Collectors.toSet());
+
+        List<Deom> policiesToDelete = new ArrayList<>();
+        List<DeomDto> policiesToCreate = new ArrayList<>();
+        List<DeomUpdateContext.DeomUpdatePair> policiesToUpdate = new ArrayList<>();
+
+        Set<Long> requestedIds = new HashSet<>();
+
+        for (DeomDto dto : request.policies()) {
+            if (dto.id() == null) {
+                validateNewPolicyName(storeId, dto.name(), existingNames);
+                policiesToCreate.add(dto);
+            } else {
+                requestedIds.add(dto.id());
+                Deom existingPolicy = existingPolicyMap.get(dto.id());
+                if (existingPolicy == null) {
+                    throw new DeomException(CommonErrorCode.INVALID_DEOM_POLICY);
+                }
+                policiesToUpdate.add(new DeomUpdateContext.DeomUpdatePair(existingPolicy, dto));
+            }
+        }
+
+        for (Deom existing : existingPolicies) {
+            if (!requestedIds.contains(existing.getId())) {
+                policiesToDelete.add(existing);
+            }
+        }
+
+        return new DeomUpdateContext(policiesToDelete, policiesToCreate, policiesToUpdate);
+    }
+
+    private void validateNewPolicyName(Long storeId, String name, Set<String> existingNames) {
+        if (existingNames.contains(name)) {
+            throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
+        }
+
+        if (deomRepository.existsByStoreIdAndNameAndDeletedAtIsNull(storeId, name)) {
             throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
         }
     }
 
-    // policy 조회
-    private Deom getValidDeomById(Long deomId) {
-        return deomRepository
-                .findById(deomId)
-                .orElseThrow(() -> new DeomException(CommonErrorCode.INVALID_DEOM_POLICY));
+    private void markPoliciesForDeletion(List<Deom> policies) {
+        policies.forEach(Deom::markAsDeleted);
+    }
+
+    private List<Deom> processDeomPolicies(Long storeId, DeomUpdateContext context) {
+        List<Deom> result = new ArrayList<>();
+
+        if (!context.getPoliciesToCreate().isEmpty()) {
+            List<Deom> newPolicies =
+                    context.getPoliciesToCreate().stream()
+                            .map(dto -> Deom.create(storeId, dto.name(), dto.requiredStampAmount()))
+                            .toList();
+
+            List<Deom> savedNewPolicies = deomRepository.saveAll(newPolicies);
+            result.addAll(savedNewPolicies);
+        }
+
+        context.getPoliciesToUpdate().forEach(this::updateExistingPolicy);
+
+        context.getPoliciesToUpdate().stream()
+                .map(DeomUpdateContext.DeomUpdatePair::getExisting)
+                .forEach(result::add);
+
+        return result;
+    }
+
+    private void updateExistingPolicy(DeomUpdateContext.DeomUpdatePair pair) {
+        pair.getExisting().update(pair.getDto().name(), pair.getDto().requiredStampAmount());
+    }
+
+    private DeomsResponse createResponse(List<Deom> policies) {
+        List<DeomDto> results = policies.stream().map(this::convertToDto).toList();
+        return new DeomsResponse(results);
+    }
+
+    private DeomDto convertToDto(Deom policy) {
+        return new DeomDto(policy.getId(), policy.getName(), policy.getRequiredStampAmount());
+    }
+
+    private void validateNoDuplicateNames(List<DeomDto> policies) {
+        Set<String> names = new HashSet<>();
+        for (DeomDto policy : policies) {
+            if (!names.add(policy.name())) {
+                throw new DeomException(CommonErrorCode.ALREADY_REGISTERED_DEOM);
+            }
+        }
+    }
+
+    private void validateStoreOwnership(Long storeId) {
+        storeRepository
+                .findByIdAndOwnerId(storeId, SecurityUtils.getCurrentUserId())
+                .orElseThrow(() -> new DeomException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
     }
 
     public Deom getDeom(Long deomId) {

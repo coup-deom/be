@@ -1,12 +1,10 @@
 package kr.kro.deom.domain.stampPolicy.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.stampPolicy.dto.*;
@@ -18,6 +16,7 @@ import kr.kro.deom.domain.store.exception.StoreException;
 import kr.kro.deom.domain.store.repository.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,293 +28,370 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class StampPolicyServiceTest {
 
     @InjectMocks private StampPolicyService stampPolicyService;
-
     @Mock private StoreRepository storeRepository;
-
     @Mock private StampPolicyRepository stampPolicyRepository;
 
     private final Long userId = 1L;
     private final Long storeId = 1L;
-    private final Long policyId = 1L;
-    private final int baseAmount = 10000;
-    private final int stampCount = 10;
-
     private Store store;
-    private StampPolicy stampPolicy;
-    private StampPolicyRequest createRequest;
-    private StampPolicyUpdateRequest updateRequest;
-    private List<StampPolicyDto> policyDtoList;
 
     @BeforeEach
     void setUp() {
-        // 테스트 데이터 초기화
-        store = new Store(); // 가정: Store 클래스가 기본 생성자를 가지고 있음
-
-        stampPolicy = StampPolicy.create(storeId, baseAmount, stampCount);
-
-        createRequest = new StampPolicyRequest(storeId, baseAmount, stampCount);
-        updateRequest = new StampPolicyUpdateRequest(storeId, baseAmount + 5000, stampCount + 2);
-
-        StampPolicyDto policyDto = new StampPolicyDto(policyId, baseAmount, stampCount);
-        policyDtoList = List.of(policyDto);
+        store = new Store();
     }
 
-    @Test
-    @DisplayName("스탬프 정책 목록 조회 성공")
-    void getStampPolicy_Success() {
-        // given
-        when(stampPolicyRepository.findPoliciesByStoreId(storeId)).thenReturn(policyDtoList);
+    @Nested
+    @DisplayName("스탬프 정책 조회 테스트")
+    class GetStampPolicyTest {
 
-        // when
-        List<StampPolicyDto> result = stampPolicyService.getStampPolicy(storeId);
+        @Test
+        @DisplayName("스탬프 정책 목록 조회 성공")
+        void getStampPolicy_Success() {
+            // given
+            List<StampPolicyDto> expectedDtos =
+                    Arrays.asList(
+                            new StampPolicyDto(1L, 10000, 10), new StampPolicyDto(2L, 20000, 20));
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(0).baseAmount()).isEqualTo(baseAmount);
-        assertThat(result.get(0).stampCount()).isEqualTo(stampCount);
-
-        verify(stampPolicyRepository).findPoliciesByStoreId(storeId);
-    }
-
-    @Test
-    @DisplayName("스탬프 정책 생성 성공")
-    void createStampPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
-                            eq(storeId), eq(baseAmount)))
-                    .thenReturn(false);
-
-            // 저장 후 반환되는 객체 설정
-            StampPolicy savedPolicy = StampPolicy.create(storeId, baseAmount, stampCount);
-            // 리플렉션이나 다른 방법으로 id 설정이 필요하다면 여기서 처리
-            when(stampPolicyRepository.save(any(StampPolicy.class))).thenReturn(savedPolicy);
+            when(stampPolicyRepository.findPoliciesByStoreId(storeId)).thenReturn(expectedDtos);
 
             // when
-            StampPolicyResponse response = stampPolicyService.createStampPolicy(createRequest);
+            List<StampPolicyDto> result = stampPolicyService.getStampPolicy(storeId);
 
             // then
-            assertThat(response).isNotNull();
-            assertThat(response.storeId()).isEqualTo(storeId);
-            assertThat(response.baseAmount()).isEqualTo(baseAmount);
-            assertThat(response.stampCount()).isEqualTo(stampCount);
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).baseAmount()).isEqualTo(10000);
+            assertThat(result.get(0).stampCount()).isEqualTo(10);
+            assertThat(result.get(1).baseAmount()).isEqualTo(20000);
+            assertThat(result.get(1).stampCount()).isEqualTo(20);
 
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository)
-                    .existsByStoreIdAndBaseAmountAndDeletedAtIsNull(eq(storeId), eq(baseAmount));
-            verify(stampPolicyRepository).save(any(StampPolicy.class));
+            verify(stampPolicyRepository).findPoliciesByStoreId(storeId);
         }
-    }
 
-    @Test
-    @DisplayName("스탬프 정책 생성 실패 - 가게 소유권 없음")
-    void createStampPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
-
-            // when & then
-            StoreException exception =
-                    assertThrows(
-                            StoreException.class,
-                            () -> stampPolicyService.createStampPolicy(createRequest));
-
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
-
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository, never()).save(any());
-        }
-    }
-
-    @Test
-    @DisplayName("스탬프 정책 생성 실패 - 이미 존재하는 정책")
-    void createStampPolicy_Fail_DuplicatePolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
-                            eq(storeId), eq(baseAmount)))
-                    .thenReturn(true);
-
-            // when & then
-            StampPolicyException exception =
-                    assertThrows(
-                            StampPolicyException.class,
-                            () -> stampPolicyService.createStampPolicy(createRequest));
-
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
-
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository)
-                    .existsByStoreIdAndBaseAmountAndDeletedAtIsNull(eq(storeId), eq(baseAmount));
-            verify(stampPolicyRepository, never()).save(any());
-        }
-    }
-
-    @Test
-    @DisplayName("스탬프 정책 수정 성공")
-    void updateStampPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-
-            // 수정할 StampPolicy 객체 생성
-            StampPolicy policyToUpdate = spy(StampPolicy.create(storeId, baseAmount, stampCount));
-            when(stampPolicyRepository.findByIdAndDeletedAtIsNull(eq(policyId)))
-                    .thenReturn(Optional.of(policyToUpdate));
+        @Test
+        @DisplayName("빈 목록 조회 성공")
+        void getStampPolicy_EmptyList_Success() {
+            // given
+            when(stampPolicyRepository.findPoliciesByStoreId(storeId))
+                    .thenReturn(Collections.emptyList());
 
             // when
-            StampPolicyResponse response =
-                    stampPolicyService.updateStampPolicy(policyId, updateRequest);
+            List<StampPolicyDto> result = stampPolicyService.getStampPolicy(storeId);
 
             // then
-            assertThat(response).isNotNull();
-
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository).findByIdAndDeletedAtIsNull(eq(policyId));
-            verify(policyToUpdate)
-                    .update(eq(updateRequest.baseAmount()), eq(updateRequest.stampCount()));
+            assertThat(result).isEmpty();
+            verify(stampPolicyRepository).findPoliciesByStoreId(storeId);
         }
     }
 
-    @Test
-    @DisplayName("스탬프 정책 수정 실패 - 가게 소유권 없음")
-    void updateStampPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName("스탬프 정책 전체 업데이트 테스트")
+    class UpdateAllStampPoliciesTest {
 
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
+        @Test
+        @DisplayName("새 정책 생성 성공")
+        void updateAllStampPolicies_CreateNew_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // when & then
-            StoreException exception =
-                    assertThrows(
-                            StoreException.class,
-                            () -> stampPolicyService.updateStampPolicy(policyId, updateRequest));
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Collections.emptyList());
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+                StampPolicy newPolicy1 = StampPolicy.create(storeId, 10000, 10);
+                StampPolicy newPolicy2 = StampPolicy.create(storeId, 20000, 20);
 
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository, never()).findByIdAndDeletedAtIsNull(any());
+                when(stampPolicyRepository.saveAll(any()))
+                        .thenReturn(Arrays.asList(newPolicy1, newPolicy2));
+
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(null, 10000, 10),
+                                new StampPolicyDto(null, 20000, 20));
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(2);
+                assertThat(response.policies().get(0).baseAmount()).isEqualTo(10000);
+                assertThat(response.policies().get(1).baseAmount()).isEqualTo(20000);
+
+                verify(stampPolicyRepository).saveAll(any());
+                verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId);
+            }
+        }
+
+        @Test
+        @DisplayName("기존 정책 업데이트 성공")
+        void updateAllStampPolicies_UpdateExisting_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                StampPolicy existingPolicy = spy(StampPolicy.create(storeId, 10000, 10));
+                when(existingPolicy.getId()).thenReturn(1L);
+
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
+
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(1L, 15000, 15) // 기존 정책 업데이트
+                                );
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(1);
+                verify(existingPolicy).update(15000, 15);
+                verify(stampPolicyRepository, never()).saveAll(any()); // 새 정책 없으므로 saveAll 호출 안됨
+            }
+        }
+
+        @Test
+        @DisplayName("기존 정책 삭제 마킹 성공")
+        void updateAllStampPolicies_DeleteExisting_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                StampPolicy existingPolicy1 = spy(StampPolicy.create(storeId, 10000, 10));
+                StampPolicy existingPolicy2 = spy(StampPolicy.create(storeId, 20000, 20));
+                when(existingPolicy1.getId()).thenReturn(1L);
+                when(existingPolicy2.getId()).thenReturn(2L);
+
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy1, existingPolicy2));
+
+                // 첫 번째 정책만 유지, 두 번째는 삭제됨
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(new StampPolicyDto(1L, 10000, 10));
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(1);
+                assertThat(response.policies().get(0).id()).isEqualTo(1L);
+
+                verify(existingPolicy2).markAsDeleted(); // 두 번째 정책이 삭제 마킹됨
+                verify(existingPolicy1, never()).markAsDeleted(); // 첫 번째는 삭제 안됨
+            }
+        }
+
+        @Test
+        @DisplayName("복합 시나리오: 생성, 업데이트, 삭제 동시 수행")
+        void updateAllStampPolicies_ComplexScenario_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                // 기존 정책 2개
+                StampPolicy existingPolicy1 = spy(StampPolicy.create(storeId, 10000, 10));
+                StampPolicy existingPolicy2 = spy(StampPolicy.create(storeId, 20000, 20));
+                when(existingPolicy1.getId()).thenReturn(1L);
+                when(existingPolicy2.getId()).thenReturn(2L);
+
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy1, existingPolicy2));
+
+                StampPolicy newPolicy = StampPolicy.create(storeId, 30000, 30);
+                when(stampPolicyRepository.saveAll(any())).thenReturn(Arrays.asList(newPolicy));
+
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(1L, 15000, 15), // 기존 정책1 업데이트
+                                new StampPolicyDto(null, 30000, 30) // 새 정책 생성
+                                // 기존 정책2는 요청에 없으므로 삭제됨
+                                );
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(2);
+
+                verify(existingPolicy1).update(15000, 15); // 업데이트됨
+                verify(existingPolicy2).markAsDeleted(); // 삭제 마킹됨
+                verify(stampPolicyRepository).saveAll(any()); // 새 정책 저장됨
+            }
         }
     }
 
-    @Test
-    @DisplayName("스탬프 정책 수정 실패 - 유효하지 않은 정책")
-    void updateStampPolicy_Fail_InvalidPolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName("검증 테스트")
+    class ValidationTest {
 
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(stampPolicyRepository.findByIdAndDeletedAtIsNull(eq(policyId)))
-                    .thenReturn(Optional.empty());
+        @Test
+        @DisplayName("중복된 baseAmount로 인한 실패")
+        void updateAllStampPolicies_DuplicateBaseAmount_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // when & then
-            StampPolicyException exception =
-                    assertThrows(
-                            StampPolicyException.class,
-                            () -> stampPolicyService.updateStampPolicy(policyId, updateRequest));
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.INVALID_STAMP_POLICY);
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(null, 10000, 10),
+                                new StampPolicyDto(null, 10000, 20) // 같은 baseAmount
+                                );
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
 
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository).findByIdAndDeletedAtIsNull(eq(policyId));
+                // when & then
+
+                StampPolicyException exception =
+                        assertThrows(
+                                StampPolicyException.class,
+                                () -> stampPolicyService.updateAllStampPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
+            }
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 스토어로 인한 권한 실패")
+        void updateAllStampPolicies_NoStorePermission_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.empty());
+
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(new StampPolicyDto(null, 10000, 10));
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                StoreException exception =
+                        assertThrows(
+                                StoreException.class,
+                                () -> stampPolicyService.updateAllStampPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+            }
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 정책 ID로 인한 실패")
+        void updateAllStampPolicies_InvalidPolicyId_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Collections.emptyList());
+
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(999L, 10000, 10) // 존재하지 않는 ID
+                                );
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
+
+                // when & then
+                StampPolicyException exception =
+                        assertThrows(
+                                StampPolicyException.class,
+                                () -> stampPolicyService.updateAllStampPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.INVALID_STAMP_POLICY);
+            }
         }
     }
 
-    @Test
-    @DisplayName("스탬프 정책 삭제 성공")
-    void deleteStampPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName(" 빈 요청 케이스 테스트")
+    class EdgeCaseTest {
 
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
+        @Test
+        @DisplayName("빈 요청으로 모든 기존 정책 삭제")
+        void updateAllStampPolicies_EmptyRequest_DeletesAllExisting() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // 삭제할 StampPolicy 객체 생성
-            StampPolicy policyToDelete = spy(StampPolicy.create(storeId, baseAmount, stampCount));
-            when(stampPolicyRepository.findByIdAndDeletedAtIsNull(eq(policyId)))
-                    .thenReturn(Optional.of(policyToDelete));
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            // when
-            stampPolicyService.deleteStampPolicy(policyId, storeId);
+                StampPolicy existingPolicy = spy(StampPolicy.create(storeId, 10000, 10));
+                when(existingPolicy.getId()).thenReturn(1L);
 
-            // then
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository).findByIdAndDeletedAtIsNull(eq(policyId));
-            verify(policyToDelete).markAsDeleted();
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
+
+                StampPoliciesRequest request = new StampPoliciesRequest(Collections.emptyList());
+
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).isEmpty();
+                verify(existingPolicy).markAsDeleted();
+            }
         }
-    }
 
-    @Test
-    @DisplayName("스탬프 정책 삭제 실패 - 가게 소유권 없음")
-    void deleteStampPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+        @Test
+        @DisplayName("동일한 값으로 업데이트 시도")
+        void updateAllStampPolicies_SameValues_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
+                when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            // when & then
-            StoreException exception =
-                    assertThrows(
-                            StoreException.class,
-                            () -> stampPolicyService.deleteStampPolicy(policyId, storeId));
+                StampPolicy existingPolicy = spy(StampPolicy.create(storeId, 10000, 10));
+                when(existingPolicy.getId()).thenReturn(1L);
+                when(existingPolicy.getBaseAmount()).thenReturn(10000);
+                when(existingPolicy.getStampCount()).thenReturn(10);
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+                when(stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
 
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository, never()).findByIdAndDeletedAtIsNull(any());
-        }
-    }
+                List<StampPolicyDto> requestPolicies =
+                        Arrays.asList(
+                                new StampPolicyDto(1L, 10000, 10) // 기존과 동일한 값
+                                );
+                StampPoliciesRequest request = new StampPoliciesRequest(requestPolicies);
 
-    @Test
-    @DisplayName("스탬프 정책 삭제 실패 - 유효하지 않은 정책")
-    void deleteStampPolicy_Fail_InvalidPolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+                // when
+                StampPoliciesResponse response =
+                        stampPolicyService.updateAllStampPolicies(storeId, request);
 
-            when(storeRepository.findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(stampPolicyRepository.findByIdAndDeletedAtIsNull(eq(policyId)))
-                    .thenReturn(Optional.empty());
+                // then
+                assertThat(response.policies()).hasSize(1);
+                assertThat(response.policies().get(0).baseAmount()).isEqualTo(10000);
+                assertThat(response.policies().get(0).stampCount()).isEqualTo(10);
 
-            // when & then
-            StampPolicyException exception =
-                    assertThrows(
-                            StampPolicyException.class,
-                            () -> stampPolicyService.deleteStampPolicy(policyId, storeId));
-
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.INVALID_STAMP_POLICY);
-
-            verify(storeRepository).findByIdAndOwnerIdAndIsDeletedFalse(eq(storeId), eq(userId));
-            verify(stampPolicyRepository).findByIdAndDeletedAtIsNull(eq(policyId));
+                verify(existingPolicy).update(10000, 10); // 호출은 되지만 JPA가 더티 체킹으로 최적화
+            }
         }
     }
 }

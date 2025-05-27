@@ -1,6 +1,8 @@
 package kr.kro.deom.domain.stampPolicy.service;
 
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
 import kr.kro.deom.domain.stampPolicy.dto.*;
@@ -24,57 +26,113 @@ public class StampPolicyService {
     }
 
     @Transactional
-    public StampPolicyResponse createStampPolicy(StampPolicyRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        checkDuplicatePolicy(request.storeId(), request.baseAmount());
-
-        StampPolicy stampPolicy =
-                StampPolicy.create(request.storeId(), request.baseAmount(), request.stampCount());
-
-        StampPolicy savedPolicy = stampPolicyRepository.save(stampPolicy);
-        return StampPolicyResponse.from(savedPolicy);
-    }
-
-    @Transactional
-    public StampPolicyResponse updateStampPolicy(Long policyId, StampPolicyUpdateRequest request) {
-
-        validateStoreOwnership(request.storeId());
-
-        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
-
-        stampPolicy.update(request.baseAmount(), request.stampCount());
-
-        return StampPolicyResponse.from(stampPolicy);
-    }
-
-    @Transactional
-    public void deleteStampPolicy(Long policyId, Long storeId) {
+    public StampPoliciesResponse updateAllStampPolicies(
+            Long storeId, StampPoliciesRequest request) {
         validateStoreOwnership(storeId);
-        StampPolicy stampPolicy = getValidStampPolicyById(policyId);
-        stampPolicy.markAsDeleted();
+        validateNoDuplicateBaseAmounts(request.policies());
+
+        List<StampPolicy> existingPolicies = getExistingPolicies(storeId);
+        StampPolicyUpdateContext context = createUpdateContext(request, existingPolicies);
+
+        markPoliciesForDeletion(context.getPoliciesToDelete());
+        List<StampPolicy> updatedPolicies = processStampPolicies(storeId, context);
+
+        return createResponse(updatedPolicies);
     }
 
-    // 소유권 검증
+    private List<StampPolicy> getExistingPolicies(Long storeId) {
+        return stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+    }
+
+    private StampPolicyUpdateContext createUpdateContext(
+            StampPoliciesRequest request, List<StampPolicy> existingPolicies) {
+
+        Map<Long, StampPolicy> existingPolicyMap =
+                existingPolicies.stream()
+                        .collect(Collectors.toMap(StampPolicy::getId, Function.identity()));
+
+        List<StampPolicy> policiesToDelete = new ArrayList<>();
+        List<StampPolicyDto> policiesToCreate = new ArrayList<>();
+        List<StampPolicyUpdateContext.StampPolicyUpdatePair> policiesToUpdate = new ArrayList<>();
+
+        Set<Long> requestedIds = new HashSet<>();
+
+        for (StampPolicyDto dto : request.policies()) {
+            if (dto.id() == null) {
+                policiesToCreate.add(dto);
+            } else {
+                requestedIds.add(dto.id());
+                StampPolicy existingPolicy = existingPolicyMap.get(dto.id());
+                if (existingPolicy == null) {
+                    throw new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY);
+                }
+                policiesToUpdate.add(
+                        new StampPolicyUpdateContext.StampPolicyUpdatePair(existingPolicy, dto));
+            }
+        }
+
+        for (StampPolicy existing : existingPolicies) {
+            if (!requestedIds.contains(existing.getId())) {
+                policiesToDelete.add(existing);
+            }
+        }
+
+        return new StampPolicyUpdateContext(policiesToDelete, policiesToCreate, policiesToUpdate);
+    }
+
+    private void markPoliciesForDeletion(List<StampPolicy> policies) {
+        policies.forEach(StampPolicy::markAsDeleted);
+    }
+
+    private List<StampPolicy> processStampPolicies(Long storeId, StampPolicyUpdateContext context) {
+        List<StampPolicy> result = new ArrayList<>();
+
+        if (!context.getPoliciesToCreate().isEmpty()) {
+            List<StampPolicy> newPolicies =
+                    context.getPoliciesToCreate().stream()
+                            .map(
+                                    dto ->
+                                            StampPolicy.create(
+                                                    storeId, dto.baseAmount(), dto.stampCount()))
+                            .toList();
+
+            List<StampPolicy> savedNewPolicies = stampPolicyRepository.saveAll(newPolicies);
+            result.addAll(savedNewPolicies);
+        }
+
+        List<StampPolicy> updatedPolicies =
+                context.getPoliciesToUpdate().stream().map(this::updateExistingPolicy).toList();
+        result.addAll(updatedPolicies);
+
+        return result;
+    }
+
+    private StampPolicy updateExistingPolicy(StampPolicyUpdateContext.StampPolicyUpdatePair pair) {
+        pair.getExisting().update(pair.getDto().baseAmount(), pair.getDto().stampCount());
+        return pair.getExisting();
+    }
+
+    private StampPoliciesResponse createResponse(List<StampPolicy> policies) {
+        List<StampPolicyDto> results = policies.stream().map(this::convertToDto).toList();
+        return new StampPoliciesResponse(results);
+    }
+
+    private StampPolicyDto convertToDto(StampPolicy policy) {
+        return new StampPolicyDto(policy.getId(), policy.getBaseAmount(), policy.getStampCount());
+    }
+
+    private void validateNoDuplicateBaseAmounts(List<StampPolicyDto> policies) {
+        Set<Integer> baseAmounts = new HashSet<>();
+        for (StampPolicyDto policy : policies) {
+            if (!baseAmounts.add(policy.baseAmount())) {
+                throw new StampPolicyException(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
+            }
+        }
+    }
+
     private void validateStoreOwnership(Long storeId) {
         storeRepository
                 .findByIdAndOwnerIdAndIsDeletedFalse(storeId, SecurityUtils.getCurrentUserId())
                 .orElseThrow(() -> new StoreException(CommonErrorCode.NO_PERMISSION_FOR_STORE));
-    }
-
-    // policy 중복 검증
-    private void checkDuplicatePolicy(Long storeId, int baseAmount) {
-        if (stampPolicyRepository.existsByStoreIdAndBaseAmountAndDeletedAtIsNull(
-                storeId, baseAmount)) {
-            throw new StampPolicyException(CommonErrorCode.ALREADY_REGISTERED_STAMP_POLICY);
-        }
-    }
-
-    // policy 조회
-    private StampPolicy getValidStampPolicyById(Long stampPolicyId) {
-        return stampPolicyRepository
-                .findByIdAndDeletedAtIsNull(stampPolicyId)
-                .orElseThrow(() -> new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY));
     }
 }

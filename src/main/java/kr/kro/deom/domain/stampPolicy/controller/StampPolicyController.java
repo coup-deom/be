@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import java.util.List;
 import kr.kro.deom.common.response.ApiResponse;
 import kr.kro.deom.common.response.CommonSuccessCode;
@@ -33,30 +32,15 @@ public class StampPolicyController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @PostMapping
-    @Operation(summary = "스탬프 정책 생성", description = "새로운 스탬프 정책을 생성합니다.")
-    public ResponseEntity<ApiResponse<StampPolicyResponse>> saveStampPolicy(
-            @RequestBody @Valid StampPolicyRequest stampPolicyRequest) {
-        StampPolicyResponse response = stampPolicyService.createStampPolicy(stampPolicyRequest);
+    @PutMapping("/{storeId}")
+    @Operation(
+            summary = "스탬프 정책 등록/수정/삭제",
+            description = "해당 매장의 스탬프 정책에 대해 등록/수정/삭제합니다.",
+            security = @SecurityRequirement(name = "access-token"))
+    public ResponseEntity<ApiResponse<StampPoliciesResponse>> updateStampPolicies(
+            @PathVariable Long storeId, @RequestBody StampPoliciesRequest stampPolicies) {
+        StampPoliciesResponse response =
+                stampPolicyService.updateAllStampPolicies(storeId, stampPolicies);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
-    }
-
-    @PutMapping("/{policyId}")
-    @Operation(summary = "스탬프 정책 수정", description = "기존 스탬프 정책을 수정합니다.")
-    public ResponseEntity<ApiResponse<StampPolicyResponse>> updateStampPolicy(
-            @Parameter(description = "정책 ID", required = true) @PathVariable Long policyId,
-            @RequestBody @Valid StampPolicyUpdateRequest stampPolicyRequest) {
-        StampPolicyResponse response =
-                stampPolicyService.updateStampPolicy(policyId, stampPolicyRequest);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
-    }
-
-    @DeleteMapping("/{storeId}/{policyId}")
-    @Operation(summary = "스탬프 정책 삭제", description = "해당 매장의 스탬프 정책을 삭제합니다.")
-    public ResponseEntity<ApiResponse<Void>> deleteStampPolicy(
-            @Parameter(description = "매장 ID", required = true) @PathVariable Long storeId,
-            @Parameter(description = "정책 ID", required = true) @PathVariable Long policyId) {
-        stampPolicyService.deleteStampPolicy(policyId, storeId);
-        return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK));
     }
 }

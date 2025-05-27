@@ -15,7 +15,11 @@ public interface DeomRepository extends JpaRepository<Deom, Long> {
     @Query(
             "SELECT new kr.kro.deom.domain.deom.dto.DeomDto(d.id, d.name, d.requiredStampAmount) "
                     + "FROM Deom d WHERE d.storeId = :storeId AND d.deletedAt IS NULL ORDER BY d.requiredStampAmount")
-    List<DeomDto> findPoliciesByStoreId(@Param("storeId") long storeId);
+    List<DeomDto> findPoliciesByStoreIdAndDeletedAtIsNull(@Param("storeId") long storeId);
 
     boolean existsByStoreIdAndName(Long storeId, String name);
+
+    List<Deom> findByStoreIdAndDeletedAtIsNull(Long storeId);
+
+    boolean existsByStoreIdAndNameAndDeletedAtIsNull(Long storeId, String name);
 }

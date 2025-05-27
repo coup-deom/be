@@ -1,18 +1,13 @@
 package kr.kro.deom.domain.deom.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
-import kr.kro.deom.domain.deom.dto.DeomDto;
-import kr.kro.deom.domain.deom.dto.DeomRequest;
-import kr.kro.deom.domain.deom.dto.DeomResponse;
-import kr.kro.deom.domain.deom.dto.DeomUpdateRequest;
+import kr.kro.deom.domain.deom.dto.*;
 import kr.kro.deom.domain.deom.entity.Deom;
 import kr.kro.deom.domain.deom.exception.DeomException;
 import kr.kro.deom.domain.deom.repository.DeomRepository;
@@ -20,6 +15,7 @@ import kr.kro.deom.domain.store.entity.Store;
 import kr.kro.deom.domain.store.repository.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,9 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class DeomServiceTest {
 
     @InjectMocks private DeomService deomService;
-
     @Mock private DeomRepository deomRepository;
-
     @Mock private StoreRepository storeRepository;
 
     private final Long userId = 1L;
@@ -43,269 +37,432 @@ class DeomServiceTest {
     private final int requiredStampAmount = 10;
 
     private Store store;
-    private Deom deom;
-    private DeomRequest createRequest;
-    private DeomUpdateRequest updateRequest;
-    private List<DeomDto> deomDtoList;
 
     @BeforeEach
     void setUp() {
-        // 테스트 데이터 초기화
-        store = new Store(); // 가정: Store 클래스가 기본 생성자를 가지고 있음
-
-        deom = Deom.create(storeId, deomName, requiredStampAmount);
-
-        createRequest = new DeomRequest(storeId, deomName, requiredStampAmount);
-        updateRequest = new DeomUpdateRequest(storeId, "수정된 디옴", requiredStampAmount + 5);
-
-        DeomDto deomDto = new DeomDto(deomId, deomName, requiredStampAmount);
-        deomDtoList = List.of(deomDto);
+        store = new Store();
     }
 
-    @Test
-    @DisplayName("덤 정책 목록 조회 성공")
-    void getDeomPolicy_Success() {
-        // given
-        when(deomRepository.findPoliciesByStoreId(storeId)).thenReturn(deomDtoList);
+    @Nested
+    @DisplayName("덤 정책 조회 테스트")
+    class GetDeomPolicyTest {
 
-        // when
-        List<DeomDto> result = deomService.getDeomPolicy(storeId);
+        @Test
+        @DisplayName("덤 정책 목록 조회 성공")
+        void getDeomPolicy_Success() {
+            // given
+            List<DeomDto> expectedDtos =
+                    Arrays.asList(new DeomDto(1L, "디옴1", 10), new DeomDto(2L, "디옴2", 20));
 
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(0).name()).isEqualTo(deomName);
-        assertThat(result.get(0).requiredStampAmount()).isEqualTo(requiredStampAmount);
-
-        verify(deomRepository).findPoliciesByStoreId(storeId);
-    }
-
-    @Test
-    @DisplayName("덤 정책 생성 성공")
-    void createDeomPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(deomRepository.existsByStoreIdAndName(eq(storeId), eq(deomName)))
-                    .thenReturn(false);
-
-            // 저장 후 반환되는 객체 설정
-            Deom savedDeom = Deom.create(storeId, deomName, requiredStampAmount);
-            // 리플렉션이나 다른 방법으로 id 설정이 필요하다면 여기서 처리
-            when(deomRepository.save(any(Deom.class))).thenReturn(savedDeom);
+            when(deomRepository.findPoliciesByStoreIdAndDeletedAtIsNull(storeId))
+                    .thenReturn(expectedDtos);
 
             // when
-            DeomResponse response = deomService.createDeomPolicy(createRequest);
+            List<DeomDto> result = deomService.getDeomPolicy(storeId);
 
             // then
-            assertThat(response).isNotNull();
-            assertThat(response.storeId()).isEqualTo(storeId);
-            assertThat(response.name()).isEqualTo(deomName);
-            assertThat(response.requiredStampAmount()).isEqualTo(requiredStampAmount);
+            assertThat(result).hasSize(2);
+            assertThat(result.get(0).name()).isEqualTo("디옴1");
+            assertThat(result.get(0).requiredStampAmount()).isEqualTo(10);
+            assertThat(result.get(1).name()).isEqualTo("디옴2");
+            assertThat(result.get(1).requiredStampAmount()).isEqualTo(20);
 
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).existsByStoreIdAndName(eq(storeId), eq(deomName));
-            verify(deomRepository).save(any(Deom.class));
+            verify(deomRepository).findPoliciesByStoreIdAndDeletedAtIsNull(storeId);
         }
-    }
 
-    @Test
-    @DisplayName("덤 정책 생성 실패 - 가게 소유권 없음")
-    void createDeomPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
-
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class, () -> deomService.createDeomPolicy(createRequest));
-
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
-
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository, never()).save(any());
-        }
-    }
-
-    @Test
-    @DisplayName("덤 정책 생성 실패 - 이미 존재하는 정책")
-    void createDeomPolicy_Fail_DuplicatePolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(deomRepository.existsByStoreIdAndName(eq(storeId), eq(deomName))).thenReturn(true);
-
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class, () -> deomService.createDeomPolicy(createRequest));
-
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.ALREADY_REGISTERED_DEOM);
-
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).existsByStoreIdAndName(eq(storeId), eq(deomName));
-            verify(deomRepository, never()).save(any());
-        }
-    }
-
-    @Test
-    @DisplayName("덤 정책 수정 성공")
-    void updateDeomPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
-
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-
-            // 수정할 Deom 객체 생성
-            Deom deomToUpdate = spy(Deom.create(storeId, deomName, requiredStampAmount));
-            when(deomRepository.findById(eq(deomId))).thenReturn(Optional.of(deomToUpdate));
+        @Test
+        @DisplayName("빈 목록 조회 성공")
+        void getDeomPolicy_EmptyList_Success() {
+            // given
+            when(deomRepository.findPoliciesByStoreIdAndDeletedAtIsNull(storeId))
+                    .thenReturn(Collections.emptyList());
 
             // when
-            DeomResponse response = deomService.updateDeomPolicy(deomId, updateRequest);
+            List<DeomDto> result = deomService.getDeomPolicy(storeId);
 
             // then
-            assertThat(response).isNotNull();
-
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).findById(eq(deomId));
-            verify(deomToUpdate)
-                    .update(eq(updateRequest.name()), eq(updateRequest.requiredStampAmount()));
+            assertThat(result).isEmpty();
+            verify(deomRepository).findPoliciesByStoreIdAndDeletedAtIsNull(storeId);
         }
     }
 
-    @Test
-    @DisplayName("덤 정책 수정 실패 - 가게 소유권 없음")
-    void updateDeomPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName("덤 정책 전체 업데이트 테스트")
+    class UpdateAllDeomPoliciesTest {
 
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
+        @Test
+        @DisplayName("새 정책 생성 성공")
+        void updateAllDeomPolicies_CreateNew_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class,
-                            () -> deomService.updateDeomPolicy(deomId, updateRequest));
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Collections.emptyList());
+                when(deomRepository.existsByStoreIdAndNameAndDeletedAtIsNull(
+                                eq(storeId), anyString()))
+                        .thenReturn(false);
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+                Deom newPolicy1 = Deom.create(storeId, "디옴1", 10);
+                Deom newPolicy2 = Deom.create(storeId, "디옴2", 20);
 
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository, never()).findById(any());
+                when(deomRepository.saveAll(any()))
+                        .thenReturn(Arrays.asList(newPolicy1, newPolicy2));
+
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(new DeomDto(null, "디옴1", 10), new DeomDto(null, "디옴2", 20));
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(2);
+                assertThat(response.policies().get(0).name()).isEqualTo("디옴1");
+                assertThat(response.policies().get(1).name()).isEqualTo("디옴2");
+
+                verify(deomRepository).saveAll(any());
+                verify(storeRepository).findByIdAndOwnerId(storeId, userId);
+            }
+        }
+
+        @Test
+        @DisplayName("기존 정책 업데이트 성공")
+        void updateAllDeomPolicies_UpdateExisting_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                Deom existingPolicy = spy(Deom.create(storeId, "기존디옴", 10));
+                when(existingPolicy.getId()).thenReturn(1L);
+
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
+
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(1L, "수정된디옴", 15) // 기존 정책 업데이트
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(1);
+                verify(existingPolicy).update("수정된디옴", 15);
+                verify(deomRepository, never()).saveAll(any()); // 새 정책 없으므로 saveAll 호출 안됨
+            }
+        }
+
+        @Test
+        @DisplayName("기존 정책 삭제 마킹 성공")
+        void updateAllDeomPolicies_DeleteExisting_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                Deom existingPolicy1 = spy(Deom.create(storeId, "디옴1", 10));
+                Deom existingPolicy2 = spy(Deom.create(storeId, "디옴2", 20));
+                when(existingPolicy1.getId()).thenReturn(1L);
+                when(existingPolicy2.getId()).thenReturn(2L);
+
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy1, existingPolicy2));
+
+                // 첫 번째 정책만 유지, 두 번째는 삭제됨
+                List<DeomDto> requestPolicies = Arrays.asList(new DeomDto(1L, "디옴1", 10));
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(1);
+                assertThat(response.policies().get(0).id()).isEqualTo(1L);
+
+                verify(existingPolicy2).markAsDeleted(); // 두 번째 정책이 삭제 마킹됨
+                verify(existingPolicy1, never()).markAsDeleted(); // 첫 번째는 삭제 안됨
+            }
+        }
+
+        @Test
+        @DisplayName("복합 시나리오: 생성, 업데이트, 삭제 동시 수행")
+        void updateAllDeomPolicies_ComplexScenario_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                // 기존 정책 2개
+                Deom existingPolicy1 = spy(Deom.create(storeId, "기존디옴1", 10));
+                Deom existingPolicy2 = spy(Deom.create(storeId, "기존디옴2", 20));
+                when(existingPolicy1.getId()).thenReturn(1L);
+                when(existingPolicy2.getId()).thenReturn(2L);
+
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy1, existingPolicy2));
+                when(deomRepository.existsByStoreIdAndNameAndDeletedAtIsNull(storeId, "새디옴"))
+                        .thenReturn(false);
+
+                // 새 정책 생성
+                Deom newPolicy = Deom.create(storeId, "새디옴", 30);
+                when(deomRepository.saveAll(any())).thenReturn(Arrays.asList(newPolicy));
+
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(1L, "수정된디옴1", 15), // 기존 정책1 업데이트
+                                new DeomDto(null, "새디옴", 30) // 새 정책 생성
+                                // 기존 정책2는 요청에 없으므로 삭제됨
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(2);
+
+                verify(existingPolicy1).update("수정된디옴1", 15); // 업데이트됨
+                verify(existingPolicy2).markAsDeleted(); // 삭제 마킹됨
+                verify(deomRepository).saveAll(any()); // 새 정책 저장됨
+            }
         }
     }
 
-    @Test
-    @DisplayName("덤 정책 수정 실패 - 유효하지 않은 정책")
-    void updateDeomPolicy_Fail_InvalidPolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName("검증 테스트")
+    class ValidationTest {
 
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(deomRepository.findById(eq(deomId))).thenReturn(Optional.empty());
+        @Test
+        @DisplayName("요청 내 중복된 이름으로 인한 실패")
+        void updateAllDeomPolicies_DuplicateNameInRequest_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class,
-                            () -> deomService.updateDeomPolicy(deomId, updateRequest));
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.INVALID_DEOM_POLICY);
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(null, "중복이름", 10),
+                                new DeomDto(null, "중복이름", 20) // 같은 이름
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
 
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).findById(eq(deomId));
+                // when & then
+                DeomException exception =
+                        assertThrows(
+                                DeomException.class,
+                                () -> deomService.updateAllDeomPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.ALREADY_REGISTERED_DEOM);
+            }
+        }
+
+        @Test
+        @DisplayName("기존 정책과 중복된 이름으로 신규 생성 시도 실패")
+        void updateAllDeomPolicies_DuplicateNameWithExisting_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+
+                Deom existingPolicy = Deom.create(storeId, "기존디옴", 10);
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
+                when(deomRepository.existsByStoreIdAndNameAndDeletedAtIsNull(storeId, "기존덤"))
+                        .thenReturn(true);
+
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(null, "기존덤", 20) // 기존과 같은 이름으로 새 정책 생성 시도
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when & then
+
+                DeomException exception =
+                        assertThrows(
+                                DeomException.class,
+                                () -> deomService.updateAllDeomPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.ALREADY_REGISTERED_DEOM);
+            }
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 스토어로 인한 권한 실패")
+        void updateAllDeomPolicies_NoStorePermission_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.empty());
+
+                List<DeomDto> requestPolicies = Arrays.asList(new DeomDto(null, "디옴", 10));
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when & then
+                DeomException exception =
+                        assertThrows(
+                                DeomException.class,
+                                () -> deomService.updateAllDeomPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+            }
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 정책 ID로 인한 실패")
+        void updateAllDeomPolicies_InvalidPolicyId_ThrowsException() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Collections.emptyList());
+
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(999L, "디옴", 10) // 존재하지 않는 ID
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when & then
+
+                DeomException exception =
+                        assertThrows(
+                                DeomException.class,
+                                () -> deomService.updateAllDeomPolicies(storeId, request));
+
+                assertThat(exception.getBaseResponseCode())
+                        .isEqualTo(CommonErrorCode.INVALID_DEOM_POLICY);
+            }
         }
     }
 
-    @Test
-    @DisplayName("덤 정책 삭제 성공")
-    void deleteDeomPolicy_Success() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+    @Nested
+    @DisplayName("엣지 케이스 테스트")
+    class EdgeCaseTest {
 
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
+        @Test
+        @DisplayName("빈 요청으로 모든 기존 정책 삭제")
+        void updateAllDeomPolicies_EmptyRequest_DeletesAllExisting() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            // 삭제할 Deom 객체 생성
-            Deom deomToDelete = spy(Deom.create(storeId, deomName, requiredStampAmount));
-            when(deomRepository.findById(eq(deomId))).thenReturn(Optional.of(deomToDelete));
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            // when
-            deomService.deleteDeomPolicy(deomId, storeId);
+                Deom existingPolicy = spy(Deom.create(storeId, "기존디옴", 10));
+                when(existingPolicy.getId()).thenReturn(1L);
 
-            // then
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).findById(eq(deomId));
-            verify(deomToDelete).markAsDeleted();
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
+
+                DeomsRequest request = new DeomsRequest(Collections.emptyList());
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).isEmpty();
+                verify(existingPolicy).markAsDeleted();
+            }
         }
-    }
 
-    @Test
-    @DisplayName("덤 정책 삭제 실패 - 가게 소유권 없음")
-    void deleteDeomPolicy_Fail_NoStoreOwnership() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+        @Test
+        @DisplayName("동일한 값으로 업데이트 시도")
+        void updateAllDeomPolicies_SameValues_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.empty());
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
 
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class,
-                            () -> deomService.deleteDeomPolicy(deomId, storeId));
+                Deom existingPolicy = spy(Deom.create(storeId, deomName, requiredStampAmount));
+                when(existingPolicy.getId()).thenReturn(1L);
+                when(existingPolicy.getName()).thenReturn(deomName);
+                when(existingPolicy.getRequiredStampAmount()).thenReturn(requiredStampAmount);
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.NO_PERMISSION_FOR_STORE);
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Arrays.asList(existingPolicy));
 
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository, never()).findById(any());
+                List<DeomDto> requestPolicies =
+                        Arrays.asList(
+                                new DeomDto(1L, deomName, requiredStampAmount) // 기존과 동일한 값
+                                );
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(1);
+                assertThat(response.policies().get(0).name()).isEqualTo(deomName);
+                assertThat(response.policies().get(0).requiredStampAmount())
+                        .isEqualTo(requiredStampAmount);
+
+                verify(existingPolicy)
+                        .update(deomName, requiredStampAmount); // 호출은 되지만 JPA가 더티 체킹으로 최적화
+            }
         }
-    }
 
-    @Test
-    @DisplayName("덤 정책 삭제 실패 - 유효하지 않은 정책")
-    void deleteDeomPolicy_Fail_InvalidPolicy() {
-        // given
-        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
-            mockedSecurityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
+        @Test
+        @DisplayName("대량 정책 처리 시나리오")
+        void updateAllDeomPolicies_LargeDataSet_Success() {
+            // given
+            try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+                securityUtils.when(SecurityUtils::getCurrentUserId).thenReturn(userId);
 
-            when(storeRepository.findByIdAndOwnerId(eq(storeId), eq(userId)))
-                    .thenReturn(Optional.of(store));
-            when(deomRepository.findById(eq(deomId))).thenReturn(Optional.empty());
+                when(storeRepository.findByIdAndOwnerId(storeId, userId))
+                        .thenReturn(Optional.of(store));
+                when(deomRepository.findByStoreIdAndDeletedAtIsNull(storeId))
+                        .thenReturn(Collections.emptyList());
+                when(deomRepository.existsByStoreIdAndNameAndDeletedAtIsNull(
+                                eq(storeId), anyString()))
+                        .thenReturn(false);
 
-            // when & then
-            DeomException exception =
-                    assertThrows(
-                            DeomException.class,
-                            () -> deomService.deleteDeomPolicy(deomId, storeId));
+                List<DeomDto> requestPolicies = new ArrayList<>();
+                List<Deom> savedPolicies = new ArrayList<>();
 
-            assertThat(exception.getBaseResponseCode())
-                    .isEqualTo(CommonErrorCode.INVALID_DEOM_POLICY);
+                for (int i = 1; i <= 100; i++) {
+                    requestPolicies.add(new DeomDto(null, "디옴" + i, i));
+                    savedPolicies.add(Deom.create(storeId, "디옴" + i, i));
+                }
 
-            verify(storeRepository).findByIdAndOwnerId(eq(storeId), eq(userId));
-            verify(deomRepository).findById(eq(deomId));
+                when(deomRepository.saveAll(any())).thenReturn(savedPolicies);
+                DeomsRequest request = new DeomsRequest(requestPolicies);
+
+                // when
+                DeomsResponse response = deomService.updateAllDeomPolicies(storeId, request);
+
+                // then
+                assertThat(response.policies()).hasSize(100);
+                verify(deomRepository).saveAll(any(List.class));
+            }
         }
     }
 }

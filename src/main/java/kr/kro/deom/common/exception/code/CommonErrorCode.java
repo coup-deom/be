@@ -37,7 +37,8 @@ public enum CommonErrorCode implements BaseResponseCode {
     // stamp policy
     INVALID_BASE_AMOUNT(HttpStatus.BAD_REQUEST, "POLICY_001", "기준 금액은 0보다 커야 합니다."),
     INVALID_STAMP_COUNT(HttpStatus.BAD_REQUEST, "POLICY_002", "스탬프 개수는 0보다 커야 합니다."),
-    ALREADY_REGISTERED_STAMP_POLICY(HttpStatus.CONFLICT, "POLICY_003", "이미 등록된 스탬프 정책이 있습니다."),
+    ALREADY_REGISTERED_STAMP_POLICY(
+            HttpStatus.CONFLICT, "POLICY_003", "같은 가격에 대해 이미 등록된 스탬프 정책이 있습니다."),
     INVALID_STAMP_POLICY(HttpStatus.NOT_FOUND, "POLICY_004", "존재하지 않는 스탬프 정책입니다."),
 
     // stamp exchange

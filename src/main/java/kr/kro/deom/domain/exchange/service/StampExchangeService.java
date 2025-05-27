@@ -236,6 +236,7 @@ public class StampExchangeService {
         if (updated2 == 0) {
             MyStamp myStamp = new MyStamp(responderId, sourceStoreId, sourceAmount);
             myStampRepository.save(myStamp);
+
         }
     }
 
