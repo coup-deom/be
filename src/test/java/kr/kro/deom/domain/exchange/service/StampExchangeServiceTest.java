@@ -459,8 +459,9 @@ class StampExchangeServiceTest {
             when(myStampRepository.findAllByUserIdWithStamps(CURRENT_USER_ID))
                     .thenReturn(userStamps);
 
-            // 변경된 부분: findByTargetStoreIdInWithStoreInfo 사용
-            when(stampExchangeRepository.findByTargetStoreIdInWithStoreInfo(anyList()))
+            // 변경된 부분: userId 파라미터 추가
+            when(stampExchangeRepository.findByTargetStoreIdInWithStoreInfo(
+                            anyList(), eq(CURRENT_USER_ID)))
                     .thenReturn(projections);
 
             // when
@@ -477,7 +478,8 @@ class StampExchangeServiceTest {
                             argThat(
                                     storeIds ->
                                             storeIds.contains(TARGET_STORE_ID)
-                                                    && storeIds.contains(101L)));
+                                                    && storeIds.contains(101L)),
+                            eq(CURRENT_USER_ID)); // userId 파라미터도 검증 추가
         }
     }
 
