@@ -25,6 +25,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtUtil jwtUtil;
     private final StoreService storeService;
     private final UserService userService;
+    private static final String REDIRECT_URL = "https://staging.deom.kro.kr/signin/callback";
 
     @Override
     public void onAuthenticationSuccess(
@@ -53,7 +54,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.addCookie(jwtUtil.createRefreshTokenCookie(refreshToken));
 
         String targetUrl =
-                UriComponentsBuilder.fromUriString("http://localhost:5173/signin/callback")
+                UriComponentsBuilder.fromUriString(REDIRECT_URL)
                         .queryParam("accessToken", accessToken)
                         .queryParam("idToken", idToken)
                         .build()
