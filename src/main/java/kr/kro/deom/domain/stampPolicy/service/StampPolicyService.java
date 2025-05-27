@@ -1,9 +1,7 @@
 package kr.kro.deom.domain.stampPolicy.service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
@@ -30,55 +28,100 @@ public class StampPolicyService {
     @Transactional
     public StampPoliciesResponse updateAllStampPolicies(
             Long storeId, StampPoliciesRequest request) {
-
         validateStoreOwnership(storeId);
-        List<StampPolicy> existingPolicies =
-                stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId);
-        velidateNoDuplicateBaseAmounts(request.policies());
+        validateNoDuplicateBaseAmounts(request.policies());
 
-        List<Long> requestedExisting =
-                request.policies().stream()
-                        .map(StampPolicyDto::id)
-                        .filter(id -> id != null)
-                        .toList();
+        List<StampPolicy> existingPolicies = getExistingPolicies(storeId);
+        StampPolicyUpdateContext context = createUpdateContext(request, existingPolicies);
 
-        existingPolicies.stream()
-                .filter(policy -> !requestedExisting.contains(policy.getId()))
-                .forEach(StampPolicy::markAsDeleted);
+        markPoliciesForDeletion(context.getPoliciesToDelete());
+        List<StampPolicy> updatedPolicies = processStampPolicies(storeId, context);
 
-        List<StampPolicy> updatePolicies = new ArrayList<>();
+        return createResponse(updatedPolicies);
+    }
 
-        for (StampPolicyDto policyDto : request.policies()) {
-            if (policyDto.id() == null) {
-                StampPolicy newPolicy =
-                        StampPolicy.create(storeId, policyDto.baseAmount(), policyDto.stampCount());
-                updatePolicies.add(stampPolicyRepository.save(newPolicy));
+    private List<StampPolicy> getExistingPolicies(Long storeId) {
+        return stampPolicyRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+    }
+
+    private StampPolicyUpdateContext createUpdateContext(
+            StampPoliciesRequest request, List<StampPolicy> existingPolicies) {
+
+        Map<Long, StampPolicy> existingPolicyMap =
+                existingPolicies.stream()
+                        .collect(Collectors.toMap(StampPolicy::getId, Function.identity()));
+
+        List<StampPolicy> policiesToDelete = new ArrayList<>();
+        List<StampPolicyDto> policiesToCreate = new ArrayList<>();
+        List<StampPolicyUpdateContext.StampPolicyUpdatePair> policiesToUpdate = new ArrayList<>();
+
+        Set<Long> requestedIds = new HashSet<>();
+
+        for (StampPolicyDto dto : request.policies()) {
+            if (dto.id() == null) {
+                policiesToCreate.add(dto);
             } else {
-                StampPolicy existingPolicy =
-                        existingPolicies.stream()
-                                .filter(p -> p.getId().equals(policyDto.id()))
-                                .findFirst()
-                                .orElseThrow(
-                                        () ->
-                                                new StampPolicyException(
-                                                        CommonErrorCode.INVALID_STAMP_POLICY));
-                existingPolicy.update(policyDto.baseAmount(), policyDto.stampCount());
-                updatePolicies.add(existingPolicy);
+                requestedIds.add(dto.id());
+                StampPolicy existingPolicy = existingPolicyMap.get(dto.id());
+                if (existingPolicy == null) {
+                    throw new StampPolicyException(CommonErrorCode.INVALID_STAMP_POLICY);
+                }
+                policiesToUpdate.add(
+                        new StampPolicyUpdateContext.StampPolicyUpdatePair(existingPolicy, dto));
             }
         }
 
-        List<StampPolicyDto> results =
-                updatePolicies.stream()
-                        .map(
-                                p ->
-                                        new StampPolicyDto(
-                                                p.getId(), p.getBaseAmount(), p.getStampCount()))
-                        .collect(Collectors.toList());
+        for (StampPolicy existing : existingPolicies) {
+            if (!requestedIds.contains(existing.getId())) {
+                policiesToDelete.add(existing);
+            }
+        }
 
+        return new StampPolicyUpdateContext(policiesToDelete, policiesToCreate, policiesToUpdate);
+    }
+
+    private void markPoliciesForDeletion(List<StampPolicy> policies) {
+        policies.forEach(StampPolicy::markAsDeleted);
+    }
+
+    private List<StampPolicy> processStampPolicies(Long storeId, StampPolicyUpdateContext context) {
+        List<StampPolicy> result = new ArrayList<>();
+
+        if (!context.getPoliciesToCreate().isEmpty()) {
+            List<StampPolicy> newPolicies =
+                    context.getPoliciesToCreate().stream()
+                            .map(
+                                    dto ->
+                                            StampPolicy.create(
+                                                    storeId, dto.baseAmount(), dto.stampCount()))
+                            .toList();
+
+            List<StampPolicy> savedNewPolicies = stampPolicyRepository.saveAll(newPolicies);
+            result.addAll(savedNewPolicies);
+        }
+
+        List<StampPolicy> updatedPolicies =
+                context.getPoliciesToUpdate().stream().map(this::updateExistingPolicy).toList();
+        result.addAll(updatedPolicies);
+
+        return result;
+    }
+
+    private StampPolicy updateExistingPolicy(StampPolicyUpdateContext.StampPolicyUpdatePair pair) {
+        pair.getExisting().update(pair.getDto().baseAmount(), pair.getDto().stampCount());
+        return pair.getExisting();
+    }
+
+    private StampPoliciesResponse createResponse(List<StampPolicy> policies) {
+        List<StampPolicyDto> results = policies.stream().map(this::convertToDto).toList();
         return new StampPoliciesResponse(results);
     }
 
-    private void velidateNoDuplicateBaseAmounts(List<StampPolicyDto> policies) {
+    private StampPolicyDto convertToDto(StampPolicy policy) {
+        return new StampPolicyDto(policy.getId(), policy.getBaseAmount(), policy.getStampCount());
+    }
+
+    private void validateNoDuplicateBaseAmounts(List<StampPolicyDto> policies) {
         Set<Integer> baseAmounts = new HashSet<>();
         for (StampPolicyDto policy : policies) {
             if (!baseAmounts.add(policy.baseAmount())) {

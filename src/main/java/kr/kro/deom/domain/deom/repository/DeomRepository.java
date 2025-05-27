@@ -20,4 +20,6 @@ public interface DeomRepository extends JpaRepository<Deom, Long> {
     boolean existsByStoreIdAndName(Long storeId, String name);
 
     List<Deom> findByStoreIdAndDeletedAtIsNull(Long storeId);
+
+    boolean existsByStoreIdAndNameAndDeletedAtIsNull(Long storeId, String name);
 }
