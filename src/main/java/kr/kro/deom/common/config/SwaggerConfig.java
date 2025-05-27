@@ -12,9 +12,8 @@ import org.springframework.context.annotation.Configuration;
 
 @OpenAPIDefinition(
         servers = {
-                @Server(url = "/api"),
-        }
-)
+            @Server(url = "/api"),
+        })
 @Configuration
 public class SwaggerConfig {
     private Info info() {

@@ -6,10 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import kr.kro.deom.common.exception.code.CommonErrorCode;
 import kr.kro.deom.common.utils.SecurityUtils;
-import kr.kro.deom.domain.exchange.dto.StampExchangeExecutionResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeRequest;
-import kr.kro.deom.domain.exchange.dto.StampExchangeResponse;
-import kr.kro.deom.domain.exchange.dto.StampExchangeUpdateRequest;
+import kr.kro.deom.domain.exchange.dto.*;
 import kr.kro.deom.domain.exchange.entity.StampExchange;
 import kr.kro.deom.domain.exchange.entity.StampExchangeStatus;
 import kr.kro.deom.domain.exchange.exception.StampExchangeException;
@@ -32,26 +29,49 @@ public class StampExchangeService {
     private final MyStampService myStampService;
     private final MyStampRepository myStampRepository;
 
+    @Transactional(readOnly = true)
+    public List<StampExchangeResponse> getAllMyStampExchanges(ExchangeStatus status) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        if (status == ExchangeStatus.PENDING) {
+            return stampExchangeRepository.findAllPendingExchangesByUserId(userId).stream()
+                    .map(StampExchangeJoinProjection::toResponse)
+                    .collect(Collectors.toList());
+
+        } else if (status == ExchangeStatus.ALL) {
+            return stampExchangeRepository.findAllExchangesByUserId(userId).stream()
+                    .map(StampExchangeJoinProjection::toResponse)
+                    .collect(Collectors.toList());
+        } else {
+            throw new StampExchangeException(CommonErrorCode.INVALID_STAMP_EXCHANGE_STATUS);
+        }
+    }
+
     @Transactional
     public StampExchangeResponse createStampExchange(StampExchangeRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
+        Long sourceStoreId = request.getSourceStoreId();
+        Integer sourceAmount = request.getSourceAmount();
+        Long targetStoreId = request.getTargetStoreId();
+        Integer targetAmount = request.getTargetAmount();
+        Long creatorId = request.getCreatorId();
 
-        validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
+        validateStampAmount(userId, sourceStoreId, sourceAmount);
 
         StampExchange exchange =
                 StampExchange.builder()
-                        .creatorId(request.getCreatorId())
-                        .sourceStoreId(request.getSourceStoreId())
-                        .targetStoreId(request.getTargetStoreId())
-                        .sourceAmount(request.getSourceAmount())
-                        .targetAmount(request.getTargetAmount())
+                        .creatorId(creatorId)
+                        .sourceStoreId(sourceStoreId)
+                        .targetStoreId(targetStoreId)
+                        .sourceAmount(sourceAmount)
+                        .targetAmount(targetAmount)
                         .status(StampExchangeStatus.PENDING)
                         .build();
 
         stampExchangeRepository.save(exchange);
 
-        Store sourceStore = storeService.getStore(request.getSourceStoreId());
-        Store targetStore = storeService.getStore(request.getTargetStoreId());
+        Store sourceStore = storeService.getStore(sourceStoreId);
+        Store targetStore = storeService.getStore(targetStoreId);
 
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
@@ -60,8 +80,11 @@ public class StampExchangeService {
     public StampExchangeResponse updateStampExchange(
             Long stampExchangeId, StampExchangeUpdateRequest request) {
         Long userId = SecurityUtils.getCurrentUserId();
-
-        validateStampAmount(userId, request.getSourceStoreId(), request.getSourceAmount());
+        Long sourceStoreId = request.getSourceStoreId();
+        Long targetStoreId = request.getTargetStoreId();
+        Integer sourceAmount = request.getSourceAmount();
+        Integer targetAmount = request.getTargetAmount();
+        validateStampAmount(userId, sourceStoreId, sourceAmount);
 
         StampExchange exchange =
                 stampExchangeRepository
@@ -71,14 +94,10 @@ public class StampExchangeService {
                                         new StampExchangeException(
                                                 CommonErrorCode.STAMP_EXCHANGE_NOT_FOUND));
 
-        Store sourceStore = storeService.getStore(request.getSourceStoreId());
-        Store targetStore = storeService.getStore(request.getTargetStoreId());
+        Store sourceStore = storeService.getStore(sourceStoreId);
+        Store targetStore = storeService.getStore(targetStoreId);
 
-        exchange.updateExchangeTerms(
-                request.getSourceStoreId(),
-                request.getTargetStoreId(),
-                request.getSourceAmount(),
-                request.getSourceAmount());
+        exchange.updateExchangeTerms(sourceStoreId, targetStoreId, sourceAmount, targetAmount);
 
         return StampExchangeResponse.from(exchange, sourceStore, targetStore);
     }
@@ -207,12 +226,16 @@ public class StampExchangeService {
         deductOrThrow(creatorId, sourceStoreId, sourceAmount);
         deductOrThrow(responderId, targetStoreId, targetAmount);
 
-        int updated1 = myStampRepository.updateStampAmount(creatorId, targetStoreId, targetAmount);
-        int updated2 =
-                myStampRepository.updateStampAmount(responderId, sourceStoreId, sourceAmount);
+        int updated1 = myStampRepository.addStampAmount(creatorId, targetStoreId, targetAmount);
+        if (updated1 == 0) {
+            MyStamp myStamp = new MyStamp(creatorId, targetStoreId, targetAmount);
+            myStampRepository.save(myStamp);
+        }
+        int updated2 = myStampRepository.addStampAmount(responderId, sourceStoreId, sourceAmount);
+        if (updated2 == 0) {
+            MyStamp myStamp = new MyStamp(responderId, sourceStoreId, sourceAmount);
+            myStampRepository.save(myStamp);
 
-        if (updated1 != 1 || updated2 != 1) {
-            throw new StampExchangeException(CommonErrorCode.STAMP_EXCHANGE_EXECUTION_FAILED);
         }
     }
 

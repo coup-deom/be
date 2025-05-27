@@ -119,6 +119,9 @@ public class JwtUtil {
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
+        cookie.setDomain("test.deom.kro.kr");
+        cookie.setSecure(true);
+        cookie.setAttribute("SameSite", "None");
 
         return cookie;
     }

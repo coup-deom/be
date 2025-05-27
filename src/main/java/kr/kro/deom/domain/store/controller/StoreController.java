@@ -60,7 +60,7 @@ public class StoreController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "이미지 업로드", description = "가게의 로고 이미지를 등록합니다.")
     public ResponseEntity<ApiResponse<StoreImageResponse>> uploadImage(
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam(value = "file", required = false) MultipartFile file) {
 
         StoreImageResponse response = storeService.uploadStoreImage(file);
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
