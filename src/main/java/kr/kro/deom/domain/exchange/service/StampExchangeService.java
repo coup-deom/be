@@ -162,7 +162,7 @@ public class StampExchangeService {
                         .collect(Collectors.toMap(MyStamp::getStoreId, MyStamp::getStampAmount));
 
         List<StampExchangeJoinProjection> allExchanges =
-                stampExchangeRepository.findByTargetStoreIdInWithStoreInfo(myStoreIds);
+                stampExchangeRepository.findByTargetStoreIdInWithStoreInfo(myStoreIds, userId);
 
         return allExchanges.stream()
                 .filter(

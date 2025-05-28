@@ -67,9 +67,10 @@ ORDER BY e.updatedAt DESC
                     + "FROM StampExchange e "
                     + "LEFT JOIN Store s1 ON e.sourceStoreId = s1.id "
                     + "LEFT JOIN Store s2 ON e.targetStoreId = s2.id "
-                    + "WHERE e.targetStoreId IN :storeIds AND e.status = 'PENDING'"
+                    + "WHERE e.targetStoreId IN :storeIds AND e.status = 'PENDING' AND e.creatorId != :userId "
                     + "ORDER BY e.updatedAt DESC")
-    List<StampExchangeJoinProjection> findByTargetStoreIdInWithStoreInfo(List<Long> storeIds);
+    List<StampExchangeJoinProjection> findByTargetStoreIdInWithStoreInfo(
+            List<Long> storeIds, Long userId);
 
     @Modifying
     @Query(
