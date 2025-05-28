@@ -32,7 +32,7 @@ public class DeomController {
         return ResponseEntity.ok(ApiResponse.success(CommonSuccessCode.OK, response));
     }
 
-    @PutMapping("/{storeId}")
+    @PostMapping("/{storeId}")
     @Operation(
             summary = "덤 정책 등록/수정/삭제",
             description = "해당 매장의 덤 정책에 대해 등록/수정/삭제합니다.",
