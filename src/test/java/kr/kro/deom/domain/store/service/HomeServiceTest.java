@@ -93,7 +93,7 @@ public class HomeServiceTest {
             when(storeRepository.findAll()).thenReturn(stores);
 
             // findByStoreIdOrderByRequiredStampAmountAsc 호출을 위한 설정
-            when(deomRepository.findByStoreIdOrderByRequiredStampAmountAsc(anyLong()))
+            when(deomRepository.findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(anyLong()))
                     .thenAnswer(
                             invocation -> {
                                 Long storeId = invocation.getArgument(0);
@@ -171,7 +171,7 @@ public class HomeServiceTest {
             // given
             when(storeRepository.findAll()).thenReturn(stores);
 
-            when(deomRepository.findByStoreIdOrderByRequiredStampAmountAsc(anyLong()))
+            when(deomRepository.findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(anyLong()))
                     .thenAnswer(
                             invocation -> {
                                 Long storeId = invocation.getArgument(0);
@@ -238,7 +238,7 @@ public class HomeServiceTest {
             // given
             when(storeRepository.findAll()).thenReturn(stores);
 
-            when(deomRepository.findByStoreIdOrderByRequiredStampAmountAsc(anyLong()))
+            when(deomRepository.findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(anyLong()))
                     .thenAnswer(
                             invocation -> {
                                 Long storeId = invocation.getArgument(0);
@@ -289,7 +289,7 @@ public class HomeServiceTest {
             // given
             when(storeRepository.findAll()).thenReturn(stores);
 
-            when(deomRepository.findByStoreIdOrderByRequiredStampAmountAsc(anyLong()))
+            when(deomRepository.findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(anyLong()))
                     .thenAnswer(
                             invocation -> {
                                 Long storeId = invocation.getArgument(0);
