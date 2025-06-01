@@ -63,7 +63,7 @@ public class HomeService {
     }
 
     private List<StoreResponse.DeomInfo> getDeomInfoList(Long storeId, Long userId) {
-        List<Deom> deoms = deomRepository.findByStoreIdOrderByRequiredStampAmountAsc(storeId);
+        List<Deom> deoms = deomRepository.findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(storeId);
         List<StoreResponse.DeomInfo> result = new ArrayList<>();
 
         boolean foundInProgress = false;
