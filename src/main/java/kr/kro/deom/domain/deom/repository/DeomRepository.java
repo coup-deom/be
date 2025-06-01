@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface DeomRepository extends JpaRepository<Deom, Long> {
     boolean existsByStoreId(Long id);
 
-    List<Deom> findByStoreIdOrderByRequiredStampAmountAsc(Long id);
+    List<Deom> findByStoreIdAndDeletedAtIsNullOrderByRequiredStampAmountAsc(Long id);
 
     @Query(
             "SELECT new kr.kro.deom.domain.deom.dto.DeomDto(d.id, d.name, d.requiredStampAmount) "
